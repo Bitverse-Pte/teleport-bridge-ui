@@ -1,4 +1,7 @@
-export interface IAssetData {
+import type { HttpProvider, IpcProvider, WebsocketProvider, AbstractProvider } from 'web3-core/types'
+import { AbstractConnector } from '@web3-react/abstract-connector'
+
+export interface ICurrency {
   symbol: string
   name: string
   decimals: string
@@ -14,7 +17,8 @@ export interface IChainData {
   chain_id: number
   network_id: number
   rpc_url: string
-  native_currency: IAssetData
+  native_currency: ICurrency
+  logo: string
 }
 
 export interface ITxData {
@@ -82,12 +86,12 @@ export interface IParsedTx {
   value: string
   input: string
   error: boolean
-  asset: IAssetData
+  asset: ICurrency
   operations: ITxOperation[]
 }
 
 export interface ITxOperation {
-  asset: IAssetData
+  asset: ICurrency
   value: string
   from: string
   to: string
@@ -156,3 +160,121 @@ export interface IBoxProfile {
   image: IBoxImage[]
   name: string
 }
+
+export interface ICoreOptions extends IProviderControllerOptions {
+  lightboxOpacity: number
+  theme: string | ThemeColors
+}
+
+export interface IProviderControllerOptions {
+  disableInjectedProvider: boolean
+  cacheProvider: boolean
+  providerOptions: IProviderOptions
+  network: string
+}
+
+export interface IAbstractConnectorOptions {
+  network: string
+  chainId: number
+}
+
+export interface IInjectedProvidersMap {
+  injectedAvailable: boolean
+  [isProviderName: string]: boolean
+}
+
+export interface IProviderDisplay {
+  name: string
+  logo: string
+  description?: string
+}
+
+export interface IProviderInfo extends IProviderDisplay {
+  id: string
+  type: string
+  check: string
+  package?: IProviderPackageOptions
+}
+export interface FullProviderInfo {
+  id: string
+  name: string
+  logo: string
+  description?: string
+  connector?(opt?: any): Promise<Web3Provider>
+  type: string
+  check: string
+  package?: IProviderPackageOptions
+  connection?: Web3Provider
+}
+
+export type RequiredOption = string | string[]
+
+export interface IProviderPackageOptions {
+  required?: RequiredOption[]
+}
+
+export interface IProviderOptions {
+  [id: string]: {
+    package: any
+    options?: any
+    connector?: FullProviderInfo['connector']
+    display?: Partial<IProviderDisplay>
+  }
+}
+
+export interface IProviderDisplayWithConnector extends IProviderDisplay {
+  id: string
+  connector(): Promise<AbstractConnector>
+  package?: IProviderPackageOptions
+}
+
+export interface IProviderUserOptions {
+  id: string
+  name: string
+  logo: string
+  description: string
+  onClick: () => Promise<void>
+}
+
+export type SimpleFunction = (input?: any) => void
+
+export interface IEventCallback {
+  event: string
+  callback: (result: any) => void
+}
+
+export type ChainData = {
+  chainId: number
+  chain: string
+  network: string
+  networkId: number
+}
+
+export type ChainDataList = {
+  [chainId: number]: ChainData
+}
+
+export type ThemeColors = {
+  background: string
+  main: string
+  secondary: string
+  border: string
+  hover: string
+}
+
+export interface IThemeConfig {
+  name: string
+  colors: ThemeColors
+}
+
+export type ThemesList = {
+  [name: string]: IThemeConfig
+}
+
+export type Connector = (provider?: any, opts?: any) => Promise<any>
+
+export interface IConnectorsMap {
+  [id: string]: Connector
+}
+
+export type Web3Provider = HttpProvider | IpcProvider | WebsocketProvider | AbstractProvider

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { isObject } from '../helpers/utilities'
+import { isObject } from 'helpers'
 
 const SContainer = styled.div`
   height: 100%;

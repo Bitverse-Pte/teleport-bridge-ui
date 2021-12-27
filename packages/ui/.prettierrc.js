@@ -5,5 +5,5 @@ module.exports = {
   semi: false,
   printWidth: 200,
   proseWrap: 'always',
-  endOfLine: "auto",
+  endOfLine: 'auto',
 }

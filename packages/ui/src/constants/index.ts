@@ -1,3 +1,6 @@
 export * from './actions'
+export * from './chains'
 export * from './contracts'
 export * from './functions'
+export * from './events'
+export * from './keys'

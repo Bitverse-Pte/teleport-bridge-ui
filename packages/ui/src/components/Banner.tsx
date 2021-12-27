@@ -1,12 +1,14 @@
 import React from 'react'
 import styled from 'styled-components'
-import logo from '../assets/web3modal-logo.png'
+import logo from 'assets/BitOS.png'
 import { fonts, colors } from '../styles'
 
 const SBannerWrapper = styled.div`
   display: flex;
   align-items: center;
   position: relative;
+  width: 24vw;
+  height: 100%;
   & span {
     color: rgb(${colors.lightBlue});
     font-weight: ${fonts.weight.bold};
@@ -16,8 +18,9 @@ const SBannerWrapper = styled.div`
 `
 
 const SBanner = styled.div`
-  width: 45px;
-  height: 45px;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.4);
   background: url(${logo}) no-repeat;
   background-size: cover;
   background-position: center;
@@ -26,7 +29,8 @@ const SBanner = styled.div`
 const Banner = () => (
   <SBannerWrapper>
     <SBanner />
-    <span>{'Web3Modal'}</span>
+    {/* <img src={logo} alt={'Icon'} /> */}
+    {/* <span>{''}</span> */}
   </SBannerWrapper>
 )
 

@@ -1,11 +1,11 @@
 import React from 'react'
 import Column from './Column'
 import AssetRow from './AssetRow'
-import { IAssetData } from '../helpers/types'
+import { ICurrency } from '../helpers/types'
 
 const AccountAssets = (props: any) => {
   const { assets, chainId } = props
-  const defaultNativeCurrency: IAssetData =
+  const defaultNativeCurrency: ICurrency =
     chainId === 100
       ? {
           contractAddress: '',
@@ -22,12 +22,12 @@ const AccountAssets = (props: any) => {
           balance: '0',
         }
 
-  let nativeCurrency: IAssetData = defaultNativeCurrency
-  let tokens: IAssetData[] = []
+  let nativeCurrency: ICurrency = defaultNativeCurrency
+  let tokens: ICurrency[] = []
   if (assets && assets.length) {
-    const filteredNativeCurrency = assets.filter((asset: IAssetData) => (asset && asset.symbol ? asset.symbol.toLowerCase() === nativeCurrency.symbol.toLowerCase() : false))
+    const filteredNativeCurrency = assets.filter((asset: ICurrency) => (asset && asset.symbol ? asset.symbol.toLowerCase() === nativeCurrency.symbol.toLowerCase() : false))
     nativeCurrency = filteredNativeCurrency && filteredNativeCurrency.length ? filteredNativeCurrency[0] : defaultNativeCurrency
-    tokens = assets.filter((asset: IAssetData) => (asset && asset.symbol ? asset.symbol.toLowerCase() !== nativeCurrency.symbol.toLowerCase() : false))
+    tokens = assets.filter((asset: ICurrency) => (asset && asset.symbol ? asset.symbol.toLowerCase() !== nativeCurrency.symbol.toLowerCase() : false))
   }
   return (
     <Column center>

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { IAssetData, IGasPrices, IParsedTx } from './types'
+import { ICurrency, IGasPrices, IParsedTx } from './types'
 
 const api: AxiosInstance = axios.create({
   baseURL: 'https://ethereum-api.xyz',
@@ -10,7 +10,7 @@ const api: AxiosInstance = axios.create({
   },
 })
 
-export async function apiGetAccountAssets(address: string, chainId: number): Promise<IAssetData[]> {
+export async function apiGetAccountAssets(address: string, chainId: number): Promise<ICurrency[]> {
   const response = await api.get(`/account-assets?address=${address}&chainId=${chainId}`)
   const { result } = response.data
   return result

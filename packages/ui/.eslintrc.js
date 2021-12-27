@@ -12,6 +12,7 @@ module.exports = {
     '@typescript-eslint/no-case-declarations': 'off',
     '@typescript-eslint/no-async-promise-executor': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
+    'no-async-promise-executor': 'off',
   },
   env: {
     browser: true,

@@ -80,11 +80,45 @@ export const responsive = {
 export const globalStyle = `
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,500,600,700,800');
 
+  * {
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+  }
+
+  /**
+  Explicitly load Inter var from public/ so it does not block LCP's critical path.
+  */
+  @font-face {
+    font-family: 'Inter custom';
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: block;
+    font-named-instance: 'Regular';
+    src: url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format("woff2 supports variations(gvar)"),
+        url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format("woff2-variations"),
+        url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format("woff2");
+  }
+
+  @supports (font-variation-settings: normal) {
+    * {
+        font-family: 'Inter custom', sans-serif;
+    }
+  }
+
   html, body, #root {
     height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
+    font-size: 16px;
+    font-variant: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    font-feature-settings: 'ss01' on, 'ss02' on, 'cv01' on, 'cv03' on;
+    iframe: {
+      visibility: hidden !important;
+    }
   }
 
   body {
