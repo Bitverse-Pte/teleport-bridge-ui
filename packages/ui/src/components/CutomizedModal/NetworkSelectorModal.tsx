@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback } from 'react'
 import { Box, Flex } from 'rebass'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -7,45 +7,38 @@ import Option from 'components/Option'
 import { CircledCloseIcon } from 'components/Icon'
 import { StyledText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
-import SupportedChains from 'helpers/chains'
 import { switchToNetwork } from 'helpers/switchToNetwork'
 import { useActiveWeb3React } from 'hooks/web3'
+import { useFromChainList } from 'hooks/useChainList'
 import { RootState } from 'store/store'
 import { useDispatch } from 'hooks'
+import { pick } from 'lodash'
 
 const OptionGrid = styled(Box)`
+  width: 100%;
+  height: 100%;
   display: grid;
   grid-gap: 10px;
   grid-template-columns: 1fr 1fr;
   ${({ theme }) => theme.mediaWidth.upToMedium`
-  grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
     grid-gap: 10px;
   `};
 `
 
 export default function NetworkSelectModal() {
-  const { active: active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
-  const networkModalOpen = useSelector((state: RootState) => state.application.networkModalOpen)
+  const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
+  const { networkModalOpen, destinationChain } = useSelector((state: RootState) => pick(state.application, 'networkModalOpen', 'destinationChain'))
   const {
     application: { setNetworkModalOpen: setNetworkMenuOpen },
   } = useDispatch()
-  /* const menuRef = useRef(null)
-
-  useEffect(() => {
-    // testRef.current && document.body.append(testRef.current)
-    const collapseMenuOnLoseFocus = (evt: MouseEvent) => {
-      if (menuRef.current && evt.currentTarget !== menuRef.current && networkMenuOpen) {
-        setNetworkMenuOpen(false)
-      }
-    }
-    document.body.addEventListener('click', collapseMenuOnLoseFocus)
-    return () => {
-      document.body.removeEventListener('click', collapseMenuOnLoseFocus)
-    }
-  }, [networkMenuOpen, menuRef]) */
+  const fromChainList = useFromChainList()
 
   const getNetworkOptions = useCallback(() => {
-    return SupportedChains.map((chain) => {
+    return fromChainList.map((chain) => {
+      if (chain.chain_id === destinationChain.chain_id) {
+        return null
+      }
       return (
         <Option
           id={`connect-${chain.name}`}
@@ -55,7 +48,6 @@ export default function NetworkSelectModal() {
           key={chain.chain_id}
           active={chainId == chain.chain_id}
           color={'blue'}
-          // link={option.href}
           header={chain.name}
           subheader={null} //use option.descriptio to bring back multi-line
           icon={chain.logo}

@@ -1,6 +1,6 @@
-import { useDispatch } from 'hooks'
 import React from 'react'
 import styled from 'styled-components'
+import { useDispatch } from 'hooks'
 
 const SConnectButtonContainer = styled.div`
   position: relative;

@@ -4,12 +4,12 @@ import { darken } from 'polished'
 import { Settings, ArrowDown, ChevronDown } from 'react-feather'
 import { useMediaQuery } from 'react-responsive'
 import styled, { css } from 'styled-components/macro'
-import { Flex, Box, Text } from 'rebass/styled-components'
+import { Flex, Box, Text } from 'rebass'
 import { ReactComponent as Dropdown } from 'assets/images/dropdown.svg'
 import { DefaultButtonRadius, MEDIA_WIDTHS, Z_INDEX } from 'theme'
 import { switchToNetwork } from 'helpers/switchToNetwork'
 import UniModal from './UniModal'
-import SupportedChains, { getChainData } from 'helpers/chains'
+import { getChainData } from 'helpers/chains'
 import Option from './Option'
 import { useActiveWeb3React } from 'hooks/web3'
 import { BaseButton, BaseButtonProps, ButtonLight, ButtonPrimary, ButtonDropdown, SelectorButton, ConnectButton } from 'components/Button'
@@ -17,9 +17,23 @@ import { StyledText } from 'components/Text'
 import { CircledCloseIcon } from 'components/Icon'
 import { useSelector } from 'react-redux'
 import { RootState } from 'store/store'
-import { SelectorLogo, SelectorLabel } from './Common'
+import { SelectorLogo, SelectorLabel, StyledLogo } from './Common'
 import NetworkSelectModal from './CutomizedModal/NetworkSelectorModal'
 import { useDispatch } from 'hooks'
+import { useTransferFromTeleContract } from 'contracts/index'
+import { RowFixed } from './Row'
+import CurrencySelectModal from './CutomizedModal/CurrencySelectModal'
+import { pick, debounce } from 'lodash'
+import { SupportedChains } from 'constants/chains'
+import TELEABI from 'contracts/tele.json'
+import { utils } from 'ethers'
+import { useTokenBalance } from 'hooks/wallet'
+import { AlertIcon } from 'components/Icon'
+import { Balance } from './Currency'
+import BigNumber from 'bignumber.js'
+import { useFromChainList } from 'hooks/useChainList'
+import { getContract } from 'helpers'
+import Loader from './Loader'
 
 const Logo = styled.img`
   height: 20px;
@@ -96,7 +110,6 @@ const StyledMenuIcon = styled(Settings)`
 const StyledMenuButton = styled.button`
   position: relative;
   width: 100%;
-  height: 100%;
   border: none;
   background-color: transparent;
   margin: 0;
@@ -132,7 +145,11 @@ export const ArrowWrapper = styled.div<{ clickable: boolean }>`
             opacity: 0.8;
           }
         `
-      : null}
+      : css`
+          cursor: not-allowed;
+          opacity: 0.4;
+          pointer-events: none;
+        `}
 `
 
 const RightTopCornerContainer = styled.div<{ top: number; right: number; width?: string; height?: string }>`
@@ -275,6 +292,7 @@ const CurrencySelect = styled(ButtonGray)<{ visible: boolean; selected: boolean;
   visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
   align-items: center;
   font-size: 24px;
+  display: flex;
   font-weight: 500;
   background-color: ${({ selected, theme }) => (selected ? theme.bg0 : theme.primary1)};
   color: ${({ selected, theme }) => (selected ? theme.text1 : theme.white)};
@@ -286,19 +304,20 @@ const CurrencySelect = styled(ButtonGray)<{ visible: boolean; selected: boolean;
   user-select: none;
   border: none;
   height: ${({ hideInput }) => (hideInput ? '2.8rem' : '2.4rem')};
-  width: ${({ hideInput }) => (hideInput ? '100%' : 'initial')};
+  width: fit-content;
+  min-width: 6.18rem;
   padding: 0 8px;
-  justify-content: space-between;
+  justify-content: space-around;
   margin-right: ${({ hideInput }) => (hideInput ? '0' : '12px')};
   :focus,
   :hover {
     background-color: ${({ selected, theme }) => (selected ? theme.bg2 : darken(0.05, theme.primary1))};
   }
-`
-
-const StyledTokenName = styled.span<{ active?: boolean }>`
-  ${({ active }) => (active ? '  margin: 0 0.25rem 0 0.25rem;' : '  margin: 0 0.25rem 0 0.25rem;')}
-  font-size:  ${({ active }) => (active ? '18px' : '18px')};
+  :disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: unset;
+  }
 `
 
 const StyledDropDown = styled(Dropdown)<{ selected: boolean }>`
@@ -318,13 +337,16 @@ const Aligner = styled.span`
   width: 100%;
 `
 
+const StyledTokenName = styled.span<{ active?: boolean }>`
+  font-size: ${({ active }) => (active ? '18px' : '18px')};
+`
+
 export const Text1 = styled(Text)`
   color: ${({ theme }) => theme.text1};
 `
 
-export const RowFixed = styled(Row)<{ gap?: string; justify?: string }>`
-  width: fit-content;
-  margin: ${({ gap }) => gap && `-${gap}`};
+export const TextPrimary1 = styled(Text)`
+  color: ${({ theme }) => theme.primary1};
 `
 
 export function DisplayButton({ children, ...rest }: Omit<BaseButtonProps, 'onClick'>) {
@@ -347,155 +369,141 @@ interface connectionInfo {
  * The styled container element that wraps the content of most pages and the tabs.
  */
 export default function AppBody({ ...rest }) {
-  const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
-  const { active: active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
-  // const { activate: activateNetwork } = useWeb3React(NetworkContextName)
   const {
-    application: { setNetworkModalOpen },
+    application: { setNetworkModalOpen, setCurrencySelectModalOpen, setSelectedCurrency, setDestinationChain },
   } = useDispatch()
-  /*   const address = useMemo(() => account ?? '', [account])
-  const menuRef = useRef(null) */
-  /*const { application: appDispatcher } = useDispatch()
-  const appState = useSelector((state: RootState) => state.application)
-  const [connectionInfo, setConnectionInfo] = useState({ chainId: 1, address: '', balance: '0' } as connectionInfo)
-  const { address, chainId, balance } = useMemo(() => connectionInfo, [connectionInfo])
-  const connected = useMemo(() => {
-    return has(appState.providerController.currentProvider, 'connection')
-  }, [appState.providerController.currentProvider]) */
+  const { connectStatus, selectedCurrency, destinationChain, networkModalOpen, currencySelectModalOpen } = useSelector((state: RootState) =>
+    pick(state.application, 'networkModalOpen', 'currencySelectModalOpen', 'connectStatus', 'selectedCurrency', 'destinationChain')
+  )
+  const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
+  const fromValueInputRef = useRef<any>({})
+  const [fromValue, setFromValue] = useState<BigNumber>(new BigNumber(0))
+  const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
+  const [ready, setReady] = useState(false)
+  const fromChainList = useFromChainList()
+
   const chainData = useMemo(() => {
     let data
     try {
-      data = getChainData(chainId)
+      if (connectStatus) {
+        data = getChainData(chainId)
+        active && library && setReady(true)
+      } else {
+        throw null
+      }
     } catch (error) {
-      setError(error as Error)
+      data = fromChainList[0]
+      setReady(false)
+      // setError(error as Error)
     }
     return data
-  }, [chainId])
-  /* 
+  }, [chainId, connectStatus, active, library])
+
   useEffect(() => {
-    appState.web3 &&
-      Promise.all([appState.web3.eth.getAccounts(), appState.web3.eth.getChainId()]).then(([[address], chainId]) => {
-        appState.web3.eth.getBalance(address).then((balance) => {
-          setConnectionInfo({
-            address,
-            chainId,
-            balance,
-          })
+    if (chainData && selectedCurrency?.chainId !== chainData.chain_id) {
+      setSelectedCurrency(chainData.supportTokens[0])
+    }
+    setFromValue(new BigNumber(0))
+  }, [selectedCurrency, chainData])
+
+  const balance = useTokenBalance(selectedCurrency!)
+
+  const transferBalanceToFromValue = useCallback(() => {
+    if (connectStatus && fromValueInputRef.current && 'value' in fromValueInputRef.current && balance) {
+      fromValueInputRef.current.value = new BigNumber(balance!.toString()).shiftedBy(-selectedCurrency!.decimals).toString()
+    }
+  }, [fromValueInputRef, balance, connectStatus, selectedCurrency])
+
+  const transferFromTeleContract = useTransferFromTeleContract()
+  const transfer = useCallback(async () => {
+    let value = ''
+    if (fromValueInputRef.current && 'value' in fromValueInputRef.current) {
+      value = fromValueInputRef.current.value
+    }
+    if (selectedCurrency && library && transferFromTeleContract && account && value) {
+      transferFromTeleContract
+        .sendTransferBase(
+          {
+            receiver: account,
+            destChain: 'test-eth',
+            relayChain: '',
+          },
+          { value: utils.parseEther(fromValueInputRef.current.value) }
+        )
+        .then((res: any) => {
+          console.log(res)
         })
-      })
-  }, [appState.web3])
- */
-
-  // const switchNetwork = useCallback(
-  //   async (chain: IChainData) => {
-  //     const formattedChainId = hexStripZeros(BigNumber.from(chain.chain_id).toHexString())
-  //     try {
-  //       const provider = get(appState, 'web3.currentProvider', {})
-  //       const requestFunction = get(provider, 'request', () => {
-  //         console.error("this provider doesn't support request")
-  //       })
-  //       await requestFunction.apply(provider, [
-  //         {
-  //           method: 'wallet_switchEthereumChain',
-  //           params: [{ chainId: formattedChainId }],
-  //         },
-  //       ])
-  //       /*   const requestFunction = get(provider, 'getBalance', () => {
-  //         console.error("this provider doesn't support request")
-  //       }) */
-  //       setNetworkMenuOpen(false)
-  //     } catch (err) {
-  //       console.error(err)
-  //     }
-  //   },
-  //   [appState]
-  // )
-
-  /* const getNetworkOptions = useCallback(() => {
-    return SupportedChains.map((chain) => {
-      return (
-        <Option
-          id={`connect-${chain.name}`}
-          onClick={() => {
-            library && switchToNetwork({ library, chainId: chain.chain_id, connector })
-          }}
-          key={chain.chain_id}
-          active={chainId == chain.chain_id}
-          color={'blue'}
-          // link={option.href}
-          header={chain.name}
-          subheader={null} //use option.descriptio to bring back multi-line
-          icon={chain.logo}
-        />
-      )
-    })
-  }, [library, chainId]) */
+        .catch((err: any) => {
+          console.error(err)
+        })
+    }
+  }, [transferFromTeleContract, selectedCurrency, fromValue, library, account, fromValueInputRef])
 
   return (
     <>
       <BodyWrapper {...rest}>
         <Flex width="100%" flexDirection="column" justifyContent="space-between" paddingTop="10px">
           <RightTopCornerContainer top={14} right={14} width="20px" height="20px">
-            <StyledMenuButton>
-              <StyledMenuIcon />
+            <StyledMenuButton disabled={!connectStatus}>
+              <StyledMenuIcon cursor={connectStatus ? 'pointer' : 'not-allowed'} />
             </StyledMenuButton>
           </RightTopCornerContainer>
           <Flex width="61.8%" justifyContent="space-between" height="40px" marginBottom="5%">
             <Flex alignItems="center" minWidth="60px">
               <Text1 fontWeight={600}>From</Text1>
             </Flex>
-            <SelectorButton
-              labelContent={`${chainData?.name}`}
-              logoSrc={chainData!.logo}
-              interactive={false}
-              maxWidth="15rem"
-              onClick={() => setNetworkModalOpen(true)}
-              disabled={!(connectStatus && active)}
-            />
+            <SelectorButton labelContent={`${chainData?.name}`} logoSrc={chainData!.logo} interactive={false} maxWidth="15rem" onClick={() => setNetworkModalOpen(true)} disabled={!connectStatus} />
           </Flex>
           <Container hideInput={false} marginBottom="2%">
             <Flex width="100%" height="100%" flexDirection="column" justifyContent="space-between">
               <Flex justifyContent="space-between">
                 <Text1>Send</Text1>
-                <Text1>Max:{/* balance */}</Text1>
+                <Flex
+                  style={{
+                    borderBottom: 'white solid',
+                    cursor: connectStatus ? 'pointer' : 'not-allowed',
+                  }}
+                  onClick={transferBalanceToFromValue}
+                  /* onClick={() => {
+                    setFromValue(new BigNumber(balance.toString()).shiftedBy(-selectedCurrency!.decimals))
+                  }} */
+                >
+                  <Text1>{'Max:'}</Text1> &nbsp;
+                  {connectStatus && selectedCurrency && balance ? <Balance balance={balance} currency={selectedCurrency} /> : connectStatus && account ? <Loader size={17} /> : <Text1>{'N/A'}</Text1>}
+                </Flex>
               </Flex>
+              <br />
               <Flex>
-                <Input type="number" />
+                <Input disabled={!connectStatus} style={{ fontSize: '2rem' }} placeholder="0.0" type="number" ref={fromValueInputRef} defaultValue={0} />
                 <CurrencySelect
+                  disabled={!connectStatus}
                   visible={true}
                   selected={false}
-                  hideInput={false}
+                  hideInput={true}
                   className="open-currency-select-button"
                   onClick={() => {
-                    /* if (onCurrencySelect) {
-                      setModalOpen(true)
-                    } */
+                    setCurrencySelectModalOpen(true)
                   }}
                 >
-                  <Aligner>
-                    <RowFixed>
-                      {/*  <CurrencyLogo style={{ marginRight: '0.5rem' }} currency={currency} size={'24px'} />
-                      <StyledTokenName className="token-symbol-container" active={Boolean(currency && currency.symbol)}>
-                      {(currency && currency.symbol && currency.symbol.length > 20
-                        ? currency.symbol.slice(0, 4) + '...' + currency.symbol.slice(currency.symbol.length - 5, currency.symbol.length)
-                        : currency?.symbol) || <Trans>Select a token</Trans>}
-                      </StyledTokenName>*/}
-                    </RowFixed>
-                    {/*{onCurrencySelect && <StyledDropDown selected={!!currency} />} */}
-                  </Aligner>
+                  {selectedCurrency && <StyledLogo srcs={[selectedCurrency.logoURI!]} size={'24px'} />}
+                  {selectedCurrency && (
+                    <StyledTokenName className="token-symbol-container" active={true}>
+                      {selectedCurrency!.symbol}
+                    </StyledTokenName>
+                  )}
                 </CurrencySelect>
               </Flex>
             </Flex>
           </Container>
           <Flex marginBottom="2%">
-            <ArrowWrapper clickable>
+            <ArrowWrapper clickable={connectStatus}>
               <ArrowDown
                 size="16"
                 onClick={() => {
-                  /*   setApprovalSubmitted(false) // reset 2 step UI for approvals
-              onSwitchTokens() */
+                  const newDestinationChain = fromChainList.find((chain) => chain.chain_id === chainId)
+                  setDestinationChain(newDestinationChain!)
+                  switchToNetwork({ library, chainId: destinationChain.chain_id })
                 }}
-                // color={/* currencies[Field.INPUT] && currencies[Field.OUTPUT] ? */ theme.text1 /* : theme.text3 */}
               />
             </ArrowWrapper>
           </Flex>
@@ -503,19 +511,23 @@ export default function AppBody({ ...rest }) {
             <Flex alignItems="center" minWidth="60px">
               <Text1 fontWeight={600}>To</Text1>
             </Flex>
-            <ButtonLight maxWidth="15rem">
-              <SelectorLogo interactive={true} src={chainData!.logo} />
-              <SelectorLabel>{chainData?.name}</SelectorLabel>
+            <ButtonLight maxWidth="15rem" disabled={!connectStatus}>
+              <SelectorLogo interactive={true} src={destinationChain.logo} />
+              <SelectorLabel>{destinationChain.name}</SelectorLabel>
             </ButtonLight>
           </Flex>
-          <Container hideInput={false} marginBottom="5%">
-            <Flex width="100%" height="100%">
-              <StyledText>{'this is to side'}</StyledText>
+          <Container hideInput={false} marginBottom="5%" flexDirection="column">
+            <Flex width="100%" height={'fit-content'}>
+              <AlertIcon size={'1rem'} style={{ alignSelf: 'center' }} />
+              &nbsp;
+              <TextPrimary1 fontWeight={600}>Receive(Estimated):</TextPrimary1>
             </Flex>
+            <br />
+            <Input disabled={true} style={{ fontSize: '2rem' }} type="number" placeholder="0.0" value={selectedCurrency ? toValue.shiftedBy(-selectedCurrency!.decimals).toString() : 0} />
           </Container>
           <Flex justifyContent="center">
             {connectStatus && (
-              <ButtonPrimary width="61.8%" fontWeight={900}>
+              <ButtonPrimary width="61.8%" fontWeight={900} onClick={transfer}>
                 Transfer
               </ButtonPrimary>
             )}
@@ -523,7 +535,8 @@ export default function AppBody({ ...rest }) {
           </Flex>
         </Flex>
       </BodyWrapper>
-      <NetworkSelectModal />
+      {networkModalOpen && <NetworkSelectModal />}
+      {currencySelectModalOpen && <CurrencySelectModal />}
     </>
   )
 }

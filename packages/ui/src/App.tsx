@@ -140,6 +140,7 @@ const INITIAL_STATE: IAppState = {
 }
 
 function App() {
+  // useConnectStatus()
   // @ts-ignore
   /* public web3Modal: Web3Modal
   public state: IAppState

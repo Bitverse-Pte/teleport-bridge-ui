@@ -140,8 +140,9 @@ export const ButtonLight = styled(BaseButton)`
   }
   :disabled {
     opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: unset;
     :hover {
-      cursor: auto;
       background-color: ${({ theme }) => theme.primary5};
       box-shadow: none;
       border: 1px solid transparent;

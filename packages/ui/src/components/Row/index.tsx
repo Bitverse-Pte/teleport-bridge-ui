@@ -23,3 +23,8 @@ const Row = styled(Box)<{
 export const RowBetween = styled(Row)`
   justify-content: space-between;
 `
+
+export const RowFixed = styled(Row)<{ gap?: string; justify?: string }>`
+  width: fit-content;
+  margin: ${({ gap }) => gap && `-${gap}`};
+`

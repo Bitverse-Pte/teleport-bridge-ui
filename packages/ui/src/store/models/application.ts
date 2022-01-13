@@ -1,4 +1,6 @@
 import { createModel } from '@rematch/core'
+import { DEFAULT_DESTINATION_CHAIN } from 'constants/index'
+import { IChainData, TokenInfo } from 'helpers'
 import Store2 from 'store2'
 // import { ProviderController } from 'controllers'
 import type { RootModel } from './index'
@@ -12,6 +14,9 @@ type IAppState = {
   networkModalOpen: boolean
   walletModalOpen: boolean
   historyModalOpen: boolean
+  currencySelectModalOpen: boolean
+  selectedCurrency: TokenInfo | undefined
+  destinationChain: IChainData
 }
 
 const initialState: IAppState = {
@@ -19,6 +24,9 @@ const initialState: IAppState = {
   networkModalOpen: false,
   walletModalOpen: false,
   historyModalOpen: false,
+  currencySelectModalOpen: false,
+  selectedCurrency: undefined,
+  destinationChain: DEFAULT_DESTINATION_CHAIN,
 }
 
 export const application = createModel<RootModel>()({
@@ -46,6 +54,24 @@ export const application = createModel<RootModel>()({
       return {
         ...state,
         historyModalOpen,
+      }
+    },
+    setCurrencySelectModalOpen(state, currencySelectModalOpen: boolean) {
+      return {
+        ...state,
+        currencySelectModalOpen,
+      }
+    },
+    setSelectedCurrency(state, selectedCurrency: TokenInfo) {
+      return {
+        ...state,
+        selectedCurrency,
+      }
+    },
+    setDestinationChain(state, destinationChain: IChainData) {
+      return {
+        ...state,
+        destinationChain,
       }
     },
   },

@@ -21,6 +21,7 @@ if (typeof INFURA_KEY === 'undefined') {
 
 const NETWORK_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.BSC]: 'https://bsc-dataseed.binance.org/',
+  [SupportedChainId.TELEPORT]: 'http://10.41.20.10:8545',
   [SupportedChainId.MAINNET]: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.RINKEBY]: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.ROPSTEN]: `https://ropsten.infura.io/v3/${INFURA_KEY}`,

@@ -1,5 +1,6 @@
 import type { HttpProvider, IpcProvider, WebsocketProvider, AbstractProvider } from 'web3-core/types'
 import { AbstractConnector } from '@web3-react/abstract-connector'
+import { ContractInterface } from '@ethersproject/contracts'
 
 export interface ICurrency {
   symbol: string
@@ -7,6 +8,21 @@ export interface ICurrency {
   decimals: string
   contractAddress: string
   balance?: string
+}
+
+export interface TokenInfo {
+  readonly chainId: number
+  readonly address: string
+  readonly name: string
+  readonly decimals: number
+  readonly symbol: string
+  readonly isNative: boolean
+  readonly logoURI: string
+  readonly tags?: string[]
+  readonly abi?: ContractInterface
+  readonly extensions?: {
+    readonly [key: string]: string | number | boolean | null
+  }
 }
 
 export interface IChainData {
@@ -19,6 +35,7 @@ export interface IChainData {
   rpc_url: string
   native_currency: ICurrency
   logo: string
+  supportTokens: TokenInfo[]
 }
 
 export interface ITxData {
@@ -278,3 +295,6 @@ export interface IConnectorsMap {
 }
 
 export type Web3Provider = HttpProvider | IpcProvider | WebsocketProvider | AbstractProvider
+
+export type Diff<T extends keyof any, U extends keyof any> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
+export type Overwrite<T, U> = Pick<T, Diff<keyof T, keyof U>> & U

@@ -132,13 +132,14 @@ export const AutoColumn = styled.div<{
 export default function Header() {
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const {
-    application: { setWalletModalOpen, setHistoryModalOpen },
+    application: { setWalletModalOpen, setHistoryModalOpen, saveConnectStatus },
   } = useDispatch()
   const { connectStatus } = useSelector((state: RootState) => pick(state.application, 'connectStatus'))
   const address = useMemo(() => account ?? '', [account])
 
   const logout = useCallback(() => {
     deactivate()
+    saveConnectStatus(false)
   }, [])
 
   const openWalletSelector = useCallback(() => {
@@ -170,7 +171,7 @@ export default function Header() {
           </ButtonDropdown>
         </Flex>
         {(!connectStatus || !active) && <ConnectButton />}
-        {connectStatus && active && (
+        {connectStatus && (
           <Web3StatusConnected
           /*    onClick={() => {
               setLogoutMenuOpen(true)
@@ -187,7 +188,7 @@ export default function Header() {
             )} */}
           </Web3StatusConnected>
         )}
-        {active && (
+        {connectStatus && (
           <ButtonPrimary onClick={logout} fontWeight={900}>
             Logout
           </ButtonPrimary>

@@ -1,6 +1,6 @@
 import React from 'react'
 import * as PropTypes from 'prop-types'
-import Icon from './Icon'
+import { Icon } from './Icon'
 import erc20 from '../assets/erc20.svg'
 
 const ERC20Icon = (props: any) => {

@@ -21,9 +21,11 @@ import { useActiveWeb3React } from 'hooks/web3'
 
 const OptionGrid = styled.div`
   display: grid;
+  width: 100%;
   grid-gap: 10px;
+  grid-template-columns: 1fr 1fr;
   ${({ theme }) => theme.mediaWidth.upToMedium`
-    grid-template-columns: 1fr;
+    grid-template-columns: 100%;
     grid-gap: 10px;
   `};
 `
@@ -61,8 +63,11 @@ export default function WalletSelectModal() {
       connector &&
         activate(connector, undefined, true)
           .then(() => {
-            saveConnectStatus(true)
-            return Promise.resolve().then(() => setWalletModalOpen(false))
+            return Promise.resolve()
+              .then(() => {
+                saveConnectStatus(true)
+              })
+              .then(() => setWalletModalOpen(false))
             // logMonitoringEvent({ walletAddress })
           })
           .catch((error) => {

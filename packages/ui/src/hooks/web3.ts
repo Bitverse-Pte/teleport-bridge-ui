@@ -1,8 +1,10 @@
+import { useFromChainList } from 'hooks/useChainList'
 import { useDispatch } from 'hooks'
 import { useSelector } from 'react-redux'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { Web3Provider } from '@ethersproject/providers'
 import { useWeb3React } from '@web3-react/core'
+import { wrap } from 'lodash'
 import { useCallback, useEffect, useState } from 'react'
 import Store2 from 'store2'
 
@@ -10,37 +12,49 @@ import { gnosisSafe, injected } from 'connectors'
 import { RootState } from 'store/store'
 import { IS_IN_IFRAME, NetworkContextName } from 'constants/misc'
 import { isMobile } from 'helpers/userAgent'
+import { switchToNetwork } from 'helpers/switchToNetwork'
 
 export function useActiveWeb3React() {
   const context = useWeb3React<Web3Provider>()
   const contextNetwork = useWeb3React<Web3Provider>(NetworkContextName)
-  const {
-    application: { saveConnectStatus },
-  } = useDispatch()
-  const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
+  // const {
+  //   application: { saveConnectStatus },
+  // } = useDispatch()
 
-  const tempContext = context.active ? context : contextNetwork
-
-  const originalDeactivate = tempContext.deactivate
-  const wrappedDeactivate = () => {
-    originalDeactivate()
-    saveConnectStatus(false)
-  }
-  tempContext.deactivate = wrappedDeactivate
-
-  const originalActivate = tempContext.activate
+  return context.active ? context : contextNetwork
+  // tempContext.deactivate = wrap(tempContext.deactivate, function (func) {
+  //   func()
+  //   saveConnectStatus(false)
+  // })
+  // /* const originalDeactivate = tempContext.deactivate
+  // const wrappedDeactivate = () => {
+  //   originalDeactivate()
+  //   saveConnectStatus(false)
+  // }
+  // tempContext.deactivate = wrappedDeactivate */
+  // tempContext.activate = wrap(tempContext.activate, function (func, ...args) {
+  //   const [connector, onError, throwErrors] = args
+  //   return func(connector as AbstractConnector, onError as ((error: Error) => void) | undefined, throwErrors as boolean | undefined).then(() => saveConnectStatus(true))
+  // })
+  /*   const originalActivate = tempContext.activate
   const wrappedActivate = (connector: AbstractConnector, onError?: ((error: Error) => void) | undefined, throwErrors?: boolean | undefined) => {
     return originalActivate.apply(tempContext, [connector, onError, throwErrors]).then(() => {
       saveConnectStatus(true)
     })
   }
-  tempContext.activate = wrappedActivate
-  if (!connectStatus) {
-    return { ...tempContext, active: false, account: null }
-  }
-  return tempContext
+  tempContext.activate = wrappedActivate */
 }
 
+/* export function useConnectStatus() {
+  const { active } = useWeb3React<Web3Provider>()
+  const {
+    application: { saveConnectStatus },
+  } = useDispatch()
+  useEffect(() => {
+    active && saveConnectStatus(active)
+  }, [active])
+}
+ */
 export function useEagerConnect() {
   const { activate, active } = useWeb3React()
   const [tried, setTried] = useState(false)
@@ -101,47 +115,54 @@ export function useEagerConnect() {
  */
 export function useInactiveListener(suppress = false) {
   const { active, error, activate, library, connector } = useWeb3React()
-
+  const {
+    application: { setDestinationChain },
+  } = useDispatch()
+  const fromChainList = useFromChainList()
+  const destinationChain = useSelector((state: RootState) => state.application.destinationChain)
+  const handleConnect = useCallback(() => {
+    console.log("Handling 'connect' event")
+    activate(injected)
+  }, [])
+  const handleChainChanged = useCallback(
+    (chainId: string | number) => {
+      console.log("Handling 'chainChanged' event with payload", chainId)
+      if (parseInt(`${chainId}`) === destinationChain.chain_id) {
+        setDestinationChain(fromChainList[0])
+        switchToNetwork({ library, chainId: destinationChain.chain_id })
+      }
+      activate(injected)
+    },
+    [destinationChain, fromChainList]
+  )
+  const handleAccountsChanged = useCallback((accounts: string[]) => {
+    console.log("Handling 'accountsChanged' event with payload", accounts)
+    if (accounts.length > 0) {
+      activate(injected)
+    }
+  }, [])
+  const handleNetworkChanged = useCallback((networkId: string | number) => {
+    console.log("Handling 'networkChanged' event with payload", networkId)
+    activate(injected)
+  }, [])
   useEffect(() => {
     const { ethereum } = window
-
-    if (ethereum && ethereum.on && !active && !error && !suppress) {
-      const { ethereum } = window as any
-      const handleConnect = () => {
-        console.log("Handling 'connect' event")
-        activate(injected)
-      }
-      const handleChainChanged = (chainId: string | number) => {
-        console.log("Handling 'chainChanged' event with payload", chainId)
-        activate(injected)
-      }
-      const handleAccountsChanged = (accounts: string[]) => {
-        console.log("Handling 'accountsChanged' event with payload", accounts)
-        if (accounts.length > 0) {
-          activate(injected)
-        }
-      }
-      const handleNetworkChanged = (networkId: string | number) => {
-        // eslint-disable-next-line no-debugger
-        debugger
-        console.log("Handling 'networkChanged' event with payload", networkId)
-        activate(injected)
-      }
-
-      ethereum.on('connect', handleConnect)
+    if (ethereum && ethereum.on) {
       ethereum.on('chainChanged', handleChainChanged)
-      ethereum.on('accountsChanged', handleAccountsChanged)
-      ethereum.on('networkChanged', handleNetworkChanged)
 
-      return () => {
-        if (ethereum.removeListener) {
-          ethereum.removeListener('connect', handleConnect)
-          ethereum.removeListener('chainChanged', handleChainChanged)
-          ethereum.removeListener('accountsChanged', handleAccountsChanged)
-          ethereum.removeListener('networkChanged', handleNetworkChanged)
-        }
+      if (!active && !error && !suppress) {
+        ethereum.on('connect', handleConnect)
+        ethereum.on('accountsChanged', handleAccountsChanged)
+        ethereum.on('networkChanged', handleNetworkChanged)
       }
     }
-    return undefined
+    return () => {
+      if (ethereum.removeListener) {
+        ethereum.removeListener('connect', handleConnect)
+        ethereum.removeListener('chainChanged', handleChainChanged)
+        ethereum.removeListener('accountsChanged', handleAccountsChanged)
+        ethereum.removeListener('networkChanged', handleNetworkChanged)
+      }
+    }
   }, [active, error, suppress, activate])
 }

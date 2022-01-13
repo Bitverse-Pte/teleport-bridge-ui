@@ -1,13 +1,14 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { darken } from 'polished'
 import { Text, Box, Flex } from 'rebass'
 import { GreyCard, DarkGreyCard } from 'components/Card'
-import { IChainData, ICurrency } from 'helpers'
+import { IChainData, ICurrency, Overwrite } from 'helpers'
 import BigNumber from 'bignumber.js'
 import { SelectorLabel, SelectorLogo } from 'components/Common'
 import { ButtonLight } from 'components/Button'
-import SupportedChains from 'helpers/chains'
+import { SupportedChains } from 'constants/chains'
+import { useActiveWeb3React } from 'hooks/web3'
 
 interface LoosedIChainData {
   short_name?: string
@@ -58,7 +59,8 @@ const DarkenedText = styled(Text)`
 `
 
 export default function HistoryRecord() {
-  const chainData = SupportedChains[0]
+  const { chainId } = useActiveWeb3React()
+  const chainData = SupportedChains.get(chainId!)
   return (
     <>
       <HistoryGreyCard>

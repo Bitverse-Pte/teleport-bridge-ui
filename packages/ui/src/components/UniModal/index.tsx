@@ -155,9 +155,11 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = fal
 
 export const UniModalContentWrapper = styled.div`
   background-color: ${({ theme }) => theme.bg0};
+  display: flex;
   padding: 1rem 1rem 1rem 1rem;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
   width: 100%;
+  // min-height: 61.8vh;
   max-height: calc(100% - 20px);
 `
