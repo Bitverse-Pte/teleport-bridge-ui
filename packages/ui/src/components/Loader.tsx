@@ -22,11 +22,11 @@ const load = keyframes`
 `
 
 interface ILoaderStyleProps {
-  size: number
+  size?: number
 }
 
 interface ILoaderProps extends ILoaderStyleProps {
-  color: string
+  color?: string
 }
 
 const SLoader = styled.svg<ILoaderStyleProps>`
@@ -36,8 +36,7 @@ const SLoader = styled.svg<ILoaderStyleProps>`
   transform: translateZ(0);
 `
 
-const Loader = (props: ILoaderProps) => {
-  const { size, color } = props
+const Loader = ({ size = 40, color = 'lightBlue' }: ILoaderProps) => {
   const rgb = `rgb(${colors[color]})`
   return (
     <SLoader viewBox="0 0 186 187" size={size}>
@@ -52,16 +51,6 @@ const Loader = (props: ILoaderProps) => {
       </g>
     </SLoader>
   )
-}
-
-Loader.propTypes = {
-  size: PropTypes.number,
-  color: PropTypes.string,
-}
-
-Loader.defaultProps = {
-  size: 40,
-  color: 'lightBlue',
 }
 
 export default Loader

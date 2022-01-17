@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import Web3 from 'web3'
 import { provider as Web3Provider } from 'web3-core'
 import { Flex } from 'rebass'
@@ -110,7 +110,6 @@ const STestButton = styled(SButtonPrimary)`
   max-width: 175px;
   margin: 12px;
 `
-
 interface IAppState {
   fetching: boolean
   address: string

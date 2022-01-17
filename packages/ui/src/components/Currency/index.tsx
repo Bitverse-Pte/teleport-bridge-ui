@@ -15,3 +15,5 @@ export const StyledBalanceText = styled(ThemedText.White)`
 export function Balance({ currency, balance }: { currency: TokenInfo; balance: BigNumber }) {
   return <StyledBalanceText /* title={balance.toExact()} */>{new BigNumberJS(balance.toString()).shiftedBy(-currency.decimals).toFixed(6)}</StyledBalanceText>
 }
+
+export * from './CurrencyList'

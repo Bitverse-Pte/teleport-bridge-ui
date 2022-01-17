@@ -4,7 +4,8 @@ import { ChevronDown } from 'react-feather'
 import CssValueParser from 'parse-unit'
 import { DefaultButtonRadius } from 'theme'
 import { BaseButtonProps, ButtonLight } from '.'
-import { SelectorLogo, SelectorLabel } from 'components/Common'
+import { SelectorLabel } from 'components/Label'
+import { SelectorLogo } from 'components/Logo'
 
 export default function SelectorButton({ interactive = false, logoSrc, labelContent, $borderRadius, ...rest }: { interactive?: boolean; logoSrc?: string; labelContent: string } & BaseButtonProps) {
   const [digit, unit] = CssValueParser($borderRadius ?? DefaultButtonRadius)

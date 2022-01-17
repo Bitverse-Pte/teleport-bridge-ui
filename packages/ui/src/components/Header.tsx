@@ -1,31 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { darken } from 'polished'
-import { AbstractConnector } from '@web3-react/abstract-connector'
-import styled, { css } from 'styled-components'
-import { Flex, Box, Text } from 'rebass/styled-components'
-import { ChevronDown, XCircle } from 'react-feather'
-
-import { injected, portis } from 'connectors'
-import Blockie from './Blockie'
-import Banner from './Banner'
-import { MEDIA_WIDTHS } from 'theme'
-import UniModal from 'components/UniModal'
-import { useDispatch } from 'hooks'
-import Option from './Option'
-import { ConnectButton } from 'components/Button'
-import { useActiveWeb3React } from 'hooks/web3'
-import { SUPPORTED_WALLETS } from 'constants/wallet'
-import { isMobile } from 'helpers/userAgent'
-import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
-import { UnsupportedChainIdError } from '@web3-react/core'
-import { StyledText, Text1 } from 'components/Text'
 import { useSelector } from 'react-redux'
-import { ButtonPrimary, ButtonSecondary, ButtonDropdown } from 'components/Button'
-import { RootState } from 'store/store'
-import { CircledCloseIcon } from 'components/Icon'
-import WalletSelectModal from './CutomizedModal/WalletSelectModal'
+import styled, { css } from 'styled-components'
+import { Flex } from 'rebass/styled-components'
 import { pick } from 'lodash'
-import HistoryModal from './CutomizedModal/HistoryModal'
+
+import { useDispatch } from 'hooks'
+import { useActiveWeb3React } from 'hooks/web3'
+import { RootState } from 'store/store'
+import Blockie from 'components/Blockie'
+import Banner from 'components/Banner'
+import { ConnectButton } from 'components/Button'
+import { StyledText, Text1 } from 'components/Text'
+import { ButtonPrimary, ButtonSecondary, ButtonDropdown } from 'components/Button'
+import WalletSelectModal from 'components/CustomizedModal/WalletSelectModal'
+import HistoryModal from 'components/CustomizedModal/HistoryModal'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -69,54 +58,6 @@ const SHeader = styled(Flex)`
 
 const SBlockie = styled(Blockie)`
   margin-right: 10px;
-`
-
-const FlyoutHeader = styled.div`
-  color: ${({ theme }) => theme.text2};
-  font-weight: 400;
-`
-const FlyoutMenu = styled.div`
-  align-items: flex-start;
-  background-color: ${({ theme }) => theme.bg1};
-  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 24px 32px rgba(0, 0, 0, 0.01);
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  font-size: 16px;
-  overflow: auto;
-  padding: 16px;
-  position: absolute;
-  top: 64px;
-  width: 100%;
-  z-index: 99;
-  & > *:not(:last-child) {
-    margin-bottom: 12px;
-  }
-  @media screen and (min-width: ${MEDIA_WIDTHS.upToSmall}px) {
-    top: 50px;
-  }
-`
-const FlyoutRow = styled.div`
-  align-items: center;
-  background-color: ${({ theme }) => theme.bg2};
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  font-weight: 500;
-  justify-content: space-between;
-  padding: 6px 8px;
-  text-align: left;
-  width: 100%;
-`
-
-const ContentWrapper = styled.div`
-  background-color: ${({ theme }) => theme.bg0};
-  padding: 1rem 1rem 1rem 1rem;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  width: 100%;
-  max-height: calc(100% - 20px);
-  ${({ theme }) => theme.mediaWidth.upToMedium`padding: 0 1rem 1rem 1rem`};
 `
 
 export const AutoColumn = styled.div<{

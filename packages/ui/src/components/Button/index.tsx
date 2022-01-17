@@ -261,6 +261,20 @@ SButtonPrimary.defaultProps = {
   left: false,
 }
 
+export const ButtonGray = styled(BaseButton)`
+  background-color: ${({ theme }) => theme.bg1};
+  color: ${({ theme }) => theme.text2};
+  font-size: 16px;
+  font-weight: 500;
+
+  &:hover {
+    background-color: ${({ theme, disabled }) => !disabled && darken(0.05, theme.bg2)};
+  }
+  &:active {
+    background-color: ${({ theme, disabled }) => !disabled && darken(0.1, theme.bg2)};
+  }
+`
+
 export { default as ButtonDropdown } from './ButtonDropdown'
 export { default as SelectorButton } from './SelectorButton'
 export { default as ConnectButton } from './ConnectButton'

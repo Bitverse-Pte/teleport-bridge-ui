@@ -1,63 +1,25 @@
 // import { Trans } from '@lingui/macro'
-import React, { CSSProperties, MutableRefObject, useCallback, useMemo } from 'react'
-import { BigNumber } from '@ethersproject/bignumber'
-import BignumberJS from 'bignumber.js'
-import { CurrencyAmount, Token } from '@uniswap/sdk-core'
+import React, { CSSProperties, MutableRefObject, useCallback } from 'react'
 import { FixedSizeList } from 'react-window'
-import { Text } from 'rebass'
 import styled from 'styled-components/macro'
 import { isEqualWith } from 'lodash'
 
-import { useTheme } from 'hooks/useTheme'
-import { TokenInfo as Currency, TokenInfo } from 'helpers/types'
-import TokenListLogo from '../../assets/svg/tokenlist.svg'
+import { TokenInfo as Currency } from 'helpers/types'
 import { useActiveWeb3React } from 'hooks/web3'
-import { ThemedText } from '../../theme'
-import Column from '../Column'
-import Loader from '../Loader'
-import { RowBetween, RowFixed } from '../Row'
+import { ThemedText } from 'theme'
+import Column from 'components/Column'
+import Loader from 'components/Loader'
+import { RowBetween, RowFixed } from 'components/Row'
 import { useTokenBalance } from 'hooks/wallet'
-import { StyledLogo } from 'components/Common'
-import { useSelector } from 'react-redux'
-import { RootState } from 'store'
 import { useDispatch } from 'hooks'
 import { Balance } from 'components/Currency'
+import { StyledLogo } from 'components/Logo'
 
 function currencyKey(currency: Currency): string {
   return currency.address || 'ETHER'
 }
 
-const Tag = styled.div`
-  background-color: ${({ theme }) => theme.bg3};
-  color: ${({ theme }) => theme.text2};
-  font-size: 14px;
-  border-radius: 4px;
-  padding: 0.25rem 0.3rem 0.25rem 0.3rem;
-  max-width: 6rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  justify-self: flex-end;
-  margin-right: 4px;
-`
-
-const FixedContentRow = styled.div`
-  padding: 4px 20px;
-  height: 56px;
-  display: grid;
-  grid-gap: 16px;
-  align-items: center;
-`
-const TagContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`
-
-const TokenListLogoWrapper = styled.img`
-  height: 20px;
-`
-
-export const MenuItem = styled(RowBetween)`
+const MenuItem = styled(RowBetween)`
   padding: 4px 20px;
   height: 56px;
   display: grid;

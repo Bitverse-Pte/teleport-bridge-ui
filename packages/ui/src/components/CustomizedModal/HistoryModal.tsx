@@ -7,7 +7,6 @@ import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { useDispatch } from 'hooks'
-import { GreyCard, DarkGreyCard, LightGreyCard } from 'components/Card'
 import HistoryRecord from 'components/HistoryRecord'
 
 export default function HistoryModal() {

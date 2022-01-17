@@ -5,10 +5,11 @@ import { Text, Box, Flex } from 'rebass'
 import { GreyCard, DarkGreyCard } from 'components/Card'
 import { IChainData, ICurrency, Overwrite } from 'helpers'
 import BigNumber from 'bignumber.js'
-import { SelectorLabel, SelectorLogo } from 'components/Common'
+import { SelectorLogo } from 'components/Logo'
 import { ButtonLight } from 'components/Button'
 import { SupportedChains } from 'constants/chains'
 import { useActiveWeb3React } from 'hooks/web3'
+import { SelectorLabel } from 'components/Label'
 
 interface LoosedIChainData {
   short_name?: string
