@@ -1,5 +1,5 @@
 import { ETH_ON_MAINNET, ETH_ON_RINKEBY, ETH_ON_TELEPORT_TEST, TELE_ON_RINKEBY, TELE_ON_TELEPORT_TEST, USDT_ON_MAINNET, USDT_ON_RINKEBY, USDT_ON_TELEPORT_TEST } from './tokens'
-import { ChainDataList, IChainData } from 'helpers'
+import { ChainDataList, IChainData } from 'constants/index'
 
 import EthereumLogo from 'assets/images/ethereum-logo.png'
 import RopstenLogo from 'assets/images/ethereum-logo-for-ropsten.webp'
@@ -282,7 +282,7 @@ export enum SupportedChainId {
   GOERLI = 5,
   KOVAN = 42,
   BSC = 56,
-  TELEPORT = 9000,
+  TELEPORT = 7001,
   ARBITRUM_ONE = 42161,
   ARBITRUM_RINKEBY = 421611,
   OPTIMISM = 10,
@@ -468,8 +468,8 @@ export const DEFAULT_DESTINATION_CHAIN: IChainData = {
   short_name: 'tpt',
   chain: 'TELE',
   network: 'rinkeby',
-  chain_id: 9000,
-  network_id: 9000,
+  chain_id: 7001,
+  network_id: 7001,
   rpc_url: 'http://10.41.20.10:8545',
   logo: defaultIcon,
   native_currency: {
@@ -506,7 +506,7 @@ export const SupportedChains: Map<number, IChainData> = new Map(
             supportTokens: [USDT_ON_RINKEBY, ETH_ON_RINKEBY, TELE_ON_RINKEBY],
           },
         ],
-        [9000, DEFAULT_DESTINATION_CHAIN],
+        [7001, DEFAULT_DESTINATION_CHAIN],
       ]
     : [
         [

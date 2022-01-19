@@ -1,12 +1,12 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { hexStripZeros } from '@ethersproject/bytes'
 import { Web3Provider } from '@ethersproject/providers'
-import { L1ChainInfo, L2ChainInfo, SupportedChainId } from 'constants/chains'
+import { SupportedChainId, Chain } from 'constants/index'
 
 interface AddNetworkArguments {
   library: Web3Provider
   chainId: SupportedChainId
-  info: L1ChainInfo | L2ChainInfo
+  info: Chain
 }
 
 // provider.request returns Promise<any>, but wallet_switchEthereumChain must return null or throw
@@ -22,10 +22,10 @@ export async function addNetwork({ library, chainId, info }: AddNetworkArguments
       params: [
         {
           chainId: formattedChainId,
-          chainName: info.label,
-          rpcUrls: info.rpcUrls,
+          chainName: info.name,
+          rpcUrls: info.rpc,
           nativeCurrency: info.nativeCurrency,
-          blockExplorerUrls: [info.explorer],
+          blockExplorerUrls: [info.explorers],
         },
       ],
     })

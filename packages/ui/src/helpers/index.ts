@@ -4,7 +4,6 @@ import { AddressZero } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
 
 export * from './local'
-export * from './types'
 // export * from './utils'
 
 export function isAddress(value: any): string | false {

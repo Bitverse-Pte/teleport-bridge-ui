@@ -13,7 +13,6 @@ import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { pick } from 'lodash'
 import { switchToNetwork } from 'helpers/switchToNetwork'
-import { useFromChainList } from 'hooks/useChainList'
 
 const MessageWrapper = styled.div`
   display: flex;
@@ -28,15 +27,19 @@ const Message = styled.h2`
 
 export default function Web3ReactManager({ children }: { children: JSX.Element }) {
   const {
-    application: { setDestinationChain },
+    application: { /* setDestinationChain, */ setLibrary, setAccount },
   } = useDispatch()
-  const { connectStatus, destinationChain } = useSelector((state: RootState) => pick(state.application, 'connectStatus', 'destinationChain'))
+
+  const { connectStatus, destinationChains: destinationChain } = useSelector((state: RootState) => pick(state.application, 'connectStatus', 'destinationChain'))
   const { active, chainId, library } = useWeb3React()
-  const { library: networkLibrary, active: networkActive, error: networkError, activate: activateNetwork, chainId: networkChainId } = useWeb3React(NetworkContextName)
-  const fromChainList = useFromChainList()
+  const { account, library: networkLibrary, active: networkActive, error: networkError, activate: activateNetwork, chainId: networkChainId } = useWeb3React(NetworkContextName)
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect()
 
+  useEffect(() => {
+    setLibrary(library)
+    setAccount(account)
+  }, [library, account])
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
   useEffect(() => {
     if (triedEager && !networkActive && !networkError && !active) {
@@ -44,14 +47,14 @@ export default function Web3ReactManager({ children }: { children: JSX.Element }
     }
   }, [triedEager, networkActive, networkError, activateNetwork, active])
 
-  useEffect(() => {
+  /*   useEffect(() => {
     if (connectStatus && (active || networkActive) && (library || networkLibrary)) {
       if (destinationChain.chain_id === chainId || destinationChain.chain_id === networkChainId) {
         setDestinationChain(fromChainList[0])
         switchToNetwork({ library: library || networkLibrary, chainId: destinationChain.chain_id })
       }
     }
-  }, [connectStatus, active, networkActive, library, networkLibrary])
+  }, [connectStatus, active, networkActive, library, networkLibrary]) */
 
   // when there's no account connected, react to logins (broadly speaking) on the injected provider, if it exists
   // useInactiveListener(!triedEager)

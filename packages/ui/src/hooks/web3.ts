@@ -1,4 +1,3 @@
-import { useFromChainList } from 'hooks/useChainList'
 import { useDispatch } from 'hooks'
 import { useSelector } from 'react-redux'
 import { AbstractConnector } from '@web3-react/abstract-connector'
@@ -116,10 +115,12 @@ export function useEagerConnect() {
 export function useInactiveListener(suppress = false) {
   const { active, error, activate, library, connector } = useWeb3React()
   const {
-    application: { setDestinationChain },
+    application: { setDestChainId, setSrcChainId, setWrongChain },
   } = useDispatch()
-  const fromChainList = useFromChainList()
-  const destinationChain = useSelector((state: RootState) => state.application.destinationChain)
+  const { srcChainId, destChainId, availableChains } = useSelector((state: RootState) => {
+    const { srcChainId, destChainId, availableChains } = state.application
+    return { srcChainId, destChainId, availableChains }
+  })
   const handleConnect = useCallback(() => {
     console.log("Handling 'connect' event")
     activate(injected)
@@ -127,13 +128,21 @@ export function useInactiveListener(suppress = false) {
   const handleChainChanged = useCallback(
     (chainId: string | number) => {
       console.log("Handling 'chainChanged' event with payload", chainId)
-      if (parseInt(`${chainId}`) === destinationChain.chain_id) {
+      /* if (parseInt(`${chainId}`) === destinationChain.chain_id) {
         setDestinationChain(fromChainList[0])
         switchToNetwork({ library, chainId: destinationChain.chain_id })
+      } */
+
+      if (chainId != srcChainId) {
+        if (!availableChains.has(parseInt(`${chainId}`))) {
+          setWrongChain(true)
+        } else {
+          setSrcChainId(parseInt(`${chainId}`))
+        }
       }
       activate(injected)
     },
-    [destinationChain, fromChainList]
+    [srcChainId, availableChains]
   )
   const handleAccountsChanged = useCallback((accounts: string[]) => {
     console.log("Handling 'accountsChanged' event with payload", accounts)

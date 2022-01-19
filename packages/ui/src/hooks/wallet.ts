@@ -1,5 +1,7 @@
 import { useMemo, useEffect, useState } from 'react'
 import { BigNumber } from '@ethersproject/bignumber'
+import { isAddress } from '@ethersproject/address'
+import { Contract, ContractFunction } from '@ethersproject/contracts'
 // import { Interface } from '@ethersproject/abi'
 // import { ContractInterface } from '@ethersproject/contracts'
 
@@ -8,8 +10,8 @@ import { BigNumber } from '@ethersproject/bignumber'
 import ERC20ABI from 'contracts/erc20.json'
 import { useActiveWeb3React } from './web3'
 // import { useUserUnclaimedAmount } from '../claim/hooks'
-import { getContract, getProviderOrSigner, TokenInfo } from 'helpers'
-import { Contract, ContractFunction } from '@ethersproject/contracts'
+import { getContract, getProviderOrSigner } from 'helpers'
+import { TokenInfo } from 'constants/index'
 // import { useTotalUniEarned } from '../stake/hooks'
 
 /**
@@ -124,12 +126,12 @@ export function useCurrencyBalance(account?: string, currency?: Currency): Curre
   )[0]
 } */
 
-export function useTokenBalance(token: TokenInfo, abi = ERC20ABI): BigNumber | undefined {
+export function useTokenBalance(token: TokenInfo = {} as TokenInfo, abi = ERC20ABI): BigNumber | undefined {
   const { chainId, library, account } = useActiveWeb3React()
   const [result, setResult] = useState<BigNumber | undefined>(undefined)
   const value = useMemo(() => result, [result])
   useEffect(() => {
-    if (!token || !library) {
+    if (!token || (!token.isNative && !isAddress(token.address)) || !library || !account) {
       return undefined
     }
     const request = token && token.isNative ? library?.getBalance(account!) : (getContract(token.address, abi, library, account!).balanceOf as ContractFunction)(account!)

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { ICurrency, IGasPrices, IParsedTx } from './types'
+import { ICurrency, IGasPrices, IParsedTx } from '../constants/types'
 
 const api: AxiosInstance = axios.create({
   baseURL: 'https://ethereum-api.xyz',

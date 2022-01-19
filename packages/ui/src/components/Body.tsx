@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { isAddress } from '@ethersproject/address'
 import { useSelector } from 'react-redux'
 import { parseEther } from '@ethersproject/units'
 import { darken } from 'polished'
@@ -8,23 +9,26 @@ import { Flex, Text } from 'rebass'
 import { pick } from 'lodash'
 import BigNumber from 'bignumber.js'
 import { MEDIA_WIDTHS, Z_INDEX } from 'theme'
+import { TokenInfo, Chain, TokenPairs, NetworkSelectModalMode } from 'constants/types'
 import { switchToNetwork } from 'helpers/switchToNetwork'
 import { getChainData } from 'helpers/chains'
 import { useActiveWeb3React } from 'hooks/web3'
 import { ButtonLight, ButtonPrimary, SelectorButton, ConnectButton, ButtonGray } from 'components/Button'
 import { RootState } from 'store/store'
 import NetworkSelectModal from 'components/CustomizedModal/NetworkSelectorModal'
-import { useDispatch } from 'hooks'
+import { useChain, useDispatch } from 'hooks'
 import { useTransferFromEvmContract, useTransferFromTeleContract } from 'contracts/index'
 import CurrencySelectModal from 'components/CustomizedModal/CurrencySelectModal'
 import { useTokenBalance } from 'hooks/wallet'
-import { AlertIcon, ERC20Icon } from 'components/Icon'
+import { AlertIcon } from 'components/Icon'
 import { Balance } from 'components/Currency'
-import { useFromChainList } from 'hooks/useChainList'
 import Loader from 'components/Loader'
 import { SelectorLabel } from 'components/Label'
 import { StyledLogo, SelectorLogo } from 'components/Logo'
 import { CurrencyInput } from 'components/Input'
+import { Text1, TextPrimary1 } from 'components/Text'
+import axios from 'axios'
+import { BRIDGE_TOKENS__URL } from 'constants/index'
 
 const BodyWrapper = styled.main<{ margin?: string; maxWidth?: string }>`
   position: relative;
@@ -133,108 +137,71 @@ const StyledTokenName = styled.span<{ active?: boolean }>`
   font-size: ${({ active }) => (active ? '18px' : '18px')};
 `
 
-export const Text1 = styled(Text)`
-  color: ${({ theme }) => theme.text1};
-`
-
-export const TextPrimary1 = styled(Text)`
-  color: ${({ theme }) => theme.primary1};
-`
-
 /**
  * The styled container element that wraps the content of most pages and the tabs.
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { setNetworkModalOpen, setCurrencySelectModalOpen, setSelectedCurrency, setDestinationChain },
+    application: { setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, setTokens, setSrcChainId, setDestChainId, setSelectedTokenName },
   } = useDispatch()
-  const { connectStatus, selectedCurrency, destinationChain, networkModalOpen, currencySelectModalOpen } = useSelector((state: RootState) =>
-    pick(state.application, 'networkModalOpen', 'currencySelectModalOpen', 'connectStatus', 'selectedCurrency', 'destinationChain')
-  )
+  const { connectStatus, selectedTokenName, tokens, networkModalMode, currencySelectModalOpen, availableChains, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { availableChains, selectedTokenName, tokens, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId } = state.application
+    return { availableChains, selectedTokenName, tokens, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId }
+  })
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
   const fromValueInputRef = useRef<any>({})
-  const [fromValue, setFromValue] = useState<BigNumber>(new BigNumber(0))
   const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
-  const [ready, setReady] = useState(false)
-  const fromChainList = useFromChainList()
+  const ready = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account])
+  const srcChain = useMemo(() => {
+    return availableChains.get(srcChainId)
+  }, [availableChains, srcChainId])
 
-  const chainData = useMemo(() => {
-    let data
-    try {
-      if (connectStatus) {
-        data = getChainData(chainId)
-        active && library && setReady(true)
-      } else {
-        throw null
-      }
-    } catch (error) {
-      data = fromChainList[0]
-      setReady(false)
-      // setError(error as Error)
+  const destChain = useMemo(() => {
+    return srcChain?.destChains.find((e) => e.chainId === destChainId)
+  }, [availableChains, destChainId])
+
+  const selectedTokenPair = useMemo(() => {
+    const pairs = tokens.get(`${srcChainId}-${destChainId}`)
+    if (pairs) {
+      return pairs.find((e) => e.name === selectedTokenName) || pairs[0]
     }
-    return data
-  }, [chainId, connectStatus, active, library])
+  }, [tokens, selectedTokenName, srcChainId, destChainId])
 
   useEffect(() => {
-    if (chainData && selectedCurrency?.chainId !== chainData.chain_id) {
-      setSelectedCurrency(chainData.supportTokens[0])
+    const key = `${srcChainId}-${destChainId}`
+    if (!tokens.has(key)) {
+      axios.get<TokenPairs[]>(BRIDGE_TOKENS__URL + `/${srcChainId}/${destChainId}`).then(({ data }) => {
+        data.forEach(({ srcToken }) => {
+          if (!isAddress(srcToken.address)) {
+            srcToken.isNative = true
+          }
+        })
+        tokens.set(key, data)
+        setTokens(new Map(tokens))
+        setSelectedTokenName(data[0].name)
+      })
     }
-    setFromValue(new BigNumber(0))
-  }, [selectedCurrency, chainData])
+  }, [srcChainId, destChainId, tokens])
 
-  const balance = useTokenBalance(selectedCurrency!)
+  useEffect(() => {
+    if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
+      fromValueInputRef.current.value = new BigNumber(0).toString()
+    }
+  }, [ready, fromValueInputRef])
+
+  const balance = useTokenBalance(selectedTokenPair && selectedTokenPair!.srcToken)
+
+  const transfer = useCallback(() => {
+    if (selectedTokenPair && fromValueInputRef.current && 'value' in fromValueInputRef.current && srcChainId && destChainId) {
+      transferTokens({ tokenInfo: selectedTokenPair!.srcToken, amount: fromValueInputRef.current.value, srcChainId, destChainId })
+    }
+  }, [tokens, selectedTokenPair, fromValueInputRef.current, srcChainId, destChainId])
 
   const transferBalanceToFromValue = useCallback(() => {
     if (connectStatus && fromValueInputRef.current && 'value' in fromValueInputRef.current && balance) {
-      fromValueInputRef.current.value = new BigNumber(balance!.toString()).shiftedBy(-selectedCurrency!.decimals).toString()
+      fromValueInputRef.current.value = new BigNumber(balance!.toString()).shiftedBy(-selectedTokenPair!.srcToken.decimals).toString()
     }
-  }, [fromValueInputRef, balance, connectStatus, selectedCurrency])
-
-  const transferFromTeleContract = useTransferFromTeleContract()
-  const transferFromEvmContract = useTransferFromEvmContract()
-  const transfer = useCallback(async () => {
-    let value = ''
-    if (fromValueInputRef.current && 'value' in fromValueInputRef.current) {
-      value = fromValueInputRef.current.value
-    }
-    if (chainId === 9000) {
-      if (selectedCurrency && library && transferFromTeleContract && account && value) {
-        transferFromTeleContract
-          .sendTransferBase(
-            {
-              receiver: account,
-              destChain: 'test-eth',
-              relayChain: '',
-            },
-            { value: parseEther(fromValueInputRef.current.value) }
-          )
-          .then((res: any) => {
-            console.log(res)
-          })
-          .catch((err: any) => {
-            console.error(err)
-          })
-      }
-    } else if (chainId === 4) {
-      if (selectedCurrency && library && transferFromEvmContract && account && value) {
-        transferFromEvmContract
-          .sendTransferBase(
-            {
-              receiver: account,
-              destChain: 'bitos',
-              relayChain: '',
-            },
-            { value: parseEther(fromValueInputRef.current.value) }
-          )
-          .then((res: any) => {
-            console.log(res)
-          })
-          .catch((err: any) => {
-            console.error(err)
-          })
-      }
-    }
-  }, [transferFromTeleContract, selectedCurrency, fromValue, library, account, fromValueInputRef])
+  }, [fromValueInputRef, balance, connectStatus, selectedTokenPair])
 
   return (
     <>
@@ -244,7 +211,14 @@ export default function AppBody({ ...rest }) {
             <Flex alignItems="center" minWidth="60px">
               <Text1 fontWeight={600}>From</Text1>
             </Flex>
-            <SelectorButton labelContent={`${chainData?.name}`} logoSrc={chainData!.logo} interactive={false} maxWidth="15rem" onClick={() => setNetworkModalOpen(true)} disabled={!connectStatus} />
+            <SelectorButton
+              labelContent={`${srcChain?.name || 'Unavailable'}`}
+              logoSrc={srcChain!.icon}
+              interactive={false}
+              maxWidth="15rem"
+              onClick={() => setNetworkModalMode(NetworkSelectModalMode.SRC)}
+              // disabled={!ready}
+            />
           </Flex>
           <Container hideInput={false} marginBottom="2%">
             <Flex width="100%" height="100%" flexDirection="column" justifyContent="space-between">
@@ -256,19 +230,22 @@ export default function AppBody({ ...rest }) {
                     cursor: connectStatus ? 'pointer' : 'not-allowed',
                   }}
                   onClick={transferBalanceToFromValue}
-                  /* onClick={() => {
-                    setFromValue(new BigNumber(balance.toString()).shiftedBy(-selectedCurrency!.decimals))
-                  }} */
                 >
                   <Text1>{'Max:'}</Text1> &nbsp;
-                  {connectStatus && selectedCurrency && balance ? <Balance balance={balance} currency={selectedCurrency} /> : connectStatus && account ? <Loader size={17} /> : <Text1>{'N/A'}</Text1>}
+                  {ready && selectedTokenName && selectedTokenPair && balance ? (
+                    <Balance balance={balance} currency={selectedTokenPair!.srcToken} />
+                  ) : connectStatus && account ? (
+                    <Loader size={17} />
+                  ) : (
+                    <Text1>{'N/A'}</Text1>
+                  )}
                 </Flex>
               </Flex>
               <br />
               <Flex>
-                <CurrencyInput disabled={!connectStatus} style={{ fontSize: '2rem' }} placeholder="0.0" type="number" ref={fromValueInputRef} defaultValue={0} />
+                <CurrencyInput disabled={!ready} style={{ fontSize: '2rem' }} placeholder="0.0" type="number" ref={fromValueInputRef} defaultValue={0} />
                 <SelectedCurrencyButton
-                  disabled={!connectStatus}
+                  disabled={!ready}
                   visible={true}
                   selected={false}
                   hideInput={true}
@@ -277,25 +254,25 @@ export default function AppBody({ ...rest }) {
                     setCurrencySelectModalOpen(true)
                   }}
                 >
-                  {selectedCurrency && <StyledLogo srcs={[selectedCurrency.logoURI!]} size={'24px'} />}
-                  {selectedCurrency && (
+                  {selectedTokenPair && <StyledLogo srcs={[selectedTokenPair!.srcToken.logoURI]} size={'24px'} />}
+                  {selectedTokenPair && (
                     <StyledTokenName className="token-symbol-container" active={true}>
-                      {selectedCurrency!.symbol}
+                      {selectedTokenPair!.srcToken.symbol}
                     </StyledTokenName>
                   )}
-                  {/* {selectedCurrency && <ERC20Icon contractAddress={selectedCurrency.address} />} */}
                 </SelectedCurrencyButton>
               </Flex>
             </Flex>
           </Container>
           <Flex marginBottom="2%">
-            <ArrowWrapper clickable={connectStatus}>
+            <ArrowWrapper clickable={!!connectStatus}>
               <ArrowDown
                 size="16"
                 onClick={() => {
-                  const newDestinationChain = fromChainList.find((chain) => chain.chain_id === chainId)
-                  setDestinationChain(newDestinationChain!)
-                  switchToNetwork({ library, chainId: destinationChain.chain_id })
+                  setSrcChainId(destChainId)
+                  /*  const newdestChain = fromChainList.find((chain) => chain.chain_id === chainId)
+                  setdestChain(newdestChain!)
+                  switchToNetwork({ library, chainId: destChain.chain_id }) */
                 }}
               />
             </ArrowWrapper>
@@ -304,10 +281,18 @@ export default function AppBody({ ...rest }) {
             <Flex alignItems="center" minWidth="60px">
               <Text1 fontWeight={600}>To</Text1>
             </Flex>
-            <ButtonLight maxWidth="15rem" disabled={!connectStatus}>
-              <SelectorLogo interactive={true} src={destinationChain.logo} />
-              <SelectorLabel>{destinationChain.name}</SelectorLabel>
-            </ButtonLight>
+            {/* <ButtonLight maxWidth="15rem" disabled={!ready}>
+              <SelectorLogo interactive={true} src={destChain!.icon} />
+              <SelectorLabel>{destChain!.name}</SelectorLabel>
+            </ButtonLight> */}
+            <SelectorButton
+              labelContent={`${destChain?.name || 'Unavailable'}`}
+              logoSrc={destChain!.icon}
+              interactive={true}
+              maxWidth="15rem"
+              onClick={() => setNetworkModalMode(NetworkSelectModalMode.DEST)}
+              // disabled={!ready}
+            />
           </Flex>
           <Container hideInput={false} marginBottom="5%" flexDirection="column">
             <Flex width="100%" height={'fit-content'}>
@@ -316,7 +301,13 @@ export default function AppBody({ ...rest }) {
               <TextPrimary1 fontWeight={600}>Receive(Estimated):</TextPrimary1>
             </Flex>
             <br />
-            <CurrencyInput disabled={true} style={{ fontSize: '2rem' }} type="number" placeholder="0.0" value={selectedCurrency ? toValue.shiftedBy(-selectedCurrency!.decimals).toString() : 0} />
+            <CurrencyInput
+              disabled={true}
+              style={{ fontSize: '2rem' }}
+              type="number"
+              placeholder="0.0"
+              value={selectedTokenPair ? toValue.shiftedBy(-selectedTokenPair!.srcToken.decimals).toString() : 0}
+            />
           </Container>
           <Flex justifyContent="center">
             {connectStatus && (
@@ -328,7 +319,7 @@ export default function AppBody({ ...rest }) {
           </Flex>
         </Flex>
       </BodyWrapper>
-      {networkModalOpen && <NetworkSelectModal />}
+      {networkModalMode !== NetworkSelectModalMode.CLOSE && <NetworkSelectModal />}
       {currencySelectModalOpen && <CurrencySelectModal />}
     </>
   )

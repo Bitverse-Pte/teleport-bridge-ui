@@ -32,7 +32,7 @@ const OptionGrid = styled.div`
 
 export default function WalletSelectModal() {
   const {
-    application: { saveConnectStatus, setWalletModalOpen },
+    application: { saveConnectStatus, setWalletModalOpen, setWaitWallet },
   } = useDispatch()
   const { connectStatus, walletModalOpen } = useSelector((state: RootState) => pick(state.application, 'connectStatus', 'walletModalOpen'))
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
@@ -59,7 +59,7 @@ export default function WalletSelectModal() {
       if (connector instanceof WalletConnectConnector) {
         connector.walletConnectProvider = undefined
       }
-
+      setWaitWallet(true)
       connector &&
         activate(connector, undefined, true)
           .then(() => {
@@ -78,6 +78,7 @@ export default function WalletSelectModal() {
               console.error(error)
             }
           })
+          .finally(() => setWaitWallet(false))
       // eslint-disable-next-line @typescript-eslint/no-empty-function
     },
     [connector]
@@ -98,8 +99,10 @@ export default function WalletSelectModal() {
           return (
             <Option
               onClick={() => {
+                tryActivation(option.connector) /* && tryActivation(option.connector)*/
+                /*  ? setWalletView(WALLET_VIEWS.ACCOUNT) : !option.href */
                 // option.connector !== connector && !option.href && tryActivation(option.connector)
-                /* option.connector !== connector */ /*  ? setWalletView(WALLET_VIEWS.ACCOUNT) : !option.href */ /* && */ tryActivation(option.connector)
+                /* option.connector !== connector */
               }}
               id={`connect-${key}`}
               key={key}

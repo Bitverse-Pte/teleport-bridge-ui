@@ -17,3 +17,7 @@ export const StyledText = styled.p`
   width: fit-content;
   font-weight: 600;
 `
+
+export const TextPrimary1 = styled(Text)`
+  color: ${({ theme }) => theme.primary1};
+`

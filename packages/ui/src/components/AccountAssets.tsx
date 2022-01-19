@@ -1,7 +1,7 @@
 import React from 'react'
 import Column from './Column'
 import AssetRow from './AssetRow'
-import { ICurrency } from '../helpers/types'
+import { ICurrency } from '../constants/types'
 
 const AccountAssets = (props: any) => {
   const { assets, chainId } = props

@@ -5,7 +5,8 @@ import { Web3ReactContextInterface } from '@web3-react/core/dist/types'
 // import { bscConnector } from 'connectors'
 // import { NetworkConnector } from '@web3-react/network-connector'
 
-import { CHAIN_INFO, SupportedChainId } from 'constants/chains'
+import { Chain } from 'constants/index'
+import { store } from 'store/store'
 
 import { addNetwork } from './addNetwork'
 /* 
@@ -47,15 +48,15 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
   } catch (error: any) {
     // 4902 is the error code for attempting to switch to an unrecognized chainId
     if (error.code === 4902 && chainId !== undefined) {
-      const info = CHAIN_INFO[chainId]
-      if (!info) {
+      const chain = store.getState().application.availableChains.get(chainId)
+      if (!chain) {
         console.error(`chain: ${chainId} is not supported!`)
         return
       }
       // metamask (only known implementer) automatically switches after a network is added
       // the second call is done here because that behavior is not a part of the spec and cannot be relied upon in the future
       // metamask's behavior when switching to the current network is just to return null (a no-op)
-      await addNetwork({ library, chainId, info })
+      await addNetwork({ library, chainId, info: chain as Chain })
     }
     if (retry) {
       await window.ethereum?.request({

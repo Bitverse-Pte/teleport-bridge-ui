@@ -2,7 +2,7 @@ import EthereumLogo from 'assets/images/ethereum-logo.png'
 import DefaultIcon from 'assets/defaultIcon.svg'
 import USDTLogo from 'assets/usdt.svg'
 import ERC20ABI from 'contracts/erc20.json'
-import { TokenInfo } from 'helpers/types'
+import { TokenInfo } from 'constants/types'
 
 /*   readonly chainId: number
   readonly address: string
@@ -37,7 +37,7 @@ export const USDT_ON_RINKEBY: TokenInfo = {
 }
 
 export const USDT_ON_TELEPORT_TEST: TokenInfo = {
-  chainId: 9000,
+  chainId: 7001,
   name: 'Tether USD',
   address: '0x88af15e1f4027b390C76F7168320bA5c90dBD959',
   logoURI: USDTLogo,
@@ -81,7 +81,7 @@ export const ETH_ON_RINKEBY: TokenInfo = {
 }
 
 export const ETH_ON_TELEPORT_TEST: TokenInfo = {
-  chainId: 9000,
+  chainId: 7001,
   symbol: 'ETH',
   name: 'Ethereum',
   decimals: 18,
@@ -127,7 +127,7 @@ export const TELE_ON_RINKEBY: TokenInfo = {
 
 export const TELE_ON_TELEPORT_TEST: TokenInfo = {
   abi: ERC20ABI,
-  chainId: 9000,
+  chainId: 7001,
   symbol: 'TELE',
   name: 'TELE',
   decimals: 18,

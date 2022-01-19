@@ -73,18 +73,15 @@ export const AutoColumn = styled.div<{
 export default function Header() {
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const {
-    application: { setWalletModalOpen, setHistoryModalOpen, saveConnectStatus },
+    application: { setHistoryModalOpen, saveConnectStatus },
   } = useDispatch()
   const { connectStatus } = useSelector((state: RootState) => pick(state.application, 'connectStatus'))
   const address = useMemo(() => account ?? '', [account])
+  const ready = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account])
 
   const logout = useCallback(() => {
     deactivate()
     saveConnectStatus(false)
-  }, [])
-
-  const openWalletSelector = useCallback(() => {
-    setWalletModalOpen(true)
   }, [])
 
   return (
@@ -107,29 +104,20 @@ export default function Header() {
         `}
       >
         <Flex>
-          <ButtonDropdown disabled={!connectStatus} onClick={() => setHistoryModalOpen(true)}>
+          <ButtonDropdown disabled={!ready} onClick={() => setHistoryModalOpen(true)}>
             <Text1 width="100%">History</Text1>
           </ButtonDropdown>
         </Flex>
-        {(!connectStatus || !active) && <ConnectButton />}
-        {connectStatus && (
-          <Web3StatusConnected
-          /*    onClick={() => {
-              setLogoutMenuOpen(true)
-            }} */
-          >
+        {!ready && <ConnectButton />}
+        {ready && (
+          <Web3StatusConnected>
             <Flex alignItems="center">
               <SBlockie address={address} />
               <StyledText>{`${address.substring(0, 6)}...${address.substring(42 - 6)}`}</StyledText>
             </Flex>
-            {/*  {logoutMenuOpen && (
-              <FlyoutMenu ref={menuRef}>
-                <FlyoutRow onClick={resetApp}>Logout</FlyoutRow>
-              </FlyoutMenu>
-            )} */}
           </Web3StatusConnected>
         )}
-        {connectStatus && (
+        {ready && (
           <ButtonPrimary onClick={logout} fontWeight={900}>
             Logout
           </ButtonPrimary>

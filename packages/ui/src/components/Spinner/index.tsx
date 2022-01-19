@@ -27,7 +27,7 @@ export const BaseSpinner = styled.div<{ warning: boolean; size: string }>`
   transition: 250ms ease border-color;
 `
 
-export default function Spinner({ warning, size = '2rem' }: { warning: boolean; size?: string | number }) {
+export default function Spinner({ warning = false, size = '2rem', children }: { warning?: boolean; size?: string | number } & { children?: React.ReactNode }) {
   return (
     <Flex
       css={css`
@@ -38,9 +38,11 @@ export default function Spinner({ warning, size = '2rem' }: { warning: boolean; 
         z-index: 999;
       `}
       justifyContent="center"
+      flexDirection={'column'}
       alignItems="center"
     >
       <BaseSpinner warning={warning} size={`${size}`} />
+      {children && children}
     </Flex>
   )
 }

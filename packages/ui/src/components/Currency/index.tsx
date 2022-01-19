@@ -1,9 +1,9 @@
 import React from 'react'
 import { BigNumber } from '@ethersproject/bignumber'
 import BigNumberJS from 'bignumber.js'
-import { TokenInfo } from 'helpers'
 import styled from 'styled-components'
 import { ThemedText } from 'theme'
+import { TokenInfo } from 'constants/index'
 
 export const StyledBalanceText = styled(ThemedText.White)`
   white-space: nowrap;

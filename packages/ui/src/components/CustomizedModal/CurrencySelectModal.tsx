@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { Flex, Text } from 'rebass'
 import { pick } from 'lodash'
 import { useSelector } from 'react-redux'
@@ -31,8 +31,15 @@ export default function CurrencySelectModal() {
   const {
     application: { setCurrencySelectModalOpen },
   } = useDispatch()
-  const { connectStatus, currencySelectModalOpen, selectedCurrency } = useSelector((state: RootState) => pick(state.application, 'connectStatus', 'currencySelectModalOpen', 'selectedCurrency'))
+  const { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, tokens, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, tokens, srcChainId, destChainId } = state.application
+    return { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, tokens, srcChainId, destChainId }
+  })
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
+  const selectedTokenPairs = useMemo(() => {
+    return tokens.get(`${srcChainId}-${destChainId}`) || []
+  }, [tokens, selectedTokenName, srcChainId, destChainId])
+
   return (
     <UniModal
       isOpen={currencySelectModalOpen}
@@ -54,8 +61,7 @@ export default function CurrencySelectModal() {
           <Flex flex={1}>
             <AutoSizer style={{ width: '100%', height: '100%' }}>
               {({ height }) => {
-                console.log(height)
-                return <CurrencyList height={height} currencies={getChainData(chainId).supportTokens} selectedCurrency={selectedCurrency} />
+                return <CurrencyList height={height} tokenPairs={selectedTokenPairs} />
               }}
             </AutoSizer>
           </Flex>

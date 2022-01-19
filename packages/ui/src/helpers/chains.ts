@@ -1,5 +1,5 @@
 import { SupportedChains } from 'constants/chains'
-import { IChainData } from './types'
+import { IChainData } from '../constants/types'
 
 export function getChainData(chainId = 1): IChainData {
   const chainData = SupportedChains.get(chainId)

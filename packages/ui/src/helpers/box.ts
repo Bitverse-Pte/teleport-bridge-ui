@@ -1,5 +1,5 @@
 import { logMsg } from './dev'
-import { IBoxProfile } from './types'
+import { IBoxProfile } from '../constants/types'
 
 const SPACE_ID = 'TEST_WEB3_APP'
 

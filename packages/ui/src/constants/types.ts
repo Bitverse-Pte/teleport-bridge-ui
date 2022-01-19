@@ -16,7 +16,7 @@ export interface TokenInfo {
   readonly name: string
   readonly decimals: number
   readonly symbol: string
-  readonly isNative: boolean
+  isNative: boolean
   readonly logoURI: string
   readonly tags?: string[]
   readonly abi?: ContractInterface
@@ -298,3 +298,45 @@ export type Web3Provider = HttpProvider | IpcProvider | WebsocketProvider | Abst
 
 export type Diff<T extends keyof any, U extends keyof any> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T]
 export type Overwrite<T, U> = Pick<T, Diff<keyof T, keyof U>> & U
+
+export interface Explorer {
+  name: string
+  url: string
+  standard: string
+}
+
+export interface Chain {
+  name: string
+  chain: string
+  icon: string
+  rpc: string[]
+  contractAddress: string
+  abi: ContractInterface
+  faucets: string[]
+  nativeCurrency: TokenInfo
+  infoURL: string
+  shortName: string
+  chainId: number
+  networkId: number
+  slip44: number
+  ens: {
+    registry: string
+  }
+  explorers: Explorer[]
+}
+
+export interface ExtChain extends Chain {
+  destChains: Chain[]
+}
+
+export interface TokenPairs {
+  destToken: TokenInfo
+  srcToken: TokenInfo
+  name: string
+}
+
+export enum NetworkSelectModalMode {
+  SRC = 'SRC',
+  DEST = 'DEST',
+  CLOSE = 'CLOSE',
+}
