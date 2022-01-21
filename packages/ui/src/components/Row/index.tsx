@@ -20,8 +20,12 @@ const Row = styled(Box)<{
   border-radius: ${({ borderRadius }) => borderRadius};
 `
 
-export const RowBetween = styled(Row)`
+export const SpaceBetweenRow = styled(Row)`
   justify-content: space-between;
+`
+
+export const HorizontalCenterRow = styled(Row)`
+  justify-content: center;
 `
 
 export const RowFixed = styled(Row)<{ gap?: string; justify?: string }>`

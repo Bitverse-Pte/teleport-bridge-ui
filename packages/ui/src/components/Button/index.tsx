@@ -275,6 +275,17 @@ export const ButtonGray = styled(BaseButton)`
   }
 `
 
+export const PrimaryButton = styled(ButtonPrimary)`
+  border-radius: 0.5rem;
+  width: 100%;
+  font-weight: 900;
+  color: white;
+  background-color: #00c6a9;
+  &:hover {
+    background-color: ${() => darken(0.05, '#00c6a9')};
+  }
+`
+
 export { default as ButtonDropdown } from './ButtonDropdown'
 export { default as SelectorButton } from './SelectorButton'
 export { default as ConnectButton } from './ConnectButton'

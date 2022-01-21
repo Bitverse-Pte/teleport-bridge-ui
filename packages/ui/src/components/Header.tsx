@@ -10,11 +10,13 @@ import { useActiveWeb3React } from 'hooks/web3'
 import { RootState } from 'store/store'
 import Blockie from 'components/Blockie'
 import Banner from 'components/Banner'
-import { ConnectButton } from 'components/Button'
+import { ConnectButton, PrimaryButton } from 'components/Button'
 import { StyledText, Text1 } from 'components/Text'
 import { ButtonPrimary, ButtonSecondary, ButtonDropdown } from 'components/Button'
+import HistorySvg from 'assets/history.svg'
 import WalletSelectModal from 'components/CustomizedModal/WalletSelectModal'
 import HistoryModal from 'components/CustomizedModal/HistoryModal'
+import { Icon } from 'components/Icon'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -31,7 +33,7 @@ const Web3StatusGeneric = styled(ButtonSecondary)`
 
 const Web3StatusConnected = styled(Web3StatusGeneric)<{ pending?: boolean }>`
   max-width: 25vw;
-  background-color: ${({ theme }) => theme.bg1};
+  background-color: transparent;
   border: 1px solid ${({ pending, theme }) => (pending ? theme.primary1 : theme.bg1)};
   color: ${({ theme }) => theme.white};
   font-weight: 500;
@@ -46,14 +48,13 @@ const Web3StatusConnected = styled(Web3StatusGeneric)<{ pending?: boolean }>`
 `
 
 const SHeader = styled(Flex)`
-  position: fixed;
-  top: 0;
+  padding: 0 5rem;
   width: 100%;
   height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: ${({ theme }) => theme.bg1};
+  background-color: transparent;
 `
 
 const SBlockie = styled(Blockie)`
@@ -73,7 +74,7 @@ export const AutoColumn = styled.div<{
 export default function Header() {
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const {
-    application: { setHistoryModalOpen, saveConnectStatus },
+    application: { setHistoryModalOpen, saveConnectStatus, setWalletModalOpen },
   } = useDispatch()
   const { connectStatus } = useSelector((state: RootState) => pick(state.application, 'connectStatus'))
   const address = useMemo(() => account ?? '', [account])
@@ -91,7 +92,7 @@ export default function Header() {
       </Flex>
       <Flex
         width="50%"
-        justifyContent="space-evenly"
+        justifyContent={ready ? 'space-evenly' : 'end'}
         css={css`
           & {
             > div,
@@ -103,25 +104,23 @@ export default function Header() {
           }
         `}
       >
-        <Flex>
-          <ButtonDropdown disabled={!ready} onClick={() => setHistoryModalOpen(true)}>
-            <Text1 width="100%">History</Text1>
-          </ButtonDropdown>
-        </Flex>
-        {!ready && <ConnectButton />}
         {ready && (
-          <Web3StatusConnected>
-            <Flex alignItems="center">
-              <SBlockie address={address} />
-              <StyledText>{`${address.substring(0, 6)}...${address.substring(42 - 6)}`}</StyledText>
+          <>
+            <Flex>
+              <ButtonDropdown style={{ backgroundColor: 'transparent' }} disabled={!ready} onClick={() => setHistoryModalOpen(true)}>
+                <Icon src={HistorySvg} />
+                <Text1>History</Text1>
+              </ButtonDropdown>
             </Flex>
-          </Web3StatusConnected>
+            <Web3StatusConnected>
+              <Flex alignItems="center">
+                <SBlockie address={address} />
+                <StyledText>{`${address.substring(0, 6)}...${address.substring(42 - 6)}`}</StyledText>
+              </Flex>
+            </Web3StatusConnected>
+          </>
         )}
-        {ready && (
-          <ButtonPrimary onClick={logout} fontWeight={900}>
-            Logout
-          </ButtonPrimary>
-        )}
+        <PrimaryButton onClick={() => (ready ? logout() : setWalletModalOpen(true))}>{ready ? 'Logout' : 'Connect'}</PrimaryButton>
       </Flex>
       <WalletSelectModal />
       <HistoryModal />

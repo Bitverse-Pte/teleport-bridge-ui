@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import logo from 'assets/BitOS.png'
+import logo from 'assets/logo.svg'
 import { fonts, colors } from '../styles'
 
 const SBannerWrapper = styled.div`
@@ -20,10 +20,7 @@ const SBannerWrapper = styled.div`
 const SBanner = styled.div`
   width: 100%;
   height: 100%;
-  transform: scale(0.4);
-  background: url(${logo}) no-repeat;
-  background-size: cover;
-  background-position: center;
+  background: url(${logo}) no-repeat center;
 `
 
 const Banner = () => (

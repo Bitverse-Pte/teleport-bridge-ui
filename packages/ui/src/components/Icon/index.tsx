@@ -30,3 +30,4 @@ Icon.defaultProps = {
 export * from './AlertIcon'
 export * from './CloseIcon'
 export * from './ERC20Icon'
+export * from './HelpIcon'

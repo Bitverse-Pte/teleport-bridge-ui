@@ -8,7 +8,7 @@ import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 
 import MetamaskIcon from 'assets/images/metamask.png'
 import { CircledCloseIcon } from 'components/Icon'
-import { StyledText } from 'components/Text'
+import { StyledText, PrimaryText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import Option from 'components/Option'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
@@ -23,7 +23,7 @@ const OptionGrid = styled.div`
   display: grid;
   width: 100%;
   grid-gap: 10px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   ${({ theme }) => theme.mediaWidth.upToMedium`
     grid-template-columns: 100%;
     grid-gap: 10px;
@@ -172,7 +172,7 @@ export default function WalletSelectModal() {
       <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
-            <a>Select a Wallet</a>
+            <PrimaryText>Select a Wallet</PrimaryText>
           </StyledText>
           <CircledCloseIcon onClick={() => setWalletModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>

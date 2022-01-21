@@ -114,9 +114,9 @@ export function useEagerConnect() {
  */
 export function useInactiveListener(suppress = false) {
   const { active, error, activate, library, connector } = useWeb3React()
-  const {
+  /*   const {
     application: { setDestChainId, setSrcChainId, setWrongChain },
-  } = useDispatch()
+  } = useDispatch() */
   const { srcChainId, destChainId, availableChains } = useSelector((state: RootState) => {
     const { srcChainId, destChainId, availableChains } = state.application
     return { srcChainId, destChainId, availableChains }
@@ -133,13 +133,13 @@ export function useInactiveListener(suppress = false) {
         switchToNetwork({ library, chainId: destinationChain.chain_id })
       } */
 
-      if (chainId != srcChainId) {
+      /*   if (chainId != srcChainId) {
         if (!availableChains.has(parseInt(`${chainId}`))) {
           setWrongChain(true)
         } else {
           setSrcChainId(parseInt(`${chainId}`))
         }
-      }
+      } */
       activate(injected)
     },
     [srcChainId, availableChains]

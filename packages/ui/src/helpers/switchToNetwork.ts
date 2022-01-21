@@ -17,7 +17,7 @@ interface SwitchNetworkArguments {
 
 // provider.request returns Promise<any>, but wallet_switchEthereumChain must return null or throw
 // see https://github.com/rekmarks/EIPs/blob/3326-create/EIPS/eip-3326.md for more info on wallet_switchEthereumChain
-export async function switchToNetwork({ library, chainId, connector }: Partial<Web3ReactContextInterface<Web3Provider>>, retry = true): Promise<null | void> {
+export async function switchToNetwork({ library, chainId, connector }: Partial<Web3ReactContextInterface<Web3Provider>>, retry = true): Promise<void> {
   if (!library?.provider?.request) {
     return
   }
@@ -45,9 +45,9 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
       },
       '0x31fF0B83003A89332BcCe9d733732A581C89ad83',
     ]) */
-  } catch (error: any) {
+  } catch (error) {
     // 4902 is the error code for attempting to switch to an unrecognized chainId
-    if (error.code === 4902 && chainId !== undefined) {
+    if ((error as any).code === 4902 && chainId !== undefined) {
       const chain = store.getState().application.availableChains.get(chainId)
       if (!chain) {
         console.error(`chain: ${chainId} is not supported!`)

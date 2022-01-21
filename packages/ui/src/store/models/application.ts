@@ -1,11 +1,13 @@
+import { isAddress } from '@ethersproject/address'
 import { parseEther } from '@ethersproject/units'
 import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
 import axios from 'axios'
-import { AVAILABLE_CHAINS_URL, DEFAULT_DESTINATION_CHAIN, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS__URL, Chain, ExtChain, NetworkSelectModalMode, TokenInfo, TokenPairs } from 'constants/index'
+import { AVAILABLE_CHAINS_URL, DEFAULT_DESTINATION_CHAIN, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, Chain, ExtChain, NetworkSelectModalMode, TokenInfo, TokenPair, BridgePair } from 'constants/index'
 import { getContract } from 'helpers'
 import Store2 from 'store2'
 import type { RootModel } from '.'
+import { switchToNetwork } from 'helpers/switchToNetwork'
 // import { ProviderController } from 'controllers'import type { RootModel } from './index'
 
 const API_KEY = process.env.REACT_APP_INFURA_ID
@@ -36,11 +38,12 @@ type IAppState = {
   availableChains: Map<number, ExtChain>
   srcChainId: number
   destChainId: number
-  tokens: Map<string, TokenPairs[]>
+  bridgePairs: Map<string, BridgePair>
   library: Web3Provider | undefined
   account: string | null | undefined
-  wrongChain: boolean
+  // wrongChain: boolean
   selectedTokenName: string
+  pageActive: boolean
 }
 
 const initialState: IAppState = {
@@ -55,11 +58,12 @@ const initialState: IAppState = {
   srcChainId: 0,
   destChainId: 0,
   availableChains: new Map(),
-  tokens: new Map(),
+  bridgePairs: new Map(),
   library: undefined,
   account: undefined,
-  wrongChain: false,
+  // wrongChain: false,
   selectedTokenName: '',
+  pageActive: true,
 }
 
 export const application = createModel<RootModel>()({
@@ -125,13 +129,20 @@ export const application = createModel<RootModel>()({
     setAccount(state, account: string | null | undefined) {
       return { ...state, account }
     },
-    setTokens(state, tokens: Map<string, TokenPairs[]>) {
+    setTokens(state, tokens: Map<string, BridgePair>) {
       return {
         ...state,
         tokens,
       }
     },
     setSrcChainId(state, srcChainId: number) {
+      if (!state.availableChains.get(srcChainId)?.destChains.find((e) => e.chainId === state.destChainId)) {
+        return {
+          ...state,
+          srcChainId,
+          destChainId: state.availableChains.get(srcChainId)?.destChains[0].chainId || state.destChainId,
+        }
+      }
       return {
         ...state,
         srcChainId,
@@ -143,16 +154,29 @@ export const application = createModel<RootModel>()({
         destChainId,
       }
     },
-    setWrongChain(state, wrongChain: boolean) {
+    /*   setWrongChain(state, wrongChain: boolean) {
       return {
         ...state,
         wrongChain,
       }
-    },
+    }, */
     setSelectedTokenName(state, tokenName: string) {
       return {
         ...state,
         selectedTokenName: tokenName,
+      }
+    },
+    exchangeSrcAndDestChain(state) {
+      return {
+        ...state,
+        destChainId: state.srcChainId,
+        srcChainId: state.destChainId,
+      }
+    },
+    setPageActive(state, pageActive: boolean) {
+      return {
+        ...state,
+        pageActive,
       }
     },
   },
@@ -162,31 +186,36 @@ export const application = createModel<RootModel>()({
       dispatch.application.setConnectStatus(connectStatus)
     },
     async transferTokens({ tokenInfo, amount, srcChainId, destChainId }: { tokenInfo: TokenInfo; amount: string; srcChainId: number; destChainId: number }, state) {
-      const { destinationChains, availableChains: sourceChains, library, account } = state.application
+      dispatch.application.setWaitWallet(true)
+      const { availableChains: sourceChains, library, account, bridgePairs } = state.application
       const sourceChain = sourceChains.get(srcChainId)
-      const destinationChain = destinationChains.get(destChainId)
-      const contract = getContract(sourceChain!.contractAddress, sourceChain?.abi, library!, account!)
-      if (tokenInfo.isNative) {
-        await contract.sendTransferBase(
-          {
-            receiver: account,
-            destChain: destinationChain?.name,
-            relayChain: '',
-          },
-          { value: parseEther(amount) }
-        )
-      } else {
-        await contract.sendTransferERC20(
-          {
-            tokenAddress: tokenInfo.address,
-            receiver: account,
-            amount: parseEther(amount),
-            destChain: destinationChain?.name,
-            relayChain: '',
-          },
-          { value: parseEther('0') }
-        )
+      const destinationChain = sourceChain?.destChains.find((e) => e.chainId === destChainId)
+      const transfer = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)?.srcChain.transfer
+      if (transfer) {
+        const composedContract = getContract(transfer.contract, transfer.abi, library!, account!)
+        if (tokenInfo.isNative) {
+          await composedContract.sendTransferBase(
+            {
+              receiver: account,
+              destChain: destinationChain?.name === 'Rinkeby' ? 'test-eth' : destinationChain?.name,
+              relayChain: '',
+            },
+            { value: parseEther(amount) }
+          )
+        } else {
+          await composedContract.sendTransferERC20(
+            {
+              tokenAddress: tokenInfo.address,
+              receiver: account,
+              amount: parseEther(amount),
+              destChain: destinationChain?.name,
+              relayChain: '',
+            },
+            { value: parseEther('0') }
+          )
+        }
       }
+      dispatch.application.setWaitWallet(false)
     },
     async initChains() {
       const { data: chains } = await axios.get<Chain[]>(AVAILABLE_CHAINS_URL)
@@ -205,6 +234,38 @@ export const application = createModel<RootModel>()({
       )
       dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
       dispatch.application.setAvailableChains(map)
+    },
+    async turnOverSrcAndDestChain(rest = {}, state) {
+      dispatch.application.setWaitWallet(true)
+      const network = await state.application.library?.getNetwork()
+      const key = `${state.application.destChainId}-${state.application.srcChainId}`
+      network && (await switchToNetwork({ library: state.application.library, chainId: state.application.destChainId }))
+      if (!state.application.bridgePairs.has(key)) {
+        const {
+          data: { tokens, destChain, srcChain },
+        } = await axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${state.application.destChainId}/${state.application.srcChainId}`)
+        tokens.forEach(({ srcToken }) => {
+          if (!isAddress(srcToken.address)) {
+            srcToken.isNative = true
+          }
+        })
+        state.application.bridgePairs.set(key, { tokens, destChain, srcChain })
+        dispatch.application.setTokens(new Map(state.application.bridgePairs))
+        dispatch.application.setSelectedTokenName(tokens[0].name)
+      }
+      dispatch.application.exchangeSrcAndDestChain()
+      dispatch.application.setWaitWallet(false)
+    },
+    async changeNetwork({ chainId }, state) {
+      dispatch.application.setWaitWallet(true)
+      try {
+        await switchToNetwork({ library: state.application.library, chainId })
+        dispatch.application.setSrcChainId(chainId)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        dispatch.application.setWaitWallet(false)
+      }
     },
   }),
 })

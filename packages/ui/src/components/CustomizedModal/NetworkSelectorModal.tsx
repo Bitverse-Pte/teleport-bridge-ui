@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 import Option from 'components/Option'
 import { CircledCloseIcon } from 'components/Icon'
-import { StyledText } from 'components/Text'
+import { PrimaryText, StyledText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import { switchToNetwork } from 'helpers/switchToNetwork'
 import { useActiveWeb3React } from 'hooks/web3'
@@ -33,7 +33,7 @@ export default function NetworkSelectModal() {
     return { waitWallet, networkModalMode, availableChains, srcChainId, destChainId }
   })
   const {
-    application: { setWaitWallet, setNetworkModalMode, setDestChainId, setSrcChainId },
+    application: { setWaitWallet, setNetworkModalMode, setDestChainId, setSrcChainId, changeNetwork },
   } = useDispatch()
   // const fromChainList = useFromChainList()
 
@@ -45,13 +45,7 @@ export default function NetworkSelectModal() {
             <Option
               id={`connect-${chain.name}`}
               onClick={() => {
-                setSrcChainId(chain.chainId)
-                if (library) {
-                  setWaitWallet(true)
-                  switchToNetwork({ library, chainId: chain.chainId, connector }).finally(() => {
-                    setWaitWallet(false)
-                  })
-                }
+                changeNetwork({ chainId: chain.chainId })
               }}
               key={chain.chainId}
               active={chainId == chain.chainId}
@@ -96,9 +90,9 @@ export default function NetworkSelectModal() {
       setIsOpen={() => setNetworkModalMode(NetworkSelectModalMode.CLOSE)}
     >
       <Flex flexDirection="column" width="100%" overflow="hidden">
-        <Flex height="fit-content" width="100%" justifyContent="flex-end">
-          <StyledText style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
-            <a style={{ fontSize: '2rem' }}>Switch Chain</a>
+        <Flex height="40px" width="100%" justifyContent="flex-end">
+          <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
+            <a>Select a Chain</a>
           </StyledText>
           <CircledCloseIcon onClick={() => setNetworkModalMode(NetworkSelectModalMode.CLOSE)} />
         </Flex>

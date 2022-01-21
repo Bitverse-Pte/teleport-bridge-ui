@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
 import { useSelector } from 'react-redux'
 
-import Header from './components/Header'
+import bg1 from 'assets/bg-1.svg'
+import bg2 from 'assets/bg-2.svg'
+import Header from 'components/Header'
 // import { hashPersonalMessage, recoverPublicKey, recoverPersonalSignature, formatTestTransaction, getChainData } from './helpers/utils'
 import Body from 'components/Body'
 import { RootState } from 'store'
@@ -17,7 +19,18 @@ const SLayout = styled(Flex)`
   position: relative;
   min-height: 100vh;
   text-align: center;
-  background-color: ${({ theme }) => theme.bg0};
+  background: url(${bg1}) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  > .bg2 {
+    background: url(${bg2}) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+  }
 `
 
 function App() {
@@ -41,15 +54,29 @@ function App() {
   }, [])
 
   return (
-    <SLayout flexDirection={'column'} justifyContent={'center'}>
-      <Header />
-      {initialized && <Body />}
-      {waitWallet && (
-        <Spinner>
-          <TextPrimary1>This DApp is awaiting response from your wallet.</TextPrimary1>
-        </Spinner>
-      )}
-    </SLayout>
+    <Flex
+      css={css`
+        width: 100%;
+        position: relative;
+        min-height: 100vh;
+        text-align: center;
+        background-color: black;
+      `}
+      flexDirection={'column'}
+      justifyContent={'center'}
+    >
+      <SLayout flexDirection={'column'} justifyContent={'center'}>
+        <Flex className={'bg2'} flex={1} flexDirection={'column'} justifyContent={'space-between'}>
+          <Header />
+          {initialized && <Body />}
+          {waitWallet && (
+            <Spinner>
+              <TextPrimary1>This DApp is awaiting response from your wallet.</TextPrimary1>
+            </Spinner>
+          )}
+        </Flex>
+      </SLayout>
+    </Flex>
   )
 }
 

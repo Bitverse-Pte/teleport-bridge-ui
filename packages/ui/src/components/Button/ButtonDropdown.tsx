@@ -1,5 +1,5 @@
 import React from 'react'
-import { RowBetween } from 'components/Row'
+import { HorizontalCenterRow } from 'components/Row'
 import { ChevronDown } from 'react-feather'
 import CssValueParser from 'parse-unit'
 import { ButtonLight, BaseButtonProps } from '.'
@@ -16,7 +16,7 @@ export default function ButtonDropdown({ disabled = false, children, $borderRadi
 
   return (
     <ButtonLight {...rest} padding="10px" disabled={disabled}>
-      <RowBetween>{children}</RowBetween>
+      <HorizontalCenterRow>{children}</HorizontalCenterRow>
       <ChevronDown style={{ position: 'absolute', right }} size={24} />
     </ButtonLight>
   )

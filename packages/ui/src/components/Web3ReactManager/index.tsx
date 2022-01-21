@@ -1,5 +1,5 @@
 // import { Trans } from '@lingui/macro'
-import React from 'react'
+import React, { useCallback, useLayoutEffect } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { Text } from 'rebass'
 import { useEffect } from 'react'
@@ -8,7 +8,7 @@ import styled from 'styled-components/macro'
 import { network } from '../../connectors'
 import { useDispatch } from 'hooks/index'
 import { NetworkContextName } from '../../constants/misc'
-import { useEagerConnect, useInactiveListener } from '../../hooks/web3'
+import { useActiveWeb3React, useEagerConnect, useInactiveListener } from '../../hooks/web3'
 import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { pick } from 'lodash'
@@ -27,19 +27,54 @@ const Message = styled.h2`
 
 export default function Web3ReactManager({ children }: { children: JSX.Element }) {
   const {
-    application: { /* setDestinationChain, */ setLibrary, setAccount },
+    application: { /* setDestinationChain, */ setLibrary, setAccount, setPageActive, changeNetwork, setSrcChainId },
   } = useDispatch()
 
-  const { connectStatus, destinationChains: destinationChain } = useSelector((state: RootState) => pick(state.application, 'connectStatus', 'destinationChain'))
-  const { active, chainId, library } = useWeb3React()
-  const { account, library: networkLibrary, active: networkActive, error: networkError, activate: activateNetwork, chainId: networkChainId } = useWeb3React(NetworkContextName)
+  const { connectStatus, availableChains, pageActive, srcChainId } = useSelector((state: RootState) => {
+    const { connectStatus, availableChains, pageActive, srcChainId } = state.application
+    return { connectStatus, availableChains, pageActive, srcChainId }
+  })
+  const { active, chainId, account, library, active: networkActive, error: networkError, activate: activateNetwork, chainId: networkChainId } = useActiveWeb3React()
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect()
+
+  const handleVisibilityChange = useCallback(() => {
+    if (document.visibilityState === 'visible') {
+      setPageActive(true)
+    } else {
+      setPageActive(false)
+    }
+    /* if (active && chainId) {
+      if (availableChains.has(chainId)) {
+        setSrcChainId(chainId)
+      } else {
+        changeNetwork({ chainId: availableChains.values().next().value.chainId })
+      }
+    } */
+  }, [])
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (pageActive && active && chainId && availableChains.size) {
+      if (availableChains.has(chainId)) {
+        chainId && changeNetwork({ chainId: chainId })
+      } else {
+        changeNetwork({ chainId: availableChains.values().next().value.chainId })
+      }
+    }
+  }, [pageActive, active, chainId, availableChains])
 
   useEffect(() => {
     setLibrary(library)
     setAccount(account)
   }, [library, account])
+
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
   useEffect(() => {
     if (triedEager && !networkActive && !networkError && !active) {

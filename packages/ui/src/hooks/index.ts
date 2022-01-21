@@ -13,5 +13,4 @@ export function useProviderController() {
 export * from './useChain'
 export * from './useInterval'
 export * from './useTheme'
-export * from './wallet'
 export * from './web3'

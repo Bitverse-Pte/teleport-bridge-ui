@@ -31,14 +31,14 @@ export default function CurrencySelectModal() {
   const {
     application: { setCurrencySelectModalOpen },
   } = useDispatch()
-  const { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, tokens, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, tokens, srcChainId, destChainId } = state.application
-    return { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, tokens, srcChainId, destChainId }
+  const { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, bridgePairs, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, bridgePairs, srcChainId, destChainId } = state.application
+    return { connectStatus, currencySelectModalOpen, selectedCurrency, selectedTokenName, bridgePairs, srcChainId, destChainId }
   })
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const selectedTokenPairs = useMemo(() => {
-    return tokens.get(`${srcChainId}-${destChainId}`) || []
-  }, [tokens, selectedTokenName, srcChainId, destChainId])
+    return bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens || []
+  }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   return (
     <UniModal

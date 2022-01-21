@@ -21,6 +21,7 @@ const StyledDialogOverlay = styled(AnimatedDialogOverlay)`
 
     background-color: ${({ theme }) => theme.modalBG};
   }
+  backdrop-filter: blur(10px);
 `
 
 const AnimatedDialogContent = animated(DialogContent)

@@ -2,33 +2,36 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { isAddress } from '@ethersproject/address'
 import { useSelector } from 'react-redux'
 import { parseEther } from '@ethersproject/units'
+import axios from 'axios'
 import { darken } from 'polished'
 import { Settings, ArrowDown } from 'react-feather'
-import styled, { css } from 'styled-components/macro'
+import styled, { css } from 'styled-components'
 import { Flex, Text } from 'rebass'
 import { pick } from 'lodash'
 import BigNumber from 'bignumber.js'
+import { BigNumber as EhterBigNumber } from '@ethersproject/bignumber'
 import { MEDIA_WIDTHS, Z_INDEX } from 'theme'
-import { TokenInfo, Chain, TokenPairs, NetworkSelectModalMode } from 'constants/types'
+import { TokenInfo, Chain, TokenPair, NetworkSelectModalMode, BridgePair } from 'constants/types'
 import { switchToNetwork } from 'helpers/switchToNetwork'
 import { getChainData } from 'helpers/chains'
 import { useActiveWeb3React } from 'hooks/web3'
-import { ButtonLight, ButtonPrimary, SelectorButton, ConnectButton, ButtonGray } from 'components/Button'
+import { ButtonLight, ButtonPrimary, SelectorButton, ConnectButton, ButtonGray, PrimaryButton } from 'components/Button'
 import { RootState } from 'store/store'
 import NetworkSelectModal from 'components/CustomizedModal/NetworkSelectorModal'
 import { useChain, useDispatch } from 'hooks'
 import { useTransferFromEvmContract, useTransferFromTeleContract } from 'contracts/index'
 import CurrencySelectModal from 'components/CustomizedModal/CurrencySelectModal'
-import { useTokenBalance } from 'hooks/wallet'
-import { AlertIcon } from 'components/Icon'
+import { AlertIcon, HelpIcon, Icon } from 'components/Icon'
 import { Balance } from 'components/Currency'
 import Loader from 'components/Loader'
 import { SelectorLabel } from 'components/Label'
 import { StyledLogo, SelectorLogo } from 'components/Logo'
 import { CurrencyInput } from 'components/Input'
-import { Text1, TextPrimary1 } from 'components/Text'
-import axios from 'axios'
-import { BRIDGE_TOKENS__URL } from 'constants/index'
+import { Text1, Text2, TextPrimary1, DarkGreenText } from 'components/Text'
+import { BRIDGE_TOKENS_URL } from 'constants/index'
+import WormHole from 'assets/wormhole.svg'
+import SwitchSvg from 'assets/switch.svg'
+import { getBalance } from 'helpers/web3'
 
 const BodyWrapper = styled.main<{ margin?: string; maxWidth?: string }>`
   position: relative;
@@ -36,55 +39,51 @@ const BodyWrapper = styled.main<{ margin?: string; maxWidth?: string }>`
   width: 50vw;
   margin-top: ${({ margin }) => margin ?? '0px'};
   ${({ theme }) => theme.mediaWidth.upToLarge`
-  width: 50vw;
+    width: 50vw;
   `}
   ${({ theme }) => theme.mediaWidth.upToMedium`
-  width: 65vw;
+   width: 67vw;
   `}
   ${({ theme }) => theme.mediaWidth.upToSmall`
-    width: 80vw;
+    width: 89vw;
   `}
   ${({ theme }) => theme.mediaWidth.upToExtraSmall`
-  width: 90vw;
+    width: 90vw;
   `}
   @media (min-width: ${MEDIA_WIDTHS.upToLarge}px) {
     max-width: 640px;
   }
-  padding: 24px;
+  background: linear-gradient(59.39deg, rgba(36, 36, 36, 0.4) 2.83%, rgba(25, 24, 27, 0.45) 98.01%);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 1.5rem;
   min-height: 20rem;
-  background-color: ${({ theme }) => theme.bg2};
+  max-height: calc(100% - 100px);
   box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 24px 32px rgba(0, 0, 0, 0.01);
-  border-radius: 24px;
-  margin-top: 1rem;
-  margin-left: auto;
-  margin-right: auto;
   z-index: ${Z_INDEX.deprecated_zero};
 `
 const Container = styled(Flex)<{ hideInput: boolean }>`
+  border-radius: 0.5rem;
+  flex-direction: column;
+  padding: 1.5rem;
   min-height: 6.18rem;
-  padding: ${({ hideInput }) => (hideInput ? '16px' : '20px')};
-  border-radius: ${({ hideInput }) => (hideInput ? '16px' : '20px')};
-  border: 1px solid ${({ theme, hideInput }) => (hideInput ? ' transparent' : theme.bg2)};
-  background-color: ${({ theme }) => theme.bg1};
+  // border: 1px solid ${({ theme, hideInput }) => (hideInput ? ' transparent' : theme.bg2)};
+  background-color: #000;
   width: ${({ hideInput }) => (hideInput ? '100%' : 'initial')};
-  :focus,
+  /* :focus,
   :hover {
     border: 1px solid ${({ theme, hideInput }) => (hideInput ? ' transparent' : theme.bg3)};
-  }
+  } */
 `
 
 const ArrowWrapper = styled.div<{ clickable: boolean }>`
-  padding: 4px;
-  border-radius: 12px;
   height: 32px;
   width: 32px;
-  position: relative;
-  //   margin-top: -14px;
-  //   margin-bottom: -14px;
+  position: absolute;
   left: calc(50% - 16px);
-  /* transform: rotate(90deg); */
-  background-color: ${({ theme }) => theme.bg6};
-  border: 0.15rem solid ${({ theme }) => darken(0.25, theme.bg6)};
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 2;
   ${({ clickable }) =>
     clickable
@@ -137,16 +136,60 @@ const StyledTokenName = styled.span<{ active?: boolean }>`
   font-size: ${({ active }) => (active ? '18px' : '18px')};
 `
 
+const WormHoleWrapper = styled(Flex)`
+  background: url(${WormHole}) no-repeat center;
+  height: 88px;
+  width: 100%;
+  align-items: center;
+  flex-direction: row-reverse;
+`
+
+const DarkenedSelectorButton = styled(SelectorButton)`
+  background: #000000;
+  height: 2.625rem;
+  ${({ fontWeight }) => fontWeight && `font-weight: ${fontWeight};`}
+  ${({ fontSize }) => fontSize && `font-size: ${String(fontSize)};`}
+  ${({ lineHeight }) => lineHeight && `line-height: ${String(lineHeight)};`}
+  box-shadow: 0px 0px 4px 2px #222529;
+  border-radius: 6rem;
+  font-family: IBM Plex Sans;
+  font-style: normal;
+  text-transform: capitalize;
+`
+
+const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
+  // background: #018d79;
+  color: #018d79;
+  font-family: IBM Plex Sans;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: right;
+  text-transform: capitalize;
+  ${({ clickable }) =>
+    clickable
+      ? css`
+          :hover {
+            cursor: pointer;
+            opacity: 0.8;
+          }
+        `
+      : css`
+          cursor: not-allowed;
+        `}
+`
+
 /**
  * The styled container element that wraps the content of most pages and the tabs.
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, setTokens, setSrcChainId, setDestChainId, setSelectedTokenName },
+    application: { setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, setTokens, setSrcChainId, turnOverSrcAndDestChain, setSelectedTokenName },
   } = useDispatch()
-  const { connectStatus, selectedTokenName, tokens, networkModalMode, currencySelectModalOpen, availableChains, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { availableChains, selectedTokenName, tokens, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId } = state.application
-    return { availableChains, selectedTokenName, tokens, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId }
+  const { connectStatus, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId } = state.application
+    return { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId }
   })
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
   const fromValueInputRef = useRef<any>({})
@@ -161,27 +204,28 @@ export default function AppBody({ ...rest }) {
   }, [availableChains, destChainId])
 
   const selectedTokenPair = useMemo(() => {
-    const pairs = tokens.get(`${srcChainId}-${destChainId}`)
-    if (pairs) {
-      return pairs.find((e) => e.name === selectedTokenName) || pairs[0]
+    const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
+    if (pair) {
+      const { tokens } = pair
+      return tokens.find((e) => e.name === selectedTokenName) || tokens[0]
     }
-  }, [tokens, selectedTokenName, srcChainId, destChainId])
+  }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   useEffect(() => {
     const key = `${srcChainId}-${destChainId}`
-    if (!tokens.has(key)) {
-      axios.get<TokenPairs[]>(BRIDGE_TOKENS__URL + `/${srcChainId}/${destChainId}`).then(({ data }) => {
-        data.forEach(({ srcToken }) => {
+    if (!bridgePairs.has(key)) {
+      axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${srcChainId}/${destChainId}`).then(({ data: { tokens, srcChain, destChain } }) => {
+        tokens.forEach(({ srcToken }) => {
           if (!isAddress(srcToken.address)) {
             srcToken.isNative = true
           }
         })
-        tokens.set(key, data)
-        setTokens(new Map(tokens))
-        setSelectedTokenName(data[0].name)
+        bridgePairs.set(key, { tokens, srcChain, destChain } as BridgePair)
+        setTokens(new Map(bridgePairs))
+        setSelectedTokenName(tokens[0].name)
       })
     }
-  }, [srcChainId, destChainId, tokens])
+  }, [srcChainId, bridgePairs])
 
   useEffect(() => {
     if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
@@ -189,13 +233,21 @@ export default function AppBody({ ...rest }) {
     }
   }, [ready, fromValueInputRef])
 
-  const balance = useTokenBalance(selectedTokenPair && selectedTokenPair!.srcToken)
+  const [balance, setBalance] = useState<EhterBigNumber | undefined>(undefined)
+  useEffect(() => {
+    library &&
+      account &&
+      getBalance(selectedTokenPair?.srcToken, library, account).then((res) => {
+        console.log(res)
+        setBalance(res)
+      })
+  }, [selectedTokenPair, srcChainId, library, account])
 
   const transfer = useCallback(() => {
     if (selectedTokenPair && fromValueInputRef.current && 'value' in fromValueInputRef.current && srcChainId && destChainId) {
       transferTokens({ tokenInfo: selectedTokenPair!.srcToken, amount: fromValueInputRef.current.value, srcChainId, destChainId })
     }
-  }, [tokens, selectedTokenPair, fromValueInputRef.current, srcChainId, destChainId])
+  }, [bridgePairs, selectedTokenPair, fromValueInputRef.current, srcChainId, destChainId])
 
   const transferBalanceToFromValue = useCallback(() => {
     if (connectStatus && fromValueInputRef.current && 'value' in fromValueInputRef.current && balance) {
@@ -205,120 +257,135 @@ export default function AppBody({ ...rest }) {
 
   return (
     <>
-      <BodyWrapper {...rest}>
-        <Flex width="100%" flexDirection="column" justifyContent="space-between" paddingTop="10px">
-          <Flex width="61.8%" justifyContent="space-between" height="40px" marginBottom="5%">
-            <Flex alignItems="center" minWidth="60px">
-              <Text1 fontWeight={600}>From</Text1>
-            </Flex>
-            <SelectorButton
-              labelContent={`${srcChain?.name || 'Unavailable'}`}
-              logoSrc={srcChain!.icon}
-              interactive={false}
-              maxWidth="15rem"
-              onClick={() => setNetworkModalMode(NetworkSelectModalMode.SRC)}
-              // disabled={!ready}
-            />
-          </Flex>
-          <Container hideInput={false} marginBottom="2%">
-            <Flex width="100%" height="100%" flexDirection="column" justifyContent="space-between">
-              <Flex justifyContent="space-between">
-                <Text1>Send</Text1>
-                <Flex
-                  style={{
-                    borderBottom: 'white solid',
-                    cursor: connectStatus ? 'pointer' : 'not-allowed',
-                  }}
-                  onClick={transferBalanceToFromValue}
-                >
-                  <Text1>{'Max:'}</Text1> &nbsp;
-                  {ready && selectedTokenName && selectedTokenPair && balance ? (
-                    <Balance balance={balance} currency={selectedTokenPair!.srcToken} />
-                  ) : connectStatus && account ? (
-                    <Loader size={17} />
-                  ) : (
-                    <Text1>{'N/A'}</Text1>
-                  )}
+      <Flex flex={1} flexDirection={'column'} justifyContent={'flex-start'} alignItems={'center'}>
+        <Flex height={'7.5rem'}></Flex>
+        <BodyWrapper {...rest}>
+          <Flex width="100%" flexDirection="column" justifyContent="space-between">
+            <Container hideInput={false}>
+              <Flex width="100%" justifyContent="space-between" height="40px">
+                <Flex alignItems="center" minWidth="60px">
+                  <Text1 fontWeight={600}>Send</Text1>
+                </Flex>
+                <Flex justifyContent="space-between" padding={'0.5rem'}>
+                  <BalanceWrapper clickable={!!(ready && selectedTokenName && selectedTokenPair && balance)} onClick={transferBalanceToFromValue}>
+                    <DarkGreenText>{'Max ≈'}&nbsp;</DarkGreenText>
+                    {ready && selectedTokenName && selectedTokenPair && balance ? (
+                      <Balance balance={balance!} currency={selectedTokenPair!.srcToken} />
+                    ) : connectStatus && account ? (
+                      <Loader size={17} color="white" />
+                    ) : (
+                      <DarkGreenText>N/A</DarkGreenText>
+                    )}
+                  </BalanceWrapper>
                 </Flex>
               </Flex>
               <br />
-              <Flex>
-                <CurrencyInput disabled={!ready} style={{ fontSize: '2rem' }} placeholder="0.0" type="number" ref={fromValueInputRef} defaultValue={0} />
-                <SelectedCurrencyButton
-                  disabled={!ready}
-                  visible={true}
-                  selected={false}
-                  hideInput={true}
-                  className="open-currency-select-button"
-                  onClick={() => {
-                    setCurrencySelectModalOpen(true)
-                  }}
-                >
-                  {selectedTokenPair && <StyledLogo srcs={[selectedTokenPair!.srcToken.logoURI]} size={'24px'} />}
-                  {selectedTokenPair && (
-                    <StyledTokenName className="token-symbol-container" active={true}>
-                      {selectedTokenPair!.srcToken.symbol}
-                    </StyledTokenName>
-                  )}
-                </SelectedCurrencyButton>
+              <Flex width="100%" flexDirection="row" justifyContent="space-between">
+                <Flex>
+                  <DarkenedSelectorButton
+                    labelContent={`${srcChain!.name.length > 10 ? srcChain?.shortName : srcChain?.name || 'Unavailable'}`}
+                    logoSrc={srcChain!.icon}
+                    interactive={false}
+                    width="10rem"
+                    onClick={() => setNetworkModalMode(NetworkSelectModalMode.SRC)}
+                    fontSize="1rem"
+                    lineHeight="1.3125rem"
+                    // disabled={!ready}
+                  />
+                </Flex>
+                <Flex flex={1} padding="0 1rem">
+                  <CurrencyInput
+                    disabled={!ready}
+                    style={{ fontSize: '2rem' }}
+                    step={selectedTokenPair && Math.pow(10, -(selectedTokenPair?.srcToken.decimals ?? 18))}
+                    placeholder="0.0"
+                    type="number"
+                    ref={fromValueInputRef}
+                    // defaultValue={0}
+                  />
+                </Flex>
+                <Flex>
+                  <DarkenedSelectorButton
+                    labelContent={`${selectedTokenPair ? selectedTokenPair!.srcToken.name ?? '' : ''}`}
+                    logoSrc={selectedTokenPair && selectedTokenPair!.srcToken.logoURI}
+                    disabled={!selectedTokenPair}
+                    interactive={false}
+                    width="10rem"
+                    fontWeight={600}
+                    fontSize="1.25rem"
+                    lineHeight="1.625rem"
+                    onClick={() => setCurrencySelectModalOpen(true)}
+                  />
+                </Flex>
               </Flex>
+            </Container>
+            <WormHoleWrapper paddingRight="1.5rem">
+              <ArrowWrapper clickable={!!connectStatus} onClick={() => turnOverSrcAndDestChain(undefined)}>
+                <Icon size={32} src={SwitchSvg} />
+              </ArrowWrapper>
+            </WormHoleWrapper>
+            <Container hideInput={false}>
+              <Flex width="100%" justifyContent="space-between">
+                <Flex alignItems="center" minWidth="60px">
+                  <Text1 fontWeight={600}>To</Text1>
+                </Flex>
+                <Flex height={'fit-content'}>
+                  <Text2 fontWeight={500}>Receive(Estimated)</Text2>
+                  &nbsp;
+                  <HelpIcon size={'1rem'} style={{ alignSelf: 'center' }} />
+                </Flex>
+              </Flex>
+              <br />
+              <Flex width="100%" justifyContent="space-between">
+                <Flex>
+                  <DarkenedSelectorButton
+                    width="10rem"
+                    fontSize="1rem"
+                    lineHeight="1.3125rem"
+                    labelContent={`${destChain!.name.length > 10 ? destChain?.shortName : destChain?.name || 'Unavailable'}`}
+                    logoSrc={destChain && destChain!.icon}
+                    interactive={true}
+                    onClick={() => setNetworkModalMode(NetworkSelectModalMode.DEST)}
+                    // disabled={!ready}
+                  />
+                </Flex>
+                <Flex flex={1} padding="0 1rem">
+                  <CurrencyInput
+                    disabled={true}
+                    style={{ fontSize: '2rem' }}
+                    step={selectedTokenPair && Math.pow(10, -(selectedTokenPair?.srcToken.decimals ?? 18))}
+                    type="number"
+                    placeholder="0.0"
+                    // value={selectedTokenPair ? toValue.shiftedBy(-selectedTokenPair!.srcToken.decimals).toString() : 0}
+                  />
+                </Flex>
+                <Flex>
+                  <DarkenedSelectorButton
+                    labelContent={`${selectedTokenPair ? selectedTokenPair!.destToken.name ?? '' : ''}`}
+                    logoSrc={selectedTokenPair && selectedTokenPair!.destToken.logoURI}
+                    disabled={true}
+                    interactive={false}
+                    width="10rem"
+                    fontWeight={600}
+                    fontSize="1.25rem"
+                    lineHeight="1.625rem"
+                  />
+                </Flex>
+              </Flex>
+            </Container>
+            <Flex
+              justifyContent="center"
+              css={css`
+                padding: 1.5rem 0 0 0;
+              `}
+            >
+              <PrimaryButton width="100%" fontWeight={900} onClick={transfer}>
+                {connectStatus ? 'Transfer' : 'Connect'}
+              </PrimaryButton>
             </Flex>
-          </Container>
-          <Flex marginBottom="2%">
-            <ArrowWrapper clickable={!!connectStatus}>
-              <ArrowDown
-                size="16"
-                onClick={() => {
-                  setSrcChainId(destChainId)
-                  /*  const newdestChain = fromChainList.find((chain) => chain.chain_id === chainId)
-                  setdestChain(newdestChain!)
-                  switchToNetwork({ library, chainId: destChain.chain_id }) */
-                }}
-              />
-            </ArrowWrapper>
           </Flex>
-          <Flex width="61.8%" justifyContent="space-between" height="40px" marginBottom="5%">
-            <Flex alignItems="center" minWidth="60px">
-              <Text1 fontWeight={600}>To</Text1>
-            </Flex>
-            {/* <ButtonLight maxWidth="15rem" disabled={!ready}>
-              <SelectorLogo interactive={true} src={destChain!.icon} />
-              <SelectorLabel>{destChain!.name}</SelectorLabel>
-            </ButtonLight> */}
-            <SelectorButton
-              labelContent={`${destChain?.name || 'Unavailable'}`}
-              logoSrc={destChain!.icon}
-              interactive={true}
-              maxWidth="15rem"
-              onClick={() => setNetworkModalMode(NetworkSelectModalMode.DEST)}
-              // disabled={!ready}
-            />
-          </Flex>
-          <Container hideInput={false} marginBottom="5%" flexDirection="column">
-            <Flex width="100%" height={'fit-content'}>
-              <AlertIcon size={'1rem'} style={{ alignSelf: 'center' }} />
-              &nbsp;
-              <TextPrimary1 fontWeight={600}>Receive(Estimated):</TextPrimary1>
-            </Flex>
-            <br />
-            <CurrencyInput
-              disabled={true}
-              style={{ fontSize: '2rem' }}
-              type="number"
-              placeholder="0.0"
-              value={selectedTokenPair ? toValue.shiftedBy(-selectedTokenPair!.srcToken.decimals).toString() : 0}
-            />
-          </Container>
-          <Flex justifyContent="center">
-            {connectStatus && (
-              <ButtonPrimary width="61.8%" fontWeight={900} onClick={transfer}>
-                Transfer
-              </ButtonPrimary>
-            )}
-            {!connectStatus && <ConnectButton />}
-          </Flex>
-        </Flex>
-      </BodyWrapper>
+        </BodyWrapper>
+      </Flex>
       {networkModalMode !== NetworkSelectModalMode.CLOSE && <NetworkSelectModal />}
       {currencySelectModalOpen && <CurrencySelectModal />}
     </>

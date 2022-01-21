@@ -1,4 +1,9 @@
-import { DAI_CONTRACT } from '../constants'
+import { ContractFunction } from '@ethersproject/contracts'
+import { BigNumber } from '@ethersproject/bignumber'
+import { isAddress, getContract } from 'helpers'
+import ERC20ABI from 'contracts/erc20.json'
+import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
+import { DAI_CONTRACT, TokenInfo } from 'constants/index'
 
 export function getDaiContract(chainId: number, web3: any) {
   const dai = new web3.eth.Contract(DAI_CONTRACT[chainId].abi, DAI_CONTRACT[chainId].address)
@@ -31,4 +36,12 @@ export function callTransfer(address: string, chainId: number, web3: any) {
       resolve(data)
     })
   })
+}
+
+export async function getBalance(token: TokenInfo = {} as TokenInfo, library: Web3Provider, account: string, abi = ERC20ABI): Promise<BigNumber | undefined> {
+  if (!token || (!token.isNative && !isAddress(token.address)) || !library || !account) {
+    return undefined
+  }
+  const request = token && token.isNative ? library?.getBalance(account!) : (getContract(token.address, abi, library, account!).balanceOf as ContractFunction)(account!)
+  return request
 }

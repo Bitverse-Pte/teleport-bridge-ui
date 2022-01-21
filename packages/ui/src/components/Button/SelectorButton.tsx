@@ -1,5 +1,4 @@
 import React from 'react'
-import styled from 'styled-components'
 import { ChevronDown } from 'react-feather'
 import CssValueParser from 'parse-unit'
 import { DefaultButtonRadius } from 'theme'
@@ -12,7 +11,7 @@ export default function SelectorButton({ interactive = false, logoSrc, labelCont
   const left = `${digit / 2}${unit ?? 'px'}`
   const right = left
   return (
-    <ButtonLight maxWidth="15rem" {...rest}>
+    <ButtonLight maxWidth="10rem" {...rest}>
       {logoSrc && <SelectorLogo interactive={interactive} left={left} src={logoSrc} />}
       <SelectorLabel>{labelContent}</SelectorLabel>
       <ChevronDown style={{ position: 'absolute', right: right }} size={24} />

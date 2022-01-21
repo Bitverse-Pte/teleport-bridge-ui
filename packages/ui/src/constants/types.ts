@@ -310,8 +310,10 @@ export interface Chain {
   chain: string
   icon: string
   rpc: string[]
-  contractAddress: string
-  abi: ContractInterface
+  transfer: {
+    contract: string
+    abi: ContractInterface
+  }
   faucets: string[]
   nativeCurrency: TokenInfo
   infoURL: string
@@ -329,7 +331,13 @@ export interface ExtChain extends Chain {
   destChains: Chain[]
 }
 
-export interface TokenPairs {
+export interface BridgePair {
+  destChain: Chain
+  srcChain: Chain
+  tokens: TokenPair[]
+}
+
+export interface TokenPair {
   destToken: TokenInfo
   srcToken: TokenInfo
   name: string
