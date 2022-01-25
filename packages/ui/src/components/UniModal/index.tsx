@@ -14,11 +14,9 @@ const StyledDialogOverlay = styled(AnimatedDialogOverlay)`
     z-index: 2;
     background-color: transparent;
     overflow: hidden;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     background-color: ${({ theme }) => theme.modalBG};
   }
   backdrop-filter: blur(10px);
@@ -31,7 +29,6 @@ const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, mobile, is
   'aria-label': 'dialog',
 })`
   overflow-y: auto;
-
   &[data-reach-dialog-content] {
     margin: 0;
     background-color: ${({ theme }) => theme.bg0};
@@ -41,9 +38,7 @@ const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, mobile, is
     width: 50vw;
     overflow-y: auto;
     overflow-x: hidden;
-
     align-self: ${({ mobile }) => (mobile ? 'flex-end' : 'center')};
-
     max-width: ${({ maxWidth }) => maxWidth ?? '420px'};
     ${({ maxHeight }) =>
       maxHeight &&

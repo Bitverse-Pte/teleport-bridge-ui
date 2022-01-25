@@ -42,6 +42,12 @@ export async function getBalance(token: TokenInfo = {} as TokenInfo, library: We
   if (!token || (!token.isNative && !isAddress(token.address)) || !library || !account) {
     return undefined
   }
-  const request = token && token.isNative ? library?.getBalance(account!) : (getContract(token.address, abi, library, account!).balanceOf as ContractFunction)(account!)
-  return request
+  if (token.isNative) {
+    const request = library?.getBalance(account!)
+    return request
+  } else {
+    const contract = getContract(token.address, abi, library, account!)
+    const request = contract.balanceOf(account!)
+    return request
+  }
 }

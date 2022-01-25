@@ -1,67 +1,27 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { isAddress } from '@ethersproject/address'
 import { useSelector } from 'react-redux'
-import { parseEther } from '@ethersproject/units'
-import axios from 'axios'
 import { darken } from 'polished'
-import { Settings, ArrowDown } from 'react-feather'
 import styled, { css } from 'styled-components'
-import { Flex, Text } from 'rebass'
-import { pick } from 'lodash'
+import { Flex } from 'rebass'
 import BigNumber from 'bignumber.js'
 import { BigNumber as EhterBigNumber } from '@ethersproject/bignumber'
-import { MEDIA_WIDTHS, Z_INDEX } from 'theme'
-import { TokenInfo, Chain, TokenPair, NetworkSelectModalMode, BridgePair } from 'constants/types'
-import { switchToNetwork } from 'helpers/switchToNetwork'
-import { getChainData } from 'helpers/chains'
+import { NetworkSelectModalMode } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'
-import { ButtonLight, ButtonPrimary, SelectorButton, ConnectButton, ButtonGray, PrimaryButton } from 'components/Button'
+import { SelectorButton, ButtonGray, PrimaryButton } from 'components/Button'
 import { RootState } from 'store/store'
 import NetworkSelectModal from 'components/CustomizedModal/NetworkSelectorModal'
-import { useChain, useDispatch } from 'hooks'
-import { useTransferFromEvmContract, useTransferFromTeleContract } from 'contracts/index'
+import { useDispatch } from 'hooks'
 import CurrencySelectModal from 'components/CustomizedModal/CurrencySelectModal'
-import { AlertIcon, HelpIcon, Icon } from 'components/Icon'
+import { HelpIcon, Icon } from 'components/Icon'
 import { Balance } from 'components/Currency'
 import Loader from 'components/Loader'
-import { SelectorLabel } from 'components/Label'
-import { StyledLogo, SelectorLogo } from 'components/Logo'
 import { CurrencyInput } from 'components/Input'
-import { Text1, Text2, TextPrimary1, DarkGreenText } from 'components/Text'
-import { BRIDGE_TOKENS_URL } from 'constants/index'
+import { Text1, Text2, DarkGreenText } from 'components/Text'
 import WormHole from 'assets/wormhole.svg'
 import SwitchSvg from 'assets/switch.svg'
 import { getBalance } from 'helpers/web3'
+import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
 
-const BodyWrapper = styled.main<{ margin?: string; maxWidth?: string }>`
-  position: relative;
-  display: flex;
-  width: 50vw;
-  margin-top: ${({ margin }) => margin ?? '0px'};
-  ${({ theme }) => theme.mediaWidth.upToLarge`
-    width: 50vw;
-  `}
-  ${({ theme }) => theme.mediaWidth.upToMedium`
-   width: 67vw;
-  `}
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-    width: 89vw;
-  `}
-  ${({ theme }) => theme.mediaWidth.upToExtraSmall`
-    width: 90vw;
-  `}
-  @media (min-width: ${MEDIA_WIDTHS.upToLarge}px) {
-    max-width: 640px;
-  }
-  background: linear-gradient(59.39deg, rgba(36, 36, 36, 0.4) 2.83%, rgba(25, 24, 27, 0.45) 98.01%);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  min-height: 20rem;
-  max-height: calc(100% - 100px);
-  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 24px 32px rgba(0, 0, 0, 0.01);
-  z-index: ${Z_INDEX.deprecated_zero};
-`
 const Container = styled(Flex)<{ hideInput: boolean }>`
   border-radius: 0.5rem;
   flex-direction: column;
@@ -185,7 +145,7 @@ const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, setTokens, setSrcChainId, turnOverSrcAndDestChain, setSelectedTokenName },
+    application: { setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, updateBridgeInfo, turnOverSrcAndDestChain },
   } = useDispatch()
   const { connectStatus, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, srcChainId, destChainId } = useSelector((state: RootState) => {
     const { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId } = state.application
@@ -212,20 +172,8 @@ export default function AppBody({ ...rest }) {
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   useEffect(() => {
-    const key = `${srcChainId}-${destChainId}`
-    if (!bridgePairs.has(key)) {
-      axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${srcChainId}/${destChainId}`).then(({ data: { tokens, srcChain, destChain } }) => {
-        tokens.forEach(({ srcToken }) => {
-          if (!isAddress(srcToken.address)) {
-            srcToken.isNative = true
-          }
-        })
-        bridgePairs.set(key, { tokens, srcChain, destChain } as BridgePair)
-        setTokens(new Map(bridgePairs))
-        setSelectedTokenName(tokens[0].name)
-      })
-    }
-  }, [srcChainId, bridgePairs])
+    updateBridgeInfo({ srcChainId, destChainId })
+  }, [srcChainId, destChainId, bridgePairs])
 
   useEffect(() => {
     if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
@@ -237,11 +185,12 @@ export default function AppBody({ ...rest }) {
   useEffect(() => {
     library &&
       account &&
+      srcChainId === chainId &&
+      selectedTokenPair &&
       getBalance(selectedTokenPair?.srcToken, library, account).then((res) => {
-        console.log(res)
         setBalance(res)
       })
-  }, [selectedTokenPair, srcChainId, library, account])
+  }, [selectedTokenPair, srcChainId, chainId, library, account, selectedTokenName])
 
   const transfer = useCallback(() => {
     if (selectedTokenPair && fromValueInputRef.current && 'value' in fromValueInputRef.current && srcChainId && destChainId) {
@@ -258,7 +207,7 @@ export default function AppBody({ ...rest }) {
   return (
     <>
       <Flex flex={1} flexDirection={'column'} justifyContent={'flex-start'} alignItems={'center'}>
-        <Flex height={'7.5rem'}></Flex>
+        <MarginTopForBodyContent />
         <BodyWrapper {...rest}>
           <Flex width="100%" flexDirection="column" justifyContent="space-between">
             <Container hideInput={false}>
@@ -308,7 +257,7 @@ export default function AppBody({ ...rest }) {
                   <DarkenedSelectorButton
                     labelContent={`${selectedTokenPair ? selectedTokenPair!.srcToken.name ?? '' : ''}`}
                     logoSrc={selectedTokenPair && selectedTokenPair!.srcToken.logoURI}
-                    disabled={!selectedTokenPair}
+                    disabled={!(connectStatus && account) || !selectedTokenPair}
                     interactive={false}
                     width="10rem"
                     fontWeight={600}

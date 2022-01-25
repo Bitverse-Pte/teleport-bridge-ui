@@ -115,7 +115,7 @@ export default function Header() {
             <Web3StatusConnected>
               <Flex alignItems="center">
                 <SBlockie address={address} />
-                <StyledText>{`${address.substring(0, 6)}...${address.substring(42 - 6)}`}</StyledText>
+                <StyledText>{`${address.substring(0, 4)}...${address.substring(38)}`}</StyledText>
               </Flex>
             </Web3StatusConnected>
           </>

@@ -28,9 +28,9 @@ const OptionGrid = styled(Box)`
 
 export default function NetworkSelectModal() {
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
-  const { waitWallet, networkModalMode, availableChains, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { waitWallet, networkModalMode, availableChains, srcChainId, destChainId } = state.application
-    return { waitWallet, networkModalMode, availableChains, srcChainId, destChainId }
+  const { waitWallet, networkModalMode, availableChains, srcChainId, destChainId, connectStatus } = useSelector((state: RootState) => {
+    const { waitWallet, networkModalMode, availableChains, srcChainId, destChainId, connectStatus } = state.application
+    return { waitWallet, networkModalMode, availableChains, srcChainId, destChainId, connectStatus }
   })
   const {
     application: { setWaitWallet, setNetworkModalMode, setDestChainId, setSrcChainId, changeNetwork },
@@ -48,7 +48,7 @@ export default function NetworkSelectModal() {
                 changeNetwork({ chainId: chain.chainId })
               }}
               key={chain.chainId}
-              active={chainId == chain.chainId}
+              active={!!(connectStatus && account && chainId == chain.chainId)}
               color={'blue'}
               header={chain.name}
               subheader={null} //use option.descriptio to bring back multi-line

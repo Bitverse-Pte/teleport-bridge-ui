@@ -12,7 +12,7 @@ import { globalStyle } from './styles'
 import { store } from './store'
 import { RootState, Dispatch } from 'store/store'
 import getLibrary from 'helpers/getLibrary'
-import Web3ReactManager from 'components/Web3ReactManager'
+import Web3Manager from 'components/Web3Manager'
 import { NetworkContextName } from 'constants/misc'
 const GlobalStyle = createGlobalStyle`
   ${globalStyle}
@@ -85,12 +85,12 @@ ReactDOM.render(
     <Provider store={store}>
       <Web3ReactProvider getLibrary={getLibrary}>
         <Web3ProviderNetwork getLibrary={getLibrary}>
-          <Web3ReactManager>
+          <Web3Manager>
             <ThemeProvider>
               <GlobalStyle />
               <WrappedApp />
             </ThemeProvider>
-          </Web3ReactManager>
+          </Web3Manager>
         </Web3ProviderNetwork>
       </Web3ReactProvider>
     </Provider>

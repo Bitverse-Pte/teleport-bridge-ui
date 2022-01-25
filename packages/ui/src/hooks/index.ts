@@ -10,7 +10,6 @@ export function useProviderController() {
   return useSelector((state: RootState) => state.application)
 }
 
-export * from './useChain'
 export * from './useInterval'
 export * from './useTheme'
 export * from './web3'

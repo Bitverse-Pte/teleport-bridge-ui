@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { pick } from 'lodash'
 import { switchToNetwork } from 'helpers/switchToNetwork'
+import { NetworkSelectModalMode } from 'constants/types'
 
 const MessageWrapper = styled.div`
   display: flex;
@@ -25,9 +26,9 @@ const Message = styled.h2`
   color: ${({ theme }) => theme.secondary1};
 `
 
-export default function Web3ReactManager({ children }: { children: JSX.Element }) {
+export default function Web3Manager({ children }: { children: JSX.Element }) {
   const {
-    application: { /* setDestinationChain, */ setLibrary, setAccount, setPageActive, changeNetwork, setSrcChainId },
+    application: { /* setDestinationChain, */ setLibrary, setAccount, setPageActive, changeNetwork, setNetworkModalMode, setSrcChainId },
   } = useDispatch()
 
   const { connectStatus, availableChains, pageActive, srcChainId } = useSelector((state: RootState) => {
@@ -63,9 +64,10 @@ export default function Web3ReactManager({ children }: { children: JSX.Element }
   useEffect(() => {
     if (pageActive && active && chainId && availableChains.size) {
       if (availableChains.has(chainId)) {
-        chainId && changeNetwork({ chainId: chainId })
+        chainId && chainId !== srcChainId && changeNetwork({ chainId: chainId })
       } else {
-        changeNetwork({ chainId: availableChains.values().next().value.chainId })
+        // changeNetwork({ chainId: availableChains.values().next().value.chainId })
+        setNetworkModalMode(NetworkSelectModalMode.SRC)
       }
     }
   }, [pageActive, active, chainId, availableChains])
