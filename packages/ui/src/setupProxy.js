@@ -1,25 +1,25 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { createProxyMiddleware } = require('http-proxy-middleware')
-
+const REACT_APP_CHAINS_DATA_URL = process.env.REACT_APP_CHAINS_DATA_URL
 module.exports = function (app) {
   app.use(
     '/chains',
     createProxyMiddleware({
-      target: 'http://localhost:8080',
+      target: REACT_APP_CHAINS_DATA_URL,
       changeOrigin: true,
     })
   )
   app.use(
     '/counterpartyChains',
     createProxyMiddleware({
-      target: 'http://localhost:8080',
+      target: REACT_APP_CHAINS_DATA_URL,
       changeOrigin: true,
     })
   )
   app.use(
     '/bridges',
     createProxyMiddleware({
-      target: 'http://localhost:8080',
+      target: REACT_APP_CHAINS_DATA_URL,
       changeOrigin: true,
     })
   )

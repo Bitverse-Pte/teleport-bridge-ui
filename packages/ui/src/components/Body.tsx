@@ -3,9 +3,10 @@ import { useSelector } from 'react-redux'
 import { darken } from 'polished'
 import styled, { css } from 'styled-components'
 import { Flex } from 'rebass'
+import { debounce } from 'lodash'
 import BigNumber from 'bignumber.js'
 import { BigNumber as EhterBigNumber } from '@ethersproject/bignumber'
-import { NetworkSelectModalMode } from 'constants/types'
+import { NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'
 import { SelectorButton, ButtonGray, PrimaryButton } from 'components/Button'
 import { RootState } from 'store/store'
@@ -21,6 +22,8 @@ import WormHole from 'assets/wormhole.svg'
 import SwitchSvg from 'assets/switch.svg'
 import { getBalance } from 'helpers/web3'
 import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
+import { BaseSpinner } from 'components/Spinner'
+import { TransferButton } from './Button/TransferButton'
 
 const Container = styled(Flex)<{ hideInput: boolean }>`
   border-radius: 0.5rem;
@@ -145,12 +148,13 @@ const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, updateBridgeInfo, turnOverSrcAndDestChain },
+    application: { setTransferStatus, setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, judgeAllowance, updateBridgeInfo, turnOverSrcAndDestChain },
   } = useDispatch()
-  const { connectStatus, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId } = state.application
-    return { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId }
+  const { connectStatus, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId } = state.application
+    return { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId }
   })
+  const [pending, setPending] = useState(false)
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
   const fromValueInputRef = useRef<any>({})
   const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
@@ -172,14 +176,43 @@ export default function AppBody({ ...rest }) {
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   useEffect(() => {
+    if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && fromValueInputRef.current.value) {
+      setTransferStatus(TRANSFER_STATUS.PENDINGALLOWANCE)
+    }
+  }, [ready, fromValueInputRef.current])
+
+  useEffect(() => {
     updateBridgeInfo({ srcChainId, destChainId })
   }, [srcChainId, destChainId, bridgePairs])
 
   useEffect(() => {
     if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
-      fromValueInputRef.current.value = new BigNumber(0).toString()
+      fromValueInputRef.current.value = undefined
+    } else if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && !fromValueInputRef.current.value) {
+      setTransferStatus(TRANSFER_STATUS.NOINPUT)
     }
-  }, [ready, fromValueInputRef])
+  }, [ready, fromValueInputRef.current.value])
+
+  const updateAllowance = useCallback(
+    debounce(async () => {
+      setPending(true)
+      if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && selectedTokenPair) {
+        fromValueInputRef.current.value && (await judgeAllowance({ value: fromValueInputRef.current.value, tokenInfo: selectedTokenPair?.srcToken }))
+      }
+      setPending(false)
+    }, 400),
+    [fromValueInputRef, selectedTokenPair]
+  )
+
+  const fromInputChange = useCallback(() => {
+    if (!selectedTokenPair) {
+      return
+    }
+    setTransferStatus(TRANSFER_STATUS.PENDINGALLOWANCE)
+    if (ready) {
+      updateAllowance()
+    }
+  }, [transferStatus, fromValueInputRef, selectedTokenPair])
 
   const [balance, setBalance] = useState<EhterBigNumber | undefined>(undefined)
   useEffect(() => {
@@ -250,6 +283,7 @@ export default function AppBody({ ...rest }) {
                     placeholder="0.0"
                     type="number"
                     ref={fromValueInputRef}
+                    onChange={fromInputChange}
                     // defaultValue={0}
                   />
                 </Flex>
@@ -328,9 +362,11 @@ export default function AppBody({ ...rest }) {
                 padding: 1.5rem 0 0 0;
               `}
             >
-              <PrimaryButton width="100%" fontWeight={900} onClick={transfer}>
+              {/*  <PrimaryButton width="100%" fontWeight={900} onClick={transfer}>
+                {pending && <BaseSpinner warning={false} size={'1rem'}></BaseSpinner>}
                 {connectStatus ? 'Transfer' : 'Connect'}
-              </PrimaryButton>
+              </PrimaryButton> */}
+              <TransferButton />
             </Flex>
           </Flex>
         </BodyWrapper>

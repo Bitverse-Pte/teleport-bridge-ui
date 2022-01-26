@@ -84,7 +84,7 @@ interface ModalProps {
 }
 
 export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = false, maxWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard }: ModalProps) {
-  const fadeTransition = useTransition(isOpen, null, {
+  const fadeTransition = useTransition(isOpen, {
     config: { duration: 200 },
     from: { opacity: 0 },
     enter: { opacity: 1 },
@@ -119,33 +119,29 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = fal
     }
   })
 
-  return (
-    <>
-      {fadeTransition.map(
-        ({ item, key, props }) =>
-          item && (
-            <StyledDialogOverlay key={key} style={props} onDismiss={onDismiss} initialFocusRef={initialFocusRef} unstable_lockFocusAcrossFrames={false}>
-              <StyledDialogContent
-                // {...(isMobile
-                //   ? {
-                //       ...bind(),
-                //       style: { transform: y.interpolate((y) => `translateY(${(y as number) > 0 ? y : 0}px)`) },
-                //     }
-                //   : {})}
-                aria-label="dialog content"
-                maxWidth={maxWidth}
-                minHeight={minHeight}
-                maxHeight={maxHeight}
-                mobile={false}
-              >
-                {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}
-                {/* {!initialFocusRef && false ? <div tabIndex={1} /> : null} */}
-                {children}
-              </StyledDialogContent>
-            </StyledDialogOverlay>
-          )
-      )}
-    </>
+  return fadeTransition(
+    (styles, item) =>
+      item && (
+        <StyledDialogOverlay /* key={key}  */ style={styles} onDismiss={onDismiss} initialFocusRef={initialFocusRef} unstable_lockFocusAcrossFrames={false}>
+          <StyledDialogContent
+            // {...(isMobile
+            //   ? {
+            //       ...bind(),
+            //       style: { transform: y.interpolate((y) => `translateY(${(y as number) > 0 ? y : 0}px)`) },
+            //     }
+            //   : {})}
+            aria-label="dialog content"
+            maxWidth={maxWidth}
+            minHeight={minHeight}
+            maxHeight={maxHeight}
+            mobile={false}
+          >
+            {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}
+            {/* {!initialFocusRef && false ? <div tabIndex={1} /> : null} */}
+            {children}
+          </StyledDialogContent>
+        </StyledDialogOverlay>
+      )
   )
 }
 

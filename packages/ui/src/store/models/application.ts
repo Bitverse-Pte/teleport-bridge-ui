@@ -1,9 +1,22 @@
+import { BigNumber as EhterBigNumber } from '@ethersproject/bignumber'
 import { isAddress } from '@ethersproject/address'
 import { parseEther } from '@ethersproject/units'
 import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
 import axios from 'axios'
-import { AVAILABLE_CHAINS_URL, DEFAULT_DESTINATION_CHAIN, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, Chain, ExtChain, NetworkSelectModalMode, TokenInfo, TokenPair, BridgePair } from 'constants/index'
+import {
+  AVAILABLE_CHAINS_URL,
+  DEFAULT_DESTINATION_CHAIN,
+  COUNTERPARTY_CHAINS_URL,
+  BRIDGE_TOKENS_URL,
+  Chain,
+  ExtChain,
+  NetworkSelectModalMode,
+  TokenInfo,
+  TokenPair,
+  BridgePair,
+  TRANSFER_STATUS,
+} from 'constants/index'
 import { getContract } from 'helpers'
 import Store2 from 'store2'
 import type { RootModel } from '.'
@@ -45,6 +58,7 @@ type IAppState = {
   // wrongChain: boolean
   selectedTokenName: string
   pageActive: boolean
+  transferStatus: TRANSFER_STATUS
 }
 
 const initialState: IAppState = {
@@ -65,6 +79,7 @@ const initialState: IAppState = {
   // wrongChain: false,
   selectedTokenName: '',
   pageActive: true,
+  transferStatus: Store2.get('connect-status') ? TRANSFER_STATUS.NOINPUT : TRANSFER_STATUS.UNCONNECTED,
 }
 
 export const application = createModel<RootModel>()({
@@ -180,6 +195,12 @@ export const application = createModel<RootModel>()({
         pageActive,
       }
     },
+    setTransferStatus(state, transferStatus: TRANSFER_STATUS) {
+      return {
+        ...state,
+        transferStatus,
+      }
+    },
   },
   effects: (dispatch) => ({
     saveConnectStatus(connectStatus: boolean) {
@@ -208,9 +229,7 @@ export const application = createModel<RootModel>()({
           //approval
           const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
           const receipt = await erc20Contract.approve(bridge.srcChain.transfer.contract, parseEther(amount))
-          console.time('receipt wait')
           await receipt.wait()
-          console.timeEnd('receipt wait')
 
           //transfer
           await composedContract.sendTransferERC20(
@@ -278,6 +297,24 @@ export const application = createModel<RootModel>()({
         state.application.bridgePairs.set(key, { tokens, srcChain, destChain } as BridgePair)
         dispatch.application.setBridgesPairs(new Map(state.application.bridgePairs))
         dispatch.application.setSelectedTokenName(tokens[0].name)
+      }
+    },
+    async judgeAllowance({ value, tokenInfo }: { value: string; tokenInfo: TokenInfo }, state) {
+      // parseEther(value)
+      // dispatch.application.setTransferStatus(TRANSFER_STATUS.PENDINGALLOWANCE)
+      const { availableChains: sourceChains, library, account, bridgePairs, srcChainId, destChainId } = state.application
+      // const bridge = bridgePairs.get(`${tokenInfo.}-${destinationChain?.chainId}`)
+      if (!tokenInfo.isNative) {
+        const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
+        const result: EhterBigNumber = await erc20Contract.allowance(account!, bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.transfer.contract)
+        if (result.gte(parseEther(value))) {
+          dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOTRANSFER)
+        } else {
+          dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOAPPROVE)
+        }
+        /*  if (result.getThan(value)) {
+        } else {
+        } */
       }
     },
   }),
