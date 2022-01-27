@@ -7,67 +7,7 @@ import { PrimaryButton } from '.'
 import { TRANSFER_STATUS } from 'constants/types'
 import { useDispatch } from 'hooks'
 import { Flex } from 'rebass'
-
-const ConnectButton = function () {
-  const {
-    application: { setWalletModalOpen },
-  } = useDispatch()
-  return (
-    <PrimaryButton width="100%" fontWeight={900} onClick={() => setWalletModalOpen(true)}>
-      Connect
-    </PrimaryButton>
-  )
-}
-
-const NoInputButton = function () {
-  return (
-    <PrimaryButton disabled={true} width="100%" fontWeight={900}>
-      Please input your amount.
-    </PrimaryButton>
-  )
-}
-
-const AllowanceOrTransferButton = function () {
-  const { transferStatus } = useSelector((state: RootState) => {
-    const { transferStatus } = state.application
-    return { transferStatus }
-  })
-  const pending = useMemo(() => {
-    return transferStatus === TRANSFER_STATUS.PENDINGALLOWANCE
-  }, [transferStatus])
-  const clickHandler = useCallback(() => {
-    if (transferStatus === TRANSFER_STATUS.READYTOTRANSFER) {
-      //transfer()
-    }
-  }, [transferStatus])
-  return (
-    <PrimaryButton width="100%" fontWeight={900} onClick={clickHandler}>
-      <TransitionSpinner show={pending} />
-      &nbsp; Transfer
-    </PrimaryButton>
-  )
-}
-
-const ApproveButton = function () {
-  const { transferStatus } = useSelector((state: RootState) => {
-    const { transferStatus } = state.application
-    return { transferStatus }
-  })
-  const pending = useMemo(() => {
-    return transferStatus === TRANSFER_STATUS.PENDINGAPPROVE
-  }, [transferStatus])
-  const clickHandler = useCallback(() => {
-    if (transferStatus === TRANSFER_STATUS.READYTOAPPROVE) {
-      //approve()
-    }
-  }, [transferStatus])
-  return (
-    <PrimaryButton width="100%" fontWeight={900} onClick={clickHandler}>
-      <TransitionSpinner show={pending} />
-      &nbsp; Approve
-    </PrimaryButton>
-  )
-}
+import { css } from 'styled-components/macro'
 
 const TRANSFER_STATUS_BUTTONS_MAP = {
   [TRANSFER_STATUS.PENDINGAPPROVE]: 3,
@@ -78,13 +18,13 @@ const TRANSFER_STATUS_BUTTONS_MAP = {
   [TRANSFER_STATUS.UNCONNECTED]: 0,
 }
 
-export const TransferButton = function () {
+export const TransferButton = function ({ error }: { error?: boolean }) {
   const { transferStatus } = useSelector((state: RootState) => {
     const { transferStatus } = state.application
     return { transferStatus }
   })
   const {
-    application: { setWalletModalOpen },
+    application: { setWalletModalOpen, setTransferConfirmationModalOpen, transferTokens, approveAmount },
   } = useDispatch()
 
   const [index, setIndex] = useState(0)
@@ -93,10 +33,11 @@ export const TransferButton = function () {
     // from: { opacity: 1 },
     // to: { opacity: 0 },
     ref: transRef,
-    // config: { ...config.gentle, duration: 400 },
-    from: { opacity: 0, transform: 'translate3d(0,0,100%)' },
-    enter: { opacity: 1, transform: 'translate3d(0,0,0%)' },
-    leave: { opacity: 0, transform: 'translate3d(0,0,-50%)' },
+    keys: null,
+    config: { ...config.gentle, duration: 400 },
+    from: { opacity: 0 /* transform: 'translate3d(0,0,100%)' */ },
+    enter: { opacity: 1 /*  transform: 'translate3d(0,0,0%)'  */ },
+    leave: { opacity: 0 /*  transform: 'translate3d(0,0,-50%)' */ },
     // delay: 200,
     // config: config.gentle,
   })
@@ -108,15 +49,29 @@ export const TransferButton = function () {
     setIndex(TRANSFER_STATUS_BUTTONS_MAP[transferStatus])
   }, [transferStatus])
 
+  const transfer = useCallback(() => {
+    if (transferStatus === TRANSFER_STATUS.READYTOTRANSFER) {
+      const input = document.getElementById('fromValueInput')
+      input && transferTokens({ amount: (input as HTMLInputElement)!.value })
+    }
+  }, [transferStatus])
+
+  const approve = useCallback(() => {
+    if (transferStatus === TRANSFER_STATUS.READYTOAPPROVE) {
+      const input = document.getElementById('fromValueInput')
+      input && approveAmount({ amount: (input as HTMLInputElement)!.value })
+    }
+  }, [transferStatus])
+
   const clickHandler = useCallback(() => {
     if (transferStatus === TRANSFER_STATUS.UNCONNECTED) {
       setWalletModalOpen(true)
     }
     if (transferStatus === TRANSFER_STATUS.READYTOTRANSFER) {
-      //transfer()
+      setTransferConfirmationModalOpen(true)
     }
     if (transferStatus === TRANSFER_STATUS.READYTOAPPROVE) {
-      //approve()
+      approve()
     }
   }, [transferStatus])
 
@@ -146,11 +101,31 @@ export const TransferButton = function () {
   }, [transferStatus])
 
   return (
-    <PrimaryButton disabled={disabled} width="100%" fontWeight={900} onClick={clickHandler}>
-      <TransitionSpinner style={{ position: 'absolute', left: '2rem' }} show={pending} />
-      {transitions((styles, item) => {
-        return <animated.div style={{ ...styles }}>{text}</animated.div>
-      })}
+    <PrimaryButton disabled={disabled || error} width="100%" fontWeight={900} onClick={clickHandler}>
+      <TransitionSpinner style={{ position: 'absolute', left: 'calc(50% - 4rem)' }} show={pending} />
+      <Flex
+        css={css`
+          width: 100%;
+          height: 1rem;
+          position: relative;
+          > div {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            will-change: transform, opacity;
+            -webkit-user-select: none;
+            user-select: none;
+          }
+        `}
+      >
+        {transitions((styles, item) => {
+          return <animated.div style={{ ...styles }}>{text}</animated.div>
+        })}
+      </Flex>
     </PrimaryButton>
   )
 }

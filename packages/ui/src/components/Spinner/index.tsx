@@ -62,7 +62,6 @@ export const TransitionSpinner = function ({ show, ...rest }: { show: boolean } 
     enter: { opacity: 1 },
     leave: { opacity: 0 },
     reverse: show,
-    delay: 200,
     config: config.molasses,
     // onRest: () => setPending(!pending),
   })

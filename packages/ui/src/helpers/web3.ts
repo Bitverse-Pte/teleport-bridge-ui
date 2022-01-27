@@ -2,8 +2,9 @@ import { ContractFunction } from '@ethersproject/contracts'
 import { BigNumber } from '@ethersproject/bignumber'
 import { isAddress, getContract } from 'helpers'
 import ERC20ABI from 'contracts/erc20.json'
-import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
+import { JsonRpcSigner, TransactionResponse, Web3Provider } from '@ethersproject/providers'
 import { DAI_CONTRACT, TokenInfo } from 'constants/index'
+import { errorNoti } from './notifaction'
 
 export function getDaiContract(chainId: number, web3: any) {
   const dai = new web3.eth.Contract(DAI_CONTRACT[chainId].abi, DAI_CONTRACT[chainId].address)
@@ -42,12 +43,17 @@ export async function getBalance(token: TokenInfo = {} as TokenInfo, library: We
   if (!token || (!token.isNative && !isAddress(token.address)) || !library || !account) {
     return undefined
   }
-  if (token.isNative) {
-    const request = library?.getBalance(account!)
-    return request
-  } else {
-    const contract = getContract(token.address, abi, library, account!)
-    const request = contract.balanceOf(account!)
-    return request
+  try {
+    let result: BigNumber | undefined
+    if (token.isNative) {
+      result = await library?.getBalance(account!)
+    } else {
+      const contract = getContract(token.address, abi, library, account!)
+      result = await contract.balanceOf(account!)
+    }
+    return result
+  } catch (err) {
+    errorNoti(`failed to get balance of ${token.name},
+    detail is ${(err as any).message}`)
   }
 }

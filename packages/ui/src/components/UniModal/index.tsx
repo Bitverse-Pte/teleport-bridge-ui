@@ -30,12 +30,13 @@ const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, mobile, is
 })`
   overflow-y: auto;
   &[data-reach-dialog-content] {
+    height: fit-content;
     margin: 0;
     background-color: ${({ theme }) => theme.bg0};
     border: 1px solid ${({ theme }) => theme.bg1};
     box-shadow: 0 5px 10px 0 ${({ theme }) => transparentize(0.2, theme.shadow1)};
     padding: 0px;
-    width: 50vw;
+    width: 55vw;
     overflow-y: auto;
     overflow-x: hidden;
     align-self: ${({ mobile }) => (mobile ? 'flex-end' : 'center')};
@@ -83,7 +84,7 @@ interface ModalProps {
   setIsOpen?(openOrNot: boolean): void
 }
 
-export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = false, maxWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard }: ModalProps) {
+export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30, maxWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard }: ModalProps) {
   const fadeTransition = useTransition(isOpen, {
     config: { duration: 200 },
     from: { opacity: 0 },

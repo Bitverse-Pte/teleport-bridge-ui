@@ -2,6 +2,9 @@ import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
 import { useSelector } from 'react-redux'
+import { ToastContainer } from 'react-toastify'
+
+import 'react-toastify/dist/ReactToastify.css'
 
 import bg1 from 'assets/bg-1.svg'
 import bg2 from 'assets/bg-2.svg'
@@ -57,27 +60,22 @@ function App() {
   constructor(props: any) {
     super(props) */
   const {
-    application: { initChains },
+    application: { initChains, initTransactions },
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
 
   useEffect(() => {
-    initChains()
+    Promise.all([initChains(), initTransactions()])
       .then(() => {
         setInitStatus(INIT_STATUS.initialized)
       })
       .catch((err) => {
-        console.error(err)
         setInitStatus(INIT_STATUS.error)
-        console.log('set initialized state as error')
       })
   }, [])
 
   const showBody = useCallback(() => {
-    if (waitWallet) {
-      return null
-    }
     switch (initStatus) {
       case INIT_STATUS.initialized:
         return <Body />
@@ -113,6 +111,7 @@ function App() {
               <TextPrimary1>This DApp is awaiting response from your wallet.</TextPrimary1>
             </Spinner>
           )}
+          <ToastContainer pauseOnFocusLoss={true} limit={8} draggable={true} autoClose={10000} theme="dark" />
         </Flex>
       </SLayout>
     </Flex>

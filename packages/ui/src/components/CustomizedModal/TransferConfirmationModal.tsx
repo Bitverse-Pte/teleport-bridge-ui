@@ -17,6 +17,8 @@ import { RootState } from 'store'
 import { useActiveWeb3React } from 'hooks/web3'
 import CurrencyList from '../Currency/CurrencyList'
 import { getChainData } from 'helpers/chains'
+import { EstimationBlock } from 'components/EstimationBlock'
+import { TransferConfirmationButton } from 'components/Button/TransferConfirmationButton'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -27,13 +29,13 @@ const OptionGrid = styled.div`
   `};
 `
 
-export default function CurrencySelectModal() {
+export default function TransferConfirmationModal() {
   const {
-    application: { setCurrencySelectModalOpen },
+    application: { setTransferConfirmationModalOpen },
   } = useDispatch()
-  const { currencySelectModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { currencySelectModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId } = state.application
-    return { currencySelectModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId }
+  const { transferConfirmationModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { transferConfirmationModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId } = state.application
+    return { transferConfirmationModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId }
   })
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const selectedTokenPairs = useMemo(() => {
@@ -42,28 +44,45 @@ export default function CurrencySelectModal() {
 
   return (
     <UniModal
-      isOpen={currencySelectModalOpen}
+      isOpen={transferConfirmationModalOpen}
       maxHeight={61.8}
       onDismiss={() => {
         console.log('dismiss')
       }}
       closeByKeyboard={true}
-      setIsOpen={setCurrencySelectModalOpen}
+      setIsOpen={setTransferConfirmationModalOpen}
     >
-      <Flex flexDirection="column" width="100%" overflow="hidden">
+      <Flex flexDirection="column" width="100%" overflow="hidden" height={'fit-content'}>
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
-            <a>Select a Token</a>
+            <a>Transfer</a>
           </StyledText>
-          <CircledCloseIcon onClick={() => setCurrencySelectModalOpen(false)} style={{ position: 'absolute' }} />
+          <CircledCloseIcon onClick={() => setTransferConfirmationModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
-        <UniModalContentWrapper style={{ flex: 1 }}>
-          <Flex flex={1}>
-            <AutoSizer style={{ width: '100%', height: '100%' }}>
-              {({ height }) => {
-                return <CurrencyList height={height} tokenPairs={selectedTokenPairs} />
-              }}
-            </AutoSizer>
+        <UniModalContentWrapper>
+          <Flex flex={1} flexDirection={'column'}>
+            <Flex justifyContent={'space-between'}>
+              <Flex>
+                <Flex>icon</Flex>
+                <Flex>sourcechain</Flex>
+              </Flex>
+              <Flex flexDirection={'column'}>
+                <Flex>tokenname</Flex>
+                <Flex>amounts</Flex>
+              </Flex>
+            </Flex>
+            <Flex justifyContent={'space-between'}>
+              <Flex>
+                <Flex>icon</Flex>
+                <Flex>destchain</Flex>
+              </Flex>
+              <Flex flexDirection={'column'}>
+                <Flex>tokenname</Flex>
+                <Flex>amounts</Flex>
+              </Flex>
+            </Flex>
+            <EstimationBlock />
+            <TransferConfirmationButton />
           </Flex>
         </UniModalContentWrapper>
       </Flex>

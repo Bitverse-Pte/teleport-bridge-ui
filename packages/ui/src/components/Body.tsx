@@ -5,7 +5,7 @@ import styled, { css } from 'styled-components'
 import { Flex } from 'rebass'
 import { debounce } from 'lodash'
 import BigNumber from 'bignumber.js'
-import { BigNumber as EhterBigNumber } from '@ethersproject/bignumber'
+import { BigNumber as EtherBigNumber } from '@ethersproject/bignumber'
 import { NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'
 import { SelectorButton, ButtonGray, PrimaryButton } from 'components/Button'
@@ -20,10 +20,10 @@ import { CurrencyInput } from 'components/Input'
 import { Text1, Text2, DarkGreenText } from 'components/Text'
 import WormHole from 'assets/wormhole.svg'
 import SwitchSvg from 'assets/switch.svg'
-import { getBalance } from 'helpers/web3'
 import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
-import { BaseSpinner } from 'components/Spinner'
-import { TransferButton } from './Button/TransferButton'
+import { TransferButton } from 'components/Button/TransferButton'
+import TransferConfirmationModal from 'components/CustomizedModal/TransferConfirmationModal'
+import { EstimationBlock } from 'components/EstimationBlock'
 
 const Container = styled(Flex)<{ hideInput: boolean }>`
   border-radius: 0.5rem;
@@ -148,15 +148,30 @@ const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { setTransferStatus, setNetworkModalMode, setCurrencySelectModalOpen, transferTokens, judgeAllowance, updateBridgeInfo, turnOverSrcAndDestChain },
+    application: {
+      stopUpdateEstimation,
+      startUpdateEstimation,
+      setTransferStatus,
+      saveCurrentTokenBalance,
+      setNetworkModalMode,
+      setCurrencySelectModalOpen,
+      judgeAllowance,
+      updateBridgeInfo,
+      turnOverSrcAndDestChain,
+    },
   } = useDispatch()
-  const { connectStatus, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId } = state.application
-    return { availableChains, selectedTokenName, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId }
-  })
+  const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId } = useSelector(
+    (state: RootState) => {
+      const { currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId } = state.application
+      const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode } = state.application // avoid to make a too long line
+      return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId }
+    }
+  )
   const [pending, setPending] = useState(false)
+  const [inputError, setInputError] = useState(false)
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
   const fromValueInputRef = useRef<any>({})
+  const toValueInputRef = useRef<any>({})
   const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
   const ready = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account])
   const srcChain = useMemo(() => {
@@ -204,38 +219,50 @@ export default function AppBody({ ...rest }) {
     [fromValueInputRef, selectedTokenPair]
   )
 
+  const resetEstimationUpdatePolling = useCallback(() => {
+    stopUpdateEstimation()
+    if (srcChainId && destChainId && bridgePairs && selectedTokenName && fromValueInputRef.current && fromValueInputRef.current.value) {
+      startUpdateEstimation(fromValueInputRef.current.value)
+    }
+  }, [srcChainId, destChainId, bridgePairs, selectedTokenName, fromValueInputRef])
+
   const fromInputChange = useCallback(() => {
     if (!selectedTokenPair) {
       return
+    }
+    if (fromValueInputRef.current.value) {
+      const parsedCurrentTokenBalance = new BigNumber(currentTokenBalance!.toHexString()).div(`1e+${selectedTokenPair?.srcToken.decimals}`)
+      const parsedValue = new BigNumber(fromValueInputRef.current.value)
+      if (parsedCurrentTokenBalance.isLessThan(parsedValue) || parsedValue.isNegative()) {
+        setInputError(true)
+      } else {
+        setInputError(false)
+      }
     }
     setTransferStatus(TRANSFER_STATUS.PENDINGALLOWANCE)
     if (ready) {
       updateAllowance()
     }
-  }, [transferStatus, fromValueInputRef, selectedTokenPair])
+    if (toValueInputRef.current) {
+      toValueInputRef.current.value = fromValueInputRef.current.value || null
+    }
+    resetEstimationUpdatePolling()
+  }, [transferStatus, fromValueInputRef, selectedTokenPair, toValueInputRef, currentTokenBalance])
 
-  const [balance, setBalance] = useState<EhterBigNumber | undefined>(undefined)
   useEffect(() => {
-    library &&
-      account &&
-      srcChainId === chainId &&
-      selectedTokenPair &&
-      getBalance(selectedTokenPair?.srcToken, library, account).then((res) => {
-        setBalance(res)
-      })
+    resetEstimationUpdatePolling()
+  }, [selectedTokenPair, srcChainId, chainId, selectedTokenName, toValueInputRef])
+
+  useEffect(() => {
+    library && account && srcChainId === chainId && selectedTokenPair && saveCurrentTokenBalance(undefined)
   }, [selectedTokenPair, srcChainId, chainId, library, account, selectedTokenName])
 
-  const transfer = useCallback(() => {
-    if (selectedTokenPair && fromValueInputRef.current && 'value' in fromValueInputRef.current && srcChainId && destChainId) {
-      transferTokens({ tokenInfo: selectedTokenPair!.srcToken, amount: fromValueInputRef.current.value, srcChainId, destChainId })
-    }
-  }, [bridgePairs, selectedTokenPair, fromValueInputRef.current, srcChainId, destChainId])
-
   const transferBalanceToFromValue = useCallback(() => {
-    if (connectStatus && fromValueInputRef.current && 'value' in fromValueInputRef.current && balance) {
-      fromValueInputRef.current.value = new BigNumber(balance!.toString()).shiftedBy(-selectedTokenPair!.srcToken.decimals).toString()
+    if (connectStatus && fromValueInputRef.current && 'value' in fromValueInputRef.current && currentTokenBalance) {
+      fromValueInputRef.current.value = new BigNumber(currentTokenBalance!.toString()).shiftedBy(-selectedTokenPair!.srcToken.decimals).toString()
+      fromInputChange()
     }
-  }, [fromValueInputRef, balance, connectStatus, selectedTokenPair])
+  }, [fromValueInputRef, currentTokenBalance, connectStatus, selectedTokenPair, transferStatus, toValueInputRef])
 
   return (
     <>
@@ -249,10 +276,10 @@ export default function AppBody({ ...rest }) {
                   <Text1 fontWeight={600}>Send</Text1>
                 </Flex>
                 <Flex justifyContent="space-between" padding={'0.5rem'}>
-                  <BalanceWrapper clickable={!!(ready && selectedTokenName && selectedTokenPair && balance)} onClick={transferBalanceToFromValue}>
+                  <BalanceWrapper clickable={!!(ready && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
                     <DarkGreenText>{'Max ≈'}&nbsp;</DarkGreenText>
-                    {ready && selectedTokenName && selectedTokenPair && balance ? (
-                      <Balance balance={balance!} currency={selectedTokenPair!.srcToken} />
+                    {ready && selectedTokenName && selectedTokenPair && currentTokenBalance ? (
+                      <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} />
                     ) : connectStatus && account ? (
                       <Loader size={17} color="white" />
                     ) : (
@@ -277,8 +304,10 @@ export default function AppBody({ ...rest }) {
                 </Flex>
                 <Flex flex={1} padding="0 1rem">
                   <CurrencyInput
-                    disabled={!ready}
-                    style={{ fontSize: '2rem' }}
+                    id={'fromValueInput'}
+                    error={inputError}
+                    disabled={!ready || !selectedTokenPair || !currentTokenBalance}
+                    style={{ fontSize: '2rem', textAlign: 'center' }}
                     step={selectedTokenPair && Math.pow(10, -(selectedTokenPair?.srcToken.decimals ?? 18))}
                     placeholder="0.0"
                     type="number"
@@ -335,7 +364,9 @@ export default function AppBody({ ...rest }) {
                 <Flex flex={1} padding="0 1rem">
                   <CurrencyInput
                     disabled={true}
-                    style={{ fontSize: '2rem' }}
+                    ref={toValueInputRef}
+                    id={'toValueInput'}
+                    style={{ fontSize: '2rem', textAlign: 'center' }}
                     step={selectedTokenPair && Math.pow(10, -(selectedTokenPair?.srcToken.decimals ?? 18))}
                     type="number"
                     placeholder="0.0"
@@ -366,13 +397,15 @@ export default function AppBody({ ...rest }) {
                 {pending && <BaseSpinner warning={false} size={'1rem'}></BaseSpinner>}
                 {connectStatus ? 'Transfer' : 'Connect'}
               </PrimaryButton> */}
-              <TransferButton />
+              <TransferButton error={inputError} />
             </Flex>
           </Flex>
         </BodyWrapper>
+        <EstimationBlock style={{ width: '44vw', borderRadius: '0 0 0.5rem 0.5rem', borderWidth: '0px 1px 1px 1px' }} />
       </Flex>
-      {networkModalMode !== NetworkSelectModalMode.CLOSE && <NetworkSelectModal />}
-      {currencySelectModalOpen && <CurrencySelectModal />}
+      <NetworkSelectModal />
+      <CurrencySelectModal />
+      <TransferConfirmationModal />
     </>
   )
 }

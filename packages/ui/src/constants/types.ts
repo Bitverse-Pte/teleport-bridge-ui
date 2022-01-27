@@ -1,6 +1,6 @@
 import type { HttpProvider, IpcProvider, WebsocketProvider, AbstractProvider } from 'web3-core/types'
 import { AbstractConnector } from '@web3-react/abstract-connector'
-import { ContractInterface } from '@ethersproject/contracts'
+import { ContractInterface, ContractTransaction } from '@ethersproject/contracts'
 
 export interface ICurrency {
   symbol: string
@@ -356,4 +356,20 @@ export enum TRANSFER_STATUS {
   READYTOAPPROVE = 'READYTOAPPROVE',
   PENDINGAPPROVE = 'PENDINGAPPROVE',
   READYTOTRANSFER = 'READYTOTRANSFER',
+}
+
+export enum TRANSACTION_STATUS {
+  SENT = 'SENT',
+  FAILED = 'FAILED',
+  SUCCEEDED = 'SUCCEEDED',
+}
+export interface StatefulTransaction extends ContractTransaction {
+  status?: TRANSACTION_STATUS
+}
+
+export interface Estimation {
+  rate: number
+  fee: number
+  minReceived: number
+  slippage: number
 }

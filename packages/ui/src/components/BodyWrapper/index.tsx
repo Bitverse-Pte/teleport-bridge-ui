@@ -10,10 +10,10 @@ export const MarginTopForBodyContent = function () {
 export const BodyWrapper = styled.main<{ margin?: string; maxWidth?: string }>`
   position: relative;
   display: flex;
-  width: 50vw;
+  width: 55vw;
   margin-top: ${({ margin }) => margin ?? '0px'};
   ${({ theme }) => theme.mediaWidth.upToLarge`
-    width: 50vw;
+    width: 55vw;
   `}
   ${({ theme }) => theme.mediaWidth.upToMedium`
    width: 67vw;
