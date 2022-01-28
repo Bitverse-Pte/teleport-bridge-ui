@@ -79,10 +79,7 @@ const SConnectButton = styled.button<IConnectButtonStyleProps>`
   @media (hover: hover) {
     &:hover {
       transform: ${({ disabled }) => (!disabled ? 'translateY(-1px)' : 'none')};
-      box-shadow: ${({ disabled }) =>
-        !disabled
-          ? '0 7px 14px 0 rgba(50, 50, 93, 0.1), 0 3px 6px 0 rgba(0, 0, 0, 0.08), inset 0 0 1px 0 rgba(0, 0, 0, 0.06)'
-          : '0 4px 6px 0 rgba(50, 50, 93, 0.11), 0 1px 3px 0 rgba(0, 0, 0, 0.08), inset 0 0 1px 0 rgba(0, 0, 0, 0.06)'};
+      box-shadow: ${({ disabled }) => (!disabled ? '0 7px 14px 0 rgba(50, 50, 93, 0.1), 0 3px 6px 0 rgba(0, 0, 0, 0.08), inset 0 0 1px 0 rgba(0, 0, 0, 0.06)' : '0 4px 6px 0 rgba(50, 50, 93, 0.11), 0 1px 3px 0 rgba(0, 0, 0, 0.08), inset 0 0 1px 0 rgba(0, 0, 0, 0.06)')};
     }
 
     &:hover ${SHoverLayer} {

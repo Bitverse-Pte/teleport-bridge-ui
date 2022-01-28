@@ -17,6 +17,7 @@ import HistorySvg from 'assets/history.svg'
 import WalletSelectModal from 'components/CustomizedModal/WalletSelectModal'
 import HistoryModal from 'components/CustomizedModal/HistoryModal'
 import { Icon } from 'components/Icon'
+import { HistoryButton } from './Button/HistoryButton'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -107,10 +108,11 @@ export default function Header() {
         {ready && (
           <>
             <Flex>
-              <ButtonDropdown style={{ backgroundColor: 'transparent' }} disabled={!ready} onClick={() => setHistoryModalOpen(true)}>
+              <HistoryButton disabled={!ready} />
+              {/* <ButtonDropdown style={{ backgroundColor: 'transparent' }} disabled={!ready} onClick={() => setHistoryModalOpen(true)}>
                 <Icon src={HistorySvg} />
                 <Text1>History</Text1>
-              </ButtonDropdown>
+              </ButtonDropdown> */}
             </Flex>
             <Web3StatusConnected>
               <Flex alignItems="center">

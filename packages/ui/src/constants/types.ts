@@ -359,12 +359,21 @@ export enum TRANSFER_STATUS {
 }
 
 export enum TRANSACTION_STATUS {
-  SENT = 'SENT',
-  FAILED = 'FAILED',
-  SUCCEEDED = 'SUCCEEDED',
+  PENDING = 1,
+  SUCCEEDED = 2,
+  FAILED = 3,
 }
-export interface StatefulTransaction extends ContractTransaction {
-  status?: TRANSACTION_STATUS
+export interface TransactionDetail {
+  src_chain: string
+  dest_chain: string
+  sender: string
+  send_tx_hash: string
+  receiver: string
+  receive_tx_hash: string
+  amount: string
+  token: string
+  token_address: string
+  status: TRANSACTION_STATUS
 }
 
 export interface Estimation {

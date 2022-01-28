@@ -8,15 +8,16 @@ import { HelpIcon } from 'components/Icon/HelpIcon'
 import { Icon } from 'components/Icon'
 import erc20 from 'assets/erc20.svg'
 import { MouseoverTooltip, MouseoverTooltipContent } from 'components/Tooltip'
+import { TransitionSpinnerMask } from 'components/Spinner'
 
 const EstimationRow = styled(Flex)`
   justify-content: space-between;
 `
 
 export function EstimationBlock({ ...rest }: FlexProps) {
-  const { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName } = useSelector((state: RootState) => {
-    const { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName } = state.application
-    return { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName }
+  const { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName, estimationUpdating } = useSelector((state: RootState) => {
+    const { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName, estimationUpdating } = state.application
+    return { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName, estimationUpdating }
   })
   const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
@@ -24,7 +25,14 @@ export function EstimationBlock({ ...rest }: FlexProps) {
   const destChain = useMemo(() => {
     return availableChains.get(destChainId)
   }, [destChainId, availableChains])
-
+  const amount = useMemo(() => {
+    const input = document.getElementById('fromValueInput')
+    if (input) {
+      return (input as HTMLInputElement).value
+    } else {
+      return '0'
+    }
+  }, [])
   return (
     <Flex
       css={css`
@@ -42,6 +50,7 @@ export function EstimationBlock({ ...rest }: FlexProps) {
       `}
       {...rest}
     >
+      <TransitionSpinnerMask show={estimationUpdating} />
       <EstimationRow>
         <Text2>Rate</Text2>
         <Text3>
@@ -74,7 +83,7 @@ export function EstimationBlock({ ...rest }: FlexProps) {
             <HelpIcon size={12} />
           </MouseoverTooltip>
         </Text2>
-        <Text3>{estimation.minReceived}</Text3>
+        <Text3>{estimation.minReceived || amount}</Text3>
       </EstimationRow>
       <EstimationRow>
         <Text2>

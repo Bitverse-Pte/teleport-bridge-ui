@@ -5,8 +5,8 @@ export class FixedSizeQueue<T> {
     this.maxSize = size
   }
 
-  public static fromArray<T>(arr: T[]): FixedSizeQueue<T> {
-    const queue = new FixedSizeQueue<T>(arr.length)
+  public static fromArray<T>(arr: T[], size = arr.length): FixedSizeQueue<T> {
+    const queue = new FixedSizeQueue<T>(size)
     for (const item of arr) {
       queue.push(item)
     }
@@ -37,11 +37,15 @@ export class FixedSizeQueue<T> {
     return this.container.find(callback)
   }
 
+  public some(callback: (e: T) => boolean) {
+    return this.container.some(callback)
+  }
+
   public shift(): T | undefined {
     return this.container.shift()
   }
 
   [Symbol.iterator]() {
-    return this.container[Symbol.iterator]
+    return this.container[Symbol.iterator]()
   }
 }

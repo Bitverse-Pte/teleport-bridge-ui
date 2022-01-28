@@ -148,25 +148,13 @@ const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: {
-      stopUpdateEstimation,
-      startUpdateEstimation,
-      setTransferStatus,
-      saveCurrentTokenBalance,
-      setNetworkModalMode,
-      setCurrencySelectModalOpen,
-      judgeAllowance,
-      updateBridgeInfo,
-      turnOverSrcAndDestChain,
-    },
+    application: { stopUpdateEstimation, startUpdateEstimation, setTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, updateBridgeInfo, turnOverSrcAndDestChain },
   } = useDispatch()
-  const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId } = useSelector(
-    (state: RootState) => {
-      const { currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId } = state.application
-      const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode } = state.application // avoid to make a too long line
-      return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId }
-    }
-  )
+  const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId } = state.application
+    const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode } = state.application // avoid to make a too long line
+    return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId }
+  })
   const [pending, setPending] = useState(false)
   const [inputError, setInputError] = useState(false)
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
@@ -278,13 +266,7 @@ export default function AppBody({ ...rest }) {
                 <Flex justifyContent="space-between" padding={'0.5rem'}>
                   <BalanceWrapper clickable={!!(ready && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
                     <DarkGreenText>{'Max ≈'}&nbsp;</DarkGreenText>
-                    {ready && selectedTokenName && selectedTokenPair && currentTokenBalance ? (
-                      <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} />
-                    ) : connectStatus && account ? (
-                      <Loader size={17} color="white" />
-                    ) : (
-                      <DarkGreenText>N/A</DarkGreenText>
-                    )}
+                    {ready && selectedTokenName && selectedTokenPair && currentTokenBalance ? <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} /> : connectStatus && account ? <Loader size={17} color="white" /> : <DarkGreenText>N/A</DarkGreenText>}
                   </BalanceWrapper>
                 </Flex>
               </Flex>
@@ -401,7 +383,7 @@ export default function AppBody({ ...rest }) {
             </Flex>
           </Flex>
         </BodyWrapper>
-        <EstimationBlock style={{ width: '44vw', borderRadius: '0 0 0.5rem 0.5rem', borderWidth: '0px 1px 1px 1px' }} />
+        <EstimationBlock style={{ width: '44vw', maxWidth: '512px', borderRadius: '0 0 0.5rem 0.5rem', borderWidth: '0px 1px 1px 1px' }} />
       </Flex>
       <NetworkSelectModal />
       <CurrencySelectModal />

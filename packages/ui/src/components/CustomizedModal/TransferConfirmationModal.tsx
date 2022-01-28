@@ -4,8 +4,8 @@ import { pick } from 'lodash'
 import { useSelector } from 'react-redux'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
-import { CircledCloseIcon } from 'components/Icon'
-import { StyledText } from 'components/Text'
+import { CircledCloseIcon, Icon } from 'components/Icon'
+import { StyledText, Text1, Text4 } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import Option from 'components/Option'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
@@ -33,14 +33,31 @@ export default function TransferConfirmationModal() {
   const {
     application: { setTransferConfirmationModalOpen },
   } = useDispatch()
-  const { transferConfirmationModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { transferConfirmationModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId } = state.application
-    return { transferConfirmationModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId }
+  const { transferConfirmationModalOpen, selectedTokenName, bridgePairs, availableChains, srcChainId, destChainId } = useSelector((state: RootState) => {
+    const { transferConfirmationModalOpen, selectedTokenName, bridgePairs, availableChains, srcChainId, destChainId } = state.application
+    return { transferConfirmationModalOpen, selectedTokenName, bridgePairs, availableChains, srcChainId, destChainId }
   })
-  const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
+
+  const sourceChain = useMemo(() => {
+    return availableChains.get(srcChainId)
+  }, [srcChainId, availableChains])
+
+  const destChain = useMemo(() => {
+    return availableChains.get(destChainId)
+  }, [destChainId, availableChains])
+
   const selectedTokenPairs = useMemo(() => {
-    return bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens || []
+    return bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((e) => e.name === selectedTokenName)
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
+
+  const amount = useMemo(() => {
+    const input = document.getElementById('fromValueInput')
+    if (input) {
+      return (input as HTMLInputElement).value
+    } else {
+      return '0'
+    }
+  }, [transferConfirmationModalOpen])
 
   return (
     <UniModal
@@ -60,29 +77,43 @@ export default function TransferConfirmationModal() {
           <CircledCloseIcon onClick={() => setTransferConfirmationModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
         <UniModalContentWrapper>
-          <Flex flex={1} flexDirection={'column'}>
-            <Flex justifyContent={'space-between'}>
+          <Flex flex={1} flexDirection={'column'} justifyContent="center">
+            <Flex justifyContent={'space-between'} color={'white'} width="100%">
               <Flex>
-                <Flex>icon</Flex>
-                <Flex>sourcechain</Flex>
+                <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
+                  <Icon src={sourceChain?.icon} />
+                </Flex>
+                <Flex flexDirection={'column'} alignItems={'start'}>
+                  <Text1 fontWeight={600}>{sourceChain?.name}</Text1>
+                  <Text4 fontSize={'0.5rem'}>Source Chain</Text4>
+                </Flex>
               </Flex>
               <Flex flexDirection={'column'}>
-                <Flex>tokenname</Flex>
-                <Flex>amounts</Flex>
+                <Text1 fontWeight={600} color="red">
+                  -{amount}
+                </Text1>
+                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.name}</Text4>
               </Flex>
             </Flex>
-            <Flex justifyContent={'space-between'}>
+            <Flex justifyContent={'space-between'} color={'white'} width="100%">
               <Flex>
-                <Flex>icon</Flex>
-                <Flex>destchain</Flex>
+                <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
+                  <Icon src={destChain?.icon} />
+                </Flex>
+                <Flex flexDirection={'column'} alignItems={'start'}>
+                  <Text1 fontWeight={600}>{destChain?.name}</Text1>
+                  <Text4 fontSize={'0.5rem'}>Source Chain</Text4>
+                </Flex>
               </Flex>
               <Flex flexDirection={'column'}>
-                <Flex>tokenname</Flex>
-                <Flex>amounts</Flex>
+                <Text1 fontWeight={600} color="green">
+                  +{amount}
+                </Text1>
+                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.destToken.name}</Text4>
               </Flex>
             </Flex>
-            <EstimationBlock />
-            <TransferConfirmationButton />
+            <EstimationBlock width="100%" margin={'1rem 0'} />
+            <TransferConfirmationButton accepted={true} />
           </Flex>
         </UniModalContentWrapper>
       </Flex>

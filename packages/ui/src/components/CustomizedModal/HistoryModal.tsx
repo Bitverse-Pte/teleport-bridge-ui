@@ -10,7 +10,10 @@ import { useDispatch } from 'hooks'
 import HistoryRecord from 'components/HistoryRecord'
 
 export default function HistoryModal() {
-  const historyModalOpen = useSelector((state: RootState) => state.application.historyModalOpen)
+  const { historyModalOpen, transactions } = useSelector((state: RootState) => {
+    const { historyModalOpen, transactions } = state.application
+    return { historyModalOpen, transactions }
+  })
   const {
     application: { setHistoryModalOpen },
   } = useDispatch()
@@ -33,7 +36,9 @@ export default function HistoryModal() {
           <CircledCloseIcon onClick={() => setHistoryModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
         <UniModalContentWrapper>
-          <HistoryRecord />
+          {[...transactions].map((transaction) => {
+            return <HistoryRecord transaction={transaction} />
+          })}
         </UniModalContentWrapper>
       </Flex>
     </UniModal>

@@ -1,6 +1,6 @@
 import { PrimaryButton } from 'components/Button'
 import React, { HTMLProps, ReactPropTypes } from 'react'
-import { useTransition, config, animated } from 'react-spring'
+import { useTransition, config, animated } from '@react-spring/web'
 import reactVirtualizedAutoSizer from 'react-virtualized-auto-sizer'
 import { Flex } from 'rebass'
 import styled, { keyframes, css } from 'styled-components'
@@ -61,7 +61,7 @@ export const TransitionSpinner = function ({ show, ...rest }: { show: boolean } 
     from: { opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
-    reverse: show,
+    // reverse: show,
     config: config.molasses,
     // onRest: () => setPending(!pending),
   })
@@ -72,6 +72,30 @@ export const TransitionSpinner = function ({ show, ...rest }: { show: boolean } 
           item && (
             <animated.div style={{ ...rest.style, opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1] }) }}>
               <BaseSpinner warning={false} size={'1rem'}></BaseSpinner>
+            </animated.div>
+          )
+      )}
+    </>
+  )
+}
+
+export const TransitionSpinnerMask = function ({ show, children, ...rest }: { show: boolean } & HTMLProps<HTMLDivElement>) {
+  const transitions = useTransition(show, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+    reverse: show,
+    config: config.molasses,
+    // onRest: () => setPending(!pending),
+  })
+  return (
+    <>
+      {transitions(
+        ({ opacity }, item) =>
+          item && (
+            <animated.div style={{ ...rest.style, opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1] }), position: 'absolute', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <BaseSpinner warning={false} size={'2rem'}></BaseSpinner>
+              {children}
             </animated.div>
           )
       )}

@@ -1,7 +1,7 @@
+import React, { useCallback, useEffect } from 'react'
 import { DialogContent, DialogOverlay } from '@reach/dialog'
 import { transparentize } from 'polished'
-import React, { useEffect } from 'react'
-import { animated, useSpring, useTransition } from 'react-spring'
+import { animated, useSpring, useTransition } from '@react-spring/web'
 import { useGesture } from 'react-use-gesture'
 import styled, { css } from 'styled-components/macro'
 
@@ -85,14 +85,7 @@ interface ModalProps {
 }
 
 export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30, maxWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard }: ModalProps) {
-  const fadeTransition = useTransition(isOpen, {
-    config: { duration: 200 },
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-  })
-
-  const [{ y }, set] = useSpring(() => ({ y: 0, config: { mass: 1, tension: 210, friction: 20 } }))
+  /*   const [{ y }, set] = useSpring(() => ({ y: 0, config: { mass: 1, tension: 210, friction: 20 } }))
   const bind = useGesture({
     onDrag: (state) => {
       set({
@@ -102,14 +95,8 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
         onDismiss()
       }
     },
-  })
-
+  }) */
   useEffect(() => {
-    const escapeOnEscUp = (event: KeyboardEvent) => {
-      if (event.which == 27 && isOpen && setIsOpen) {
-        setIsOpen(false)
-      }
-    }
     if (closeByKeyboard) {
       document.addEventListener('keyup', escapeOnEscUp)
     }
@@ -118,7 +105,22 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
         document.removeEventListener('keyup', escapeOnEscUp)
       }
     }
+  }, [isOpen])
+
+  const fadeTransition = useTransition(isOpen, {
+    config: { duration: 200 },
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
   })
+  const escapeOnEscUp = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.which == 27 && isOpen && setIsOpen) {
+        setIsOpen(false)
+      }
+    },
+    [isOpen]
+  )
 
   return fadeTransition(
     (styles, item) =>

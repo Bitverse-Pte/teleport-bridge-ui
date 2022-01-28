@@ -6,6 +6,7 @@ import { isAddress } from '@ethersproject/address'
 import { parseEther } from '@ethersproject/units'
 import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
+import { toast } from 'react-toastify'
 import axios from 'axios'
 import {
   AVAILABLE_CHAINS_URL,
@@ -19,7 +20,7 @@ import {
   TokenPair,
   BridgePair,
   TRANSFER_STATUS,
-  StatefulTransaction,
+  TransactionDetail,
   TRANSACTION_STATUS,
   TRANSACTION_HISTORY_URL,
   Estimation,
@@ -73,8 +74,9 @@ type IAppState = {
   pageActive: boolean
   transferStatus: TRANSFER_STATUS
   currentTokenBalance: EtherBigNumber | undefined
-  transactions: FixedSizeQueue<StatefulTransaction>
+  transactions: FixedSizeQueue<TransactionDetail>
   estimation: Estimation
+  estimationUpdating: boolean
 }
 
 const initialState: IAppState = {
@@ -99,6 +101,7 @@ const initialState: IAppState = {
   currentTokenBalance: undefined,
   transactions: new FixedSizeQueue(10),
   estimation: {} as Estimation,
+  estimationUpdating: false,
 }
 
 export const application = createModel<RootModel>()({
@@ -226,7 +229,7 @@ export const application = createModel<RootModel>()({
         currentTokenBalance,
       }
     },
-    setTransactions(state, transactions: FixedSizeQueue<StatefulTransaction>) {
+    setTransactions(state, transactions: FixedSizeQueue<TransactionDetail>) {
       return {
         ...state,
         transactions: transactions.reborn(),
@@ -244,16 +247,22 @@ export const application = createModel<RootModel>()({
         transferConfirmationModalOpen,
       }
     },
+    setEstimationUpdating(state, estimationUpdating: boolean) {
+      return {
+        ...state,
+        estimationUpdating,
+      }
+    },
   },
   effects: (dispatch) => ({
     saveConnectStatus(connectStatus: boolean) {
       Store2.set('connect-status', connectStatus)
       dispatch.application.setConnectStatus(connectStatus)
     },
-    async initTransactions() {
+    async initTransactions(account: string) {
       try {
-        const { data: transactions } = await axios.get<StatefulTransaction[]>(TRANSACTION_HISTORY_URL)
-        dispatch.application.setTransactions(FixedSizeQueue.fromArray<StatefulTransaction>(transactions))
+        const { data: transactions } = await axios.post<TransactionDetail[]>(TRANSACTION_HISTORY_URL, { sender: account })
+        dispatch.application.setTransactions(FixedSizeQueue.fromArray<TransactionDetail>(transactions, 10))
       } catch (err) {
         errorNoti(`failed to load historic transactions info from ${TRANSACTION_HISTORY_URL},
         the detail is ${(err as any)?.message}`)
@@ -295,21 +304,22 @@ export const application = createModel<RootModel>()({
     },
     async transferTokens({ amount }: { amount: string }, state) {
       dispatch.application.setWaitWallet(true)
-      const { availableChains: sourceChains, library, account, bridgePairs, selectedTokenName, srcChainId, destChainId } = state.application
+      const { availableChains: sourceChains, library, account, bridgePairs, selectedTokenName, srcChainId, destChainId, transactions } = state.application
       const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChain?.destChains.find((e) => e.chainId === destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName)?.srcToken
       const cachedTokenName = selectedTokenName
       try {
+        let toastId = ''
         if (bridge && tokenInfo) {
           const composedContract = getContract(bridge.srcChain.transfer.contract, bridge.srcChain.transfer.abi, library!, account!)
-          let transaction: StatefulTransaction
+          let transaction
           if (tokenInfo?.isNative) {
             transaction = await composedContract.sendTransferBase(
               {
                 receiver: account,
-                destChain: bridge.destChain.name,
+                destChain: 'tss-eth', //bridge.destChain.name,
                 relayChain: '',
               },
               { value: parseEther(amount) }
@@ -326,21 +336,42 @@ export const application = createModel<RootModel>()({
               { value: parseEther('0') }
             )
           }
-          transaction.status = TRANSACTION_STATUS.SENT
+
+          const transactionDetail = {
+            src_chain: `${srcChainId}`,
+            dest_chain: `${destChainId}`,
+            sender: account,
+            send_tx_hash: '',
+            receiver: account,
+            receive_tx_hash: '',
+            amount: parseEther(amount).toHexString(),
+            token: selectedTokenName,
+            token_address: '',
+            status: TRANSACTION_STATUS.PENDING,
+          } as TransactionDetail
+          transactions.push(transactionDetail)
+          dispatch.application.setTransactions(transactions)
+          toastId = transaction.hash
           transaction
             .wait()
             .then(() => {
               if (cachedTokenName === state.application.selectedTokenName) {
                 dispatch.application.saveCurrentTokenBalance(undefined)
               }
-              transaction.status = TRANSACTION_STATUS.SUCCEEDED
-              successNoti(`succeeded to transfer ${amount} of ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId}!`)
+              transactionDetail.status = TRANSACTION_STATUS.SUCCEEDED
+              successNoti(`succeeded to transfer ${amount} of ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId}!`, toastId)
             })
             .catch((err: any) => {
               console.error(err)
-              transaction.status = TRANSACTION_STATUS.FAILED
-              errorNoti(`failed to transfer this amount: ${amount} for token: ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId},
-              the detail is ${err?.message}`)
+              transactionDetail.status = TRANSACTION_STATUS.FAILED
+              errorNoti(
+                `failed to transfer this amount: ${amount} for token: ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId},
+              the detail is ${err?.message}`,
+                toastId
+              )
+            })
+            .finally(() => {
+              dispatch.application.setTransactions(transactions)
             })
         }
         const fromInput = document.getElementById('fromValueInput')
@@ -351,13 +382,17 @@ export const application = createModel<RootModel>()({
         if (toInput) {
           ;(toInput as HTMLInputElement).value = ''
         }
-        infoNoti(`sent request to transfer ${amount} of ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId}!`)
+        infoNoti(`sent request to transfer ${amount} of ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId}!`, toastId)
       } catch (err) {
         console.error(err)
-        errorNoti(`failed to transfer this amount: ${amount} for token: ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId},
-              the detail is ${(err as any)?.message}`)
+        errorNoti(
+          `failed to transfer this amount: ${amount} for token: ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId},
+              the detail is ${(err as any)?.message}`
+        )
       } finally {
         dispatch.application.setWaitWallet(false)
+        dispatch.application.setTransferConfirmationModalOpen(false)
+        dispatch.application.stopUpdateEstimation()
       }
     },
     async initChains() {
@@ -465,6 +500,7 @@ export const application = createModel<RootModel>()({
         const { tokens } = pair
         const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName) || tokens[0]
         if (selectedTokenPair) {
+          dispatch.application.updateEstimation({ amount, srcChainId, destChainId, selectedTokenName, selectedTokenPair })
           estimationClockId = window.setInterval(() => dispatch.application.updateEstimation({ amount, srcChainId, destChainId, selectedTokenName, selectedTokenPair }), 30 * 1000)
         }
       }
@@ -478,27 +514,26 @@ export const application = createModel<RootModel>()({
         slippage: NaN,
       })
     },
-    async updateEstimation({
-      amount,
-      srcChainId,
-      destChainId,
-      selectedTokenName,
-      selectedTokenPair,
-    }: {
-      amount: string
-      srcChainId: number
-      destChainId: number
-      selectedTokenName: string
-      selectedTokenPair: TokenPair
-    }) {
+    async updateEstimation({ amount, srcChainId, destChainId, selectedTokenName, selectedTokenPair }: { amount: string; srcChainId: number; destChainId: number; selectedTokenName: string; selectedTokenPair: TokenPair }) {
+      dispatch.application.setEstimationUpdating(true)
       try {
-        const { data: estimation } = await axios.get<Estimation>(`${ESTIMATION_URL}/${srcChainId}/${destChainId}/${selectedTokenName}/${parseEther(amount)}`)
-        dispatch.application.setEstimation(estimation)
+        // const { data: estimation } = await axios.get<Estimation>(`${ESTIMATION_URL}/${srcChainId}/${destChainId}/${selectedTokenName}/${parseEther(amount)}`)
+        await new Promise((res) => {
+          setTimeout(() => res(undefined), 2000)
+        })
+        dispatch.application.setEstimation({
+          rate: 1,
+          fee: 0,
+          minReceived: NaN,
+          slippage: 0,
+        })
       } catch (err) {
         console.error(err)
         errorNoti(`failed to update estimation for token: ${selectedTokenPair.srcToken.name} from ${srcChainId} to ${destChainId},
             detail is ${(err as any)?.message}}`)
         dispatch.application.stopUpdateEstimation()
+      } finally {
+        dispatch.application.setEstimationUpdating(false)
       }
     },
   }),

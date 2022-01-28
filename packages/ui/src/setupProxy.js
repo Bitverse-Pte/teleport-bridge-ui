@@ -23,4 +23,11 @@ module.exports = function (app) {
       changeOrigin: true,
     })
   )
+  app.use(
+    '/bridge/packet/history',
+    createProxyMiddleware({
+      target: REACT_APP_CHAINS_DATA_URL,
+      changeOrigin: true,
+    })
+  )
 }

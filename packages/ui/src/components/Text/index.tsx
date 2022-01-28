@@ -31,6 +31,15 @@ export const Text3 = styled(Text)`
   color: #e9e9e9;
 `
 
+export const Text4 = styled(Text)`
+  font-family: IBM Plex Sans;
+  font-style: normal;
+  font-size: 1.25rem;
+  line-height: 1.625rem;
+  text-transform: capitalize;
+  color: #999999;
+`
+
 export const StyledText = styled.p`
   flex: 1 1 auto;
   color: ${({ theme }) => theme.text1};

@@ -1,15 +1,17 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import { darken } from 'polished'
 import { Text, Box, Flex } from 'rebass'
 import { GreyCard, DarkGreyCard } from 'components/Card'
-import { IChainData, ICurrency, Overwrite } from 'constants/index'
+import { IChainData, ICurrency, Overwrite, TransactionDetail, TRANSACTION_STATUS } from 'constants/index'
 import BigNumber from 'bignumber.js'
 import { SelectorLogo } from 'components/Logo'
 import { ButtonLight } from 'components/Button'
 import { SupportedChains } from 'constants/chains'
 import { useActiveWeb3React } from 'hooks/web3'
 import { SelectorLabel } from 'components/Label'
+import { useSelector } from 'react-redux'
+import { RootState } from 'store'
 
 interface LoosedIChainData {
   short_name?: string
@@ -40,6 +42,33 @@ const GreenCircle = styled.div`
   }
 `
 
+const YellowCircle = styled.div`
+  ${({ theme }) => theme.flexRowNoWrap}
+  justify-content: center;
+  align-items: center;
+
+  &:first-child {
+    height: 8px;
+    width: 8px;
+    margin-right: 8px;
+    background-color: ${({ theme }) => theme.yellow1};
+    border-radius: 50%;
+  }
+`
+const RedCircle = styled.div`
+  ${({ theme }) => theme.flexRowNoWrap}
+  justify-content: center;
+  align-items: center;
+
+  &:first-child {
+    height: 8px;
+    width: 8px;
+    margin-right: 8px;
+    background-color: ${({ theme }) => theme.red1};
+    border-radius: 50%;
+  }
+`
+
 const HistoryGreyCard = styled(GreyCard)`
   height: 6rem;
   padding: 0.618rem;
@@ -59,9 +88,32 @@ const DarkenedText = styled(Text)`
   color: ${({ theme }) => darken(0.3, theme.text2)};
 `
 
-export default function HistoryRecord() {
-  const { chainId } = useActiveWeb3React()
-  const chainData = SupportedChains.get(chainId!)
+/* 
+export interface TransactionDetail {
+  src_chain: string
+  dest_chain: string
+  sender: string
+  send_tx_hash: string
+  receiver: string
+  receive_tx_hash: string
+  amount: string
+  token: string
+  token_address: string
+  status: TRANSACTION_STATUS
+}
+*/
+
+export default function HistoryRecord({ transaction }: { transaction: TransactionDetail }) {
+  const { availableChains } = useSelector((state: RootState) => {
+    const { availableChains } = state.application
+    return { availableChains }
+  })
+  const srcChain = useMemo(() => {
+    return availableChains.get(+transaction.src_chain)
+  }, [availableChains, transaction.src_chain])
+  const destChain = useMemo(() => {
+    return availableChains.get(+transaction.dest_chain)
+  }, [availableChains, transaction.dest_chain])
   return (
     <>
       <HistoryGreyCard>
@@ -70,8 +122,8 @@ export default function HistoryRecord() {
         </Box>
         <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <ButtonLight maxWidth="15rem" height="2rem">
-            <SelectorLogo interactive={true} src={chainData!.logo} />
-            <SelectorLabel>{chainData?.name}</SelectorLabel>
+            <SelectorLogo interactive={true} src={srcChain!.icon} />
+            <SelectorLabel>{srcChain!.name}</SelectorLabel>
           </ButtonLight>
         </Box>
         <Box style={{ display: 'flex', justifyContent: 'end', paddingRight: '0.5rem', alignItems: 'center' }}>
@@ -79,28 +131,59 @@ export default function HistoryRecord() {
         </Box>
         <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <ButtonLight maxWidth="15rem" height="2rem">
-            <SelectorLogo interactive={true} src={chainData!.logo} />
-            <SelectorLabel>{chainData?.name}</SelectorLabel>
+            <SelectorLogo interactive={true} src={destChain!.icon} />
+            <SelectorLabel>{destChain!.name}</SelectorLabel>
           </ButtonLight>
         </Box>
-        <Flex justifyContent="center" alignItems="center">
-          <CircleWrapper>
-            <GreenCircle>
-              <div />
-            </GreenCircle>
-          </CircleWrapper>
-          <DarkenedText height="fit-content">Success</DarkenedText>
-        </Flex>
+        {(() => {
+          switch (transaction.status) {
+            case TRANSACTION_STATUS.PENDING:
+              return (
+                <Flex justifyContent="center" alignItems="center">
+                  <CircleWrapper>
+                    <YellowCircle>
+                      <div />
+                    </YellowCircle>
+                  </CircleWrapper>
+                  <DarkenedText height="fit-content">Pending</DarkenedText>
+                </Flex>
+              )
+            case TRANSACTION_STATUS.SUCCEEDED:
+              return (
+                <Flex justifyContent="center" alignItems="center">
+                  <CircleWrapper>
+                    <GreenCircle>
+                      <div />
+                    </GreenCircle>
+                  </CircleWrapper>
+                  <DarkenedText height="fit-content">Success</DarkenedText>
+                </Flex>
+              )
+              break
+            case TRANSACTION_STATUS.FAILED:
+              return (
+                <Flex justifyContent="center" alignItems="center">
+                  <CircleWrapper>
+                    <RedCircle>
+                      <div />
+                    </RedCircle>
+                  </CircleWrapper>
+                  <DarkenedText height="fit-content">Failed</DarkenedText>
+                </Flex>
+              )
+              break
+          }
+        })()}
         <Box></Box>
         <Flex justifyContent="center" alignItems="center">
           <Text height="fit-content" fontWeight={600}>
-            15 USDT
+            {transaction.amount}&nbsp;{transaction.token}
           </Text>
         </Flex>
         <Box></Box>
         <Flex justifyContent="center" alignItems="center">
           <Text height="fit-content" fontWeight={600}>
-            14.99998 USDT
+            {transaction.amount}&nbsp;{transaction.token}
           </Text>
         </Flex>
         <Box></Box>

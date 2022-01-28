@@ -8,7 +8,37 @@ import { TRANSFER_STATUS } from 'constants/types'
 import { useDispatch } from 'hooks'
 import BigNumber from 'bignumber.js'
 import { Flex } from 'rebass'
-import { css } from 'styled-components/macro'
+import styled, { css } from 'styled-components/macro'
+import { darken } from 'polished'
+
+const StyledAnimatedBtn = styled(animated.button)`
+  border-radius: 0.5rem;
+  width: 100%;
+  font-weight: 900;
+  background-color: ${({ backgroundColor }) => backgroundColor};
+  &:hover {
+    background-color: ${({ backgroundColor }) => darken(0.05, backgroundColor)};
+  }
+`
+
+const Wrapper = styled.div`
+  width: 100%;
+  height: 3rem;
+  position: relative;
+  display: flex;
+  > button {
+    position: absolute;
+    cursor: pointer;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    will-change: transform, opacity;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+`
 
 export const TransferConfirmationButton = function ({ accepted = true }: { accepted?: boolean }) {
   const { transferStatus, estimation } = useSelector((state: RootState) => {
@@ -27,14 +57,17 @@ export const TransferConfirmationButton = function ({ accepted = true }: { accep
     ref: transRef,
     keys: null,
     config: { ...config.gentle, duration: 400 },
-    from: { opacity: 0 /* transform: 'translate3d(0,0,100%)' */ },
-    enter: { background: ' #2B1010', border: '1px solid #D25958', boxSizing: 'border-box', color: '#D25958' },
+    from: { opacity: 0 /* backgroundColor: '#00c6a9', color: 'white'  */ /* transform: 'translate3d(0,0,100%)' */ },
+    enter: { opacity: 1 /* , backgroundColor: '#2B1010', color: '#D25958', border: '1px solid #D25958', boxSizing: 'border-box' */ },
     leave: { opacity: 0 /*  transform: 'translate3d(0,0,-50%)' */ },
-    // delay: 200,
+    delay: 200,
     // config: config.gentle,
   })
   useEffect(() => {
     transRef.start()
+    return () => {
+      transRef.stop()
+    }
   }, [manuallyAccepted])
 
   const transfer = useCallback(() => {
@@ -68,34 +101,27 @@ export const TransferConfirmationButton = function ({ accepted = true }: { accep
   }, [text, transferStatus])
 
   useEffect(() => {
-    setManuallyAccepted(false)
+    setManuallyAccepted((pre) => !pre)
   }, [estimation])
 
-  return transitions((styles, item) => {
-    return (
-      <PrimaryButton disabled={disabled} width="100%" fontWeight={900} onClick={clickHandler}>
-        <Flex
-          css={css`
-            width: 100%;
-            height: 1rem;
-            position: relative;
-            > div {
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              color: white;
-              will-change: transform, opacity;
-              -webkit-user-select: none;
-              user-select: none;
-            }
-          `}
-        >
-          <animated.div style={{ ...styles }}>{text}</animated.div>
-        </Flex>
-      </PrimaryButton>
-    )
-  })
+  return (
+    <Wrapper>
+      {transitions((styles, item) => {
+        return (
+          <>
+            {item ? (
+              <StyledAnimatedBtn disabled={disabled} backgroundColor={'#00c6a9'} style={{ /* backgroundColor: '#00c6a9', */ color: 'white', ...styles }} onClick={clickHandler}>
+                <animated.div>{text}</animated.div>
+              </StyledAnimatedBtn>
+            ) : (
+              <StyledAnimatedBtn disabled={disabled} backgroundColor={'#2B1010'} style={{ border: '1px solid #D25958', /*  backgroundColor: '#2B1010', */ color: '#D25958', ...styles }} onClick={clickHandler}>
+                <animated.div>{text}</animated.div>
+              </StyledAnimatedBtn>
+            )}
+          </>
+        )
+      })}
+      )
+    </Wrapper>
+  )
 }
