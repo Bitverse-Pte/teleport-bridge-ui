@@ -2,7 +2,7 @@
 const { createProxyMiddleware } = require('http-proxy-middleware')
 const REACT_APP_CHAINS_DATA_URL = process.env.REACT_APP_CHAINS_DATA_URL
 module.exports = function (app) {
-  app.use(
+  /*  app.use(
     '/chains',
     createProxyMiddleware({
       target: REACT_APP_CHAINS_DATA_URL,
@@ -25,6 +25,13 @@ module.exports = function (app) {
   )
   app.use(
     '/bridge/packet/history',
+    createProxyMiddleware({
+      target: REACT_APP_CHAINS_DATA_URL,
+      changeOrigin: true,
+    })
+  ) */
+  app.use(
+    '/bridge',
     createProxyMiddleware({
       target: REACT_APP_CHAINS_DATA_URL,
       changeOrigin: true,

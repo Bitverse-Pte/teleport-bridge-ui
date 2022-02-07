@@ -113,7 +113,7 @@ export default function TransferConfirmationModal() {
               </Flex>
             </Flex>
             <EstimationBlock width="100%" margin={'1rem 0'} />
-            <TransferConfirmationButton accepted={true} />
+            <TransferConfirmationButton />
           </Flex>
         </UniModalContentWrapper>
       </Flex>

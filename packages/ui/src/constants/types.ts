@@ -310,8 +310,9 @@ export interface Chain {
   chain: string
   icon: string
   rpc: string[]
+  isTele: boolean
   transfer: {
-    contract: string
+    address: string
     abi: ContractInterface
   }
   faucets: string[]
@@ -366,6 +367,8 @@ export enum TRANSACTION_STATUS {
 export interface TransactionDetail {
   src_chain: string
   dest_chain: string
+  src_chain_id: number
+  dest_chain_id: number
   sender: string
   send_tx_hash: string
   receiver: string
@@ -377,6 +380,7 @@ export interface TransactionDetail {
 }
 
 export interface Estimation {
+  id?: number
   rate: number
   fee: number
   minReceived: number

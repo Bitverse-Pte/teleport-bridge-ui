@@ -4,6 +4,7 @@ import { transparentize } from 'polished'
 import { animated, useSpring, useTransition } from '@react-spring/web'
 import { useGesture } from 'react-use-gesture'
 import styled, { css } from 'styled-components/macro'
+import { Flex } from 'rebass'
 
 // import { isMobile } from '../../utils/userAgent'
 
@@ -148,7 +149,7 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
   )
 }
 
-export const UniModalContentWrapper = styled.div`
+export const UniModalContentWrapper = styled(Flex)`
   background-color: ${({ theme }) => theme.bg0};
   display: flex;
   padding: 1rem 1rem 1rem 1rem;

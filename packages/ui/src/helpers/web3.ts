@@ -55,5 +55,6 @@ export async function getBalance(token: TokenInfo = {} as TokenInfo, library: We
   } catch (err) {
     errorNoti(`failed to get balance of ${token.name},
     detail is ${(err as any).message}`)
+    throw err
   }
 }

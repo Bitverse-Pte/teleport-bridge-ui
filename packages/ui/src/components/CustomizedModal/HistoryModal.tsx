@@ -36,9 +36,11 @@ export default function HistoryModal() {
           <CircledCloseIcon onClick={() => setHistoryModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
         <UniModalContentWrapper>
-          {[...transactions].map((transaction) => {
-            return <HistoryRecord transaction={transaction} />
-          })}
+          <Flex height={'100%'} width="100%" flexDirection={'column'} maxHeight={'61.8vh'} overflowX={'hidden'} overflowY={'auto'}>
+            {[...transactions].map((transaction) => {
+              return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
+            })}
+          </Flex>
         </UniModalContentWrapper>
       </Flex>
     </UniModal>

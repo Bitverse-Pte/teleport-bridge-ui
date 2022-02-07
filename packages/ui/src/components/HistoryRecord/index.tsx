@@ -72,6 +72,7 @@ const RedCircle = styled.div`
 const HistoryGreyCard = styled(GreyCard)`
   height: 6rem;
   padding: 0.618rem;
+  margin: 0.618rem;
   display: grid;
   grid-template-rows: 1fr 1fr;
   grid-template-columns: 1fr 3fr 1fr 3fr 2fr;
@@ -84,8 +85,8 @@ const CircleWrapper = styled.div`
   align-items: center;
 `
 
-const DarkenedText = styled(Text)`
-  color: ${({ theme }) => darken(0.3, theme.text2)};
+const DarkenedText = styled(Text)<{ color: string }>`
+  color: ${({ theme, color }) => darken(0.3, color || theme.text2)};
 `
 
 /* 
@@ -104,16 +105,28 @@ export interface TransactionDetail {
 */
 
 export default function HistoryRecord({ transaction }: { transaction: TransactionDetail }) {
-  const { availableChains } = useSelector((state: RootState) => {
-    const { availableChains } = state.application
-    return { availableChains }
+  const { availableChains, bridgePairs } = useSelector((state: RootState) => {
+    const { availableChains, bridgePairs } = state.application
+    return { availableChains, bridgePairs }
   })
-  const srcChain = useMemo(() => {
-    return availableChains.get(+transaction.src_chain)
-  }, [availableChains, transaction.src_chain])
-  const destChain = useMemo(() => {
-    return availableChains.get(+transaction.dest_chain)
-  }, [availableChains, transaction.dest_chain])
+  const [srcChain, destChain] = useMemo(() => {
+    let sc, dc
+    for (const chain of availableChains.values()) {
+      if (chain.chainId == transaction.src_chain_id) {
+        sc = chain
+      }
+      if (chain.chainId == transaction.dest_chain_id) {
+        dc = chain
+      }
+    }
+    return [sc, dc]
+  }, [availableChains, transaction])
+
+  const { srcToken, destToken } = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    const { srcToken, destToken } = bridgePairs.get(`${transaction.src_chain_id}-${transaction.dest_chain_id}`)?.tokens.find((e) => e.srcToken.address === transaction.token_address || e.destToken.address === transaction.token_address)!
+    return { srcToken, destToken }
+  }, [transaction.src_chain_id, transaction.dest_chain_id, transaction.token, bridgePairs])
   return (
     <>
       <HistoryGreyCard>
@@ -145,7 +158,9 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
                       <div />
                     </YellowCircle>
                   </CircleWrapper>
-                  <DarkenedText height="fit-content">Pending</DarkenedText>
+                  <DarkenedText color="yellow" height="fit-content">
+                    Pending
+                  </DarkenedText>
                 </Flex>
               )
             case TRANSACTION_STATUS.SUCCEEDED:
@@ -156,10 +171,11 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
                       <div />
                     </GreenCircle>
                   </CircleWrapper>
-                  <DarkenedText height="fit-content">Success</DarkenedText>
+                  <DarkenedText color="green" height="fit-content">
+                    Success
+                  </DarkenedText>
                 </Flex>
               )
-              break
             case TRANSACTION_STATUS.FAILED:
               return (
                 <Flex justifyContent="center" alignItems="center">
@@ -168,22 +184,23 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
                       <div />
                     </RedCircle>
                   </CircleWrapper>
-                  <DarkenedText height="fit-content">Failed</DarkenedText>
+                  <DarkenedText color="red" height="fit-content">
+                    Failed
+                  </DarkenedText>
                 </Flex>
               )
-              break
           }
         })()}
         <Box></Box>
         <Flex justifyContent="center" alignItems="center">
           <Text height="fit-content" fontWeight={600}>
-            {transaction.amount}&nbsp;{transaction.token}
+            {new BigNumber(transaction.amount).shiftedBy(srcToken.decimals).toFixed(4)}&nbsp;{transaction.token}
           </Text>
         </Flex>
         <Box></Box>
         <Flex justifyContent="center" alignItems="center">
           <Text height="fit-content" fontWeight={600}>
-            {transaction.amount}&nbsp;{transaction.token}
+            {new BigNumber(transaction.amount).shiftedBy(destToken.decimals).toFixed(4)}&nbsp;{transaction.token}
           </Text>
         </Flex>
         <Box></Box>

@@ -21,6 +21,7 @@ if (typeof INFURA_KEY === 'undefined') {
 
 const NETWORK_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.BSC]: 'https://bsc-dataseed.binance.org/',
+  [SupportedChainId.BSC_TESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   [SupportedChainId.TELEPORT]: 'http://10.41.20.10:8545',
   [SupportedChainId.MAINNET]: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.RINKEBY]: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
@@ -43,10 +44,10 @@ export const bscConnector = new NetworkConnector({
   defaultChainId: 56,
 }) */
 
-let networkLibrary: Web3Provider | undefined
+/* let networkLibrary: Web3Provider | undefined
 export function getNetworkLibrary(): Web3Provider {
   return (networkLibrary = networkLibrary ?? getLibrary(network.provider))
-}
+} */
 
 export const injected = new InjectedConnector({
   supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,

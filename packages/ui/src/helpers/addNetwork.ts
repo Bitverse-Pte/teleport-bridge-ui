@@ -25,7 +25,7 @@ export async function addNetwork({ library, chainId, info }: AddNetworkArguments
           chainName: info.name,
           rpcUrls: info.rpc,
           nativeCurrency: info.nativeCurrency,
-          blockExplorerUrls: [info.explorers],
+          blockExplorerUrls: info.explorers.map((e) => e.url),
         },
       ],
     })

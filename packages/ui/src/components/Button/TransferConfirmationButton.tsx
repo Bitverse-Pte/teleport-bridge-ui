@@ -10,6 +10,7 @@ import BigNumber from 'bignumber.js'
 import { Flex } from 'rebass'
 import styled, { css } from 'styled-components/macro'
 import { darken } from 'polished'
+import { getBalance } from 'helpers/web3'
 
 const StyledAnimatedBtn = styled(animated.button)`
   border-radius: 0.5rem;
@@ -40,18 +41,27 @@ const Wrapper = styled.div`
   }
 `
 
-export const TransferConfirmationButton = function ({ accepted = true }: { accepted?: boolean }) {
-  const { transferStatus, estimation } = useSelector((state: RootState) => {
-    const { transferStatus, estimation } = state.application
-    return { transferStatus, estimation }
+enum TransferConfirmButtonStatus {
+  MANUALLY_ACCEPTED,
+  NEED_MANUALLY_ACCEPTED,
+  INVALID_BALANCE,
+}
+
+export const TransferConfirmationButton = function () {
+  const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account } = useSelector((state: RootState) => {
+    const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account } = state.application
+    return { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account }
   })
   const {
     application: { transferTokens },
   } = useDispatch()
-
-  const [manuallyAccepted, setManuallyAccepted] = useState(accepted)
+  const [lastEstimationId, setLastEstimationId] = useState(0)
+  useEffect(() => {
+    setLastEstimationId(estimation?.id || 0)
+  }, [])
+  const [buttonStatus, setButtonStatus] = useState(TransferConfirmButtonStatus.MANUALLY_ACCEPTED)
   const transRef = useSpringRef()
-  const transitions = useTransition(manuallyAccepted, {
+  const transitions = useTransition(buttonStatus, {
     // from: { opacity: 1 },
     // to: { opacity: 0 },
     ref: transRef,
@@ -68,7 +78,7 @@ export const TransferConfirmationButton = function ({ accepted = true }: { accep
     return () => {
       transRef.stop()
     }
-  }, [manuallyAccepted])
+  }, [buttonStatus])
 
   const transfer = useCallback(() => {
     if (transferStatus === TRANSFER_STATUS.READYTOTRANSFER) {
@@ -82,44 +92,68 @@ export const TransferConfirmationButton = function ({ accepted = true }: { accep
   }, [estimation])
 
   const text = useMemo(() => {
-    if (estimation.rate && manuallyAccepted) {
+    if (estimation.rate && buttonStatus === TransferConfirmButtonStatus.MANUALLY_ACCEPTED) {
       return 'Confirm'
-    } else if (!disabled) {
+    } else if (!disabled && buttonStatus === TransferConfirmButtonStatus.NEED_MANUALLY_ACCEPTED) {
       return 'Accept'
+    } else if (buttonStatus === TransferConfirmButtonStatus.INVALID_BALANCE) {
+      return 'Invalid Balance'
     } else {
       return 'Confirm'
     }
-  }, [estimation, disabled, manuallyAccepted])
+  }, [estimation, disabled, buttonStatus])
 
   const clickHandler = useCallback(() => {
-    if (text === 'Accept') {
-      setManuallyAccepted(true)
+    if (buttonStatus === TransferConfirmButtonStatus.NEED_MANUALLY_ACCEPTED) {
+      setButtonStatus(TransferConfirmButtonStatus.MANUALLY_ACCEPTED)
     }
-    if (text === 'Confirm') {
+    if (buttonStatus === TransferConfirmButtonStatus.MANUALLY_ACCEPTED) {
       transfer()
     }
   }, [text, transferStatus])
 
   useEffect(() => {
-    setManuallyAccepted((pre) => !pre)
-  }, [estimation])
+    if (lastEstimationId !== estimation?.id) {
+      setButtonStatus(TransferConfirmButtonStatus.NEED_MANUALLY_ACCEPTED)
+    } else {
+      setButtonStatus(TransferConfirmButtonStatus.MANUALLY_ACCEPTED)
+    }
+    const selectedToken = bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((token) => token.name === selectedTokenName)?.srcToken
+    getBalance(selectedToken, library!, account!).then((balance) => {
+      const input = document.getElementById('fromValueInput') as HTMLInputElement
+      if (input) {
+        const parsedCurrentTokenBalance = new BigNumber(balance!.toHexString()).div(`1e+${selectedToken!.decimals}`)
+        const parsedInputValue = new BigNumber(input.value)
+        if (parsedCurrentTokenBalance.isLessThan(parsedInputValue) || parsedInputValue.isNegative()) {
+          setButtonStatus(TransferConfirmButtonStatus.INVALID_BALANCE)
+        }
+      }
+    })
+  }, [lastEstimationId, estimation?.id])
 
   return (
     <Wrapper>
       {transitions((styles, item) => {
-        return (
-          <>
-            {item ? (
+        switch (item) {
+          case TransferConfirmButtonStatus.MANUALLY_ACCEPTED:
+            return (
               <StyledAnimatedBtn disabled={disabled} backgroundColor={'#00c6a9'} style={{ /* backgroundColor: '#00c6a9', */ color: 'white', ...styles }} onClick={clickHandler}>
                 <animated.div>{text}</animated.div>
               </StyledAnimatedBtn>
-            ) : (
+            )
+          case TransferConfirmButtonStatus.NEED_MANUALLY_ACCEPTED:
+            return (
               <StyledAnimatedBtn disabled={disabled} backgroundColor={'#2B1010'} style={{ border: '1px solid #D25958', /*  backgroundColor: '#2B1010', */ color: '#D25958', ...styles }} onClick={clickHandler}>
                 <animated.div>{text}</animated.div>
               </StyledAnimatedBtn>
-            )}
-          </>
-        )
+            )
+          case TransferConfirmButtonStatus.INVALID_BALANCE:
+            return (
+              <StyledAnimatedBtn disabled={disabled} backgroundColor={'#222222'} style={{ backgroundColor: '#222222', color: '#C3C5CB', cursor: 'not-allowed', boxShadow: 'none', border: '1px solid transparent', outline: 'none', ...styles }}>
+                <animated.div>{text}</animated.div>
+              </StyledAnimatedBtn>
+            )
+        }
       })}
       )
     </Wrapper>
