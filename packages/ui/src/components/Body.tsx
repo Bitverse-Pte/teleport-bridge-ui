@@ -23,6 +23,7 @@ import SwitchSvg from 'assets/switch.svg'
 import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
 import { TransferButton } from 'components/Button/TransferButton'
 import TransferConfirmationModal from 'components/CustomizedModal/TransferConfirmationModal'
+import TransactionDetailModal from 'components/CustomizedModal/TransactionDetailModal'
 import { EstimationBlock } from 'components/EstimationBlock'
 
 const Container = styled(Flex)<{ hideInput: boolean }>`
@@ -388,6 +389,7 @@ export default function AppBody({ ...rest }) {
       <NetworkSelectModal />
       <CurrencySelectModal />
       <TransferConfirmationModal />
+      <TransactionDetailModal />
     </>
   )
 }

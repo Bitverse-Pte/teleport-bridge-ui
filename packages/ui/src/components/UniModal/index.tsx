@@ -157,5 +157,5 @@ export const UniModalContentWrapper = styled(Flex)`
   border-bottom-right-radius: 20px;
   width: 100%;
   // min-height: 61.8vh;
-  max-height: calc(100% - 20px);
+  max-height: calc(100% - 40px);
 `

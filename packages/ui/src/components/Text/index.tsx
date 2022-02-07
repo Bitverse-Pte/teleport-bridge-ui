@@ -80,3 +80,24 @@ export const DarkGreenText = styled(Text)`
   max-width: 5rem;
   // text-overflow: ellipsis;
 `
+
+export const HistoryGrayText = styled(Text)`
+  height: fit-content;
+  font-weight: 300;
+  font-family: PingFang SC;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.45);
+`
+
+export const HistoryGrayDetailText = styled(Text)`
+  height: fit-content;
+  font-weight: 300;
+  font-family: PingFang SC;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+`

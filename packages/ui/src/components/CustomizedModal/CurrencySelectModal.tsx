@@ -49,6 +49,7 @@ export default function CurrencySelectModal() {
       }}
       closeByKeyboard={true}
       setIsOpen={setCurrencySelectModalOpen}
+      maxWidth={'40rem'}
     >
       <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">

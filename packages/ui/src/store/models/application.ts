@@ -32,7 +32,7 @@ import Store2 from 'store2'
 import type { RootModel } from '.'
 import ERC20ABI from 'contracts/erc20.json'
 import { switchToNetwork } from 'helpers/switchToNetwork'
-import { errorNoti, infoNoti, successNoti } from 'helpers/notifaction'
+import { errorNoti, infoNoti, successNoti, warnNoti } from 'helpers/notifaction'
 import { ContractTransaction } from '@ethersproject/contracts'
 import { FixedSizeQueue } from 'helpers/fixedQueue'
 import { setInterval } from 'timers'
@@ -272,6 +272,20 @@ export const application = createModel<RootModel>()({
         transactionDetailModalOpen,
       }
     },
+    openTransactionDetailModal(state, selectedTransactionId: string) {
+      return {
+        ...state,
+        selectedTransactionId,
+        transactionDetailModalOpen: true,
+      }
+    },
+    closeTransactionDetailModal(state) {
+      return {
+        ...state,
+        selectedTransactionId: '',
+        transactionDetailModalOpen: false,
+      }
+    },
   },
   effects: (dispatch) => ({
     saveConnectStatus(connectStatus: boolean) {
@@ -331,7 +345,6 @@ export const application = createModel<RootModel>()({
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName)?.srcToken
       const cachedTokenName = selectedTokenName
-      let toastId: number
       let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
       try {
         if (bridge && tokenInfo) {
@@ -428,6 +441,10 @@ export const application = createModel<RootModel>()({
             .finally(() => {
               dispatch.application.setTransactions(transactions)
             })
+          setTimeout(() => {
+            dispatch.application.openTransactionDetailModal(transactionDetail.send_tx_hash)
+            dispatch.application.setTransactionDetailModalOpen(true)
+          }, 100)
           infoNoti(`sent request to transfer ${amount} of ${selectedTokenName} from chain: ${bridge.srcChain.name} to chain ${bridge.destChain.name}!`, transaction!.hash) as number
           const fromInput = document.getElementById('fromValueInput')
           const toInput = document.getElementById('toValueInput')
@@ -550,7 +567,7 @@ export const application = createModel<RootModel>()({
           } catch (err) {
             console.error(err)
             dispatch.application.setCurrentTokenBalance(undefined)
-            errorNoti(
+            warnNoti(
               `failed to get balance for token: ${selectedTokenPair.srcToken.name} on chain: ${pair.srcChain.name},
               detail is ${(err as any)?.message}},
               will retry.`,
@@ -610,9 +627,6 @@ export const application = createModel<RootModel>()({
         dispatch.application.setEstimationUpdating(false)
       }
     },
-    /*   findTxInHistory({ sender, send_tx_hash, getter }: { sender: string; send_tx_hash: string; getter: { emit: (...args: any) => void } }, state) {
-      getter.emit(state.application.transactions.find((e) => e.sender === sender && e.send_tx_hash === send_tx_hash))
-    }, */
     async saveTransactions(transactions: FixedSizeQueue<TransactionDetail>, state) {
       for (const tx of transactions) {
         if (tx.status === TRANSACTION_STATUS.PENDING && !transactionsHistoryUpdateList.some((item) => item.transactionHash === tx.send_tx_hash)) {

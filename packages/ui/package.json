@@ -81,6 +81,7 @@
     "eslint-webpack-plugin": "^2.1.0",
     "ethereumjs-util": "^7.0.7",
     "ethers": "^5.5.3",
+    "ethers-multicall": "^0.2.2",
     "file-loader": "6.1.1",
     "fortmatic": "^2.2.1",
     "fs-extra": "^9.0.1",

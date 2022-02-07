@@ -17,7 +17,7 @@ export const TooltipContainer = styled.div`
   box-shadow: 0 4px 8px 0 ${({ theme }) => transparentize(0.9, theme.shadow1)};
 `
 
-interface TooltipProps extends Omit<PopoverProps, 'content'> {
+export interface TooltipProps extends Omit<PopoverProps, 'content'> {
   text: ReactNode
 }
 

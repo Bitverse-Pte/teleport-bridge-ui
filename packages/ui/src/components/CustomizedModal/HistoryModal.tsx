@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Flex } from 'rebass'
+import { css } from 'styled-components/macro'
 
 import { CircledCloseIcon } from 'components/Icon'
 import { StyledText } from 'components/Text'
@@ -10,16 +11,20 @@ import { useDispatch } from 'hooks'
 import HistoryRecord from 'components/HistoryRecord'
 
 export default function HistoryModal() {
-  const { historyModalOpen, transactions } = useSelector((state: RootState) => {
-    const { historyModalOpen, transactions } = state.application
-    return { historyModalOpen, transactions }
+  const { historyModalOpen, transactionDetailModalOpen, transactions } = useSelector((state: RootState) => {
+    const { historyModalOpen, transactionDetailModalOpen, transactions } = state.application
+    return { historyModalOpen, transactionDetailModalOpen, transactions }
   })
   const {
     application: { setHistoryModalOpen },
   } = useDispatch()
+
+  const isOpen = useMemo(() => {
+    return historyModalOpen && !transactionDetailModalOpen
+  }, [historyModalOpen, transactionDetailModalOpen])
   return (
     <UniModal
-      isOpen={historyModalOpen}
+      isOpen={isOpen}
       maxWidth="61.8rem"
       maxHeight={61.8}
       onDismiss={() => {
@@ -36,7 +41,25 @@ export default function HistoryModal() {
           <CircledCloseIcon onClick={() => setHistoryModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
         <UniModalContentWrapper>
-          <Flex height={'100%'} width="100%" flexDirection={'column'} maxHeight={'61.8vh'} overflowX={'hidden'} overflowY={'auto'}>
+          <Flex
+            css={css`
+              &::-webkit-scrollbar {
+                width: 0.618rem;
+                background-color: rgba(0, 0, 0, 0);
+              }
+              &::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 0.25rem;
+              }
+            `}
+            width="100%"
+            flexDirection={'column'}
+            maxHeight={'61.8vh'}
+            overflowX={'hidden'}
+            overflowY={'auto'}
+            justifyContent={'center'}
+            alignItems={'center'}
+          >
             {[...transactions].map((transaction) => {
               return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
             })}

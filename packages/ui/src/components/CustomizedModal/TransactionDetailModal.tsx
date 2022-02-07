@@ -1,24 +1,19 @@
-import React, { useCallback, useMemo } from 'react'
-import { Flex, Text } from 'rebass'
-import { pick } from 'lodash'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { Flex, Box } from 'rebass'
 import { useSelector } from 'react-redux'
-import AutoSizer from 'react-virtualized-auto-sizer'
+import BigNumberJS from 'bignumber.js'
+import { Check } from 'react-feather'
+import { css } from 'styled-components/macro'
 
 import { CircledCloseIcon, Icon } from 'components/Icon'
 import { StyledText, Text1, Text2, Text4 } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
-import Option from 'components/Option'
-import { SUPPORTED_WALLETS } from 'constants/wallet'
-import { injected, portis } from 'connectors'
-import { isMobile } from 'helpers/userAgent'
-import styled from 'styled-components'
+import styled, { StyledComponent } from 'styled-components'
 import { useDispatch } from 'hooks'
-import { RootState } from 'store'
-import { useActiveWeb3React } from 'hooks/web3'
-import CurrencyList from '../Currency/CurrencyList'
-import { getChainData } from 'helpers/chains'
-import { EstimationBlock } from 'components/EstimationBlock'
-import { TransferConfirmationButton } from 'components/Button/TransferConfirmationButton'
+import { RootState } from 'store/store'
+import { Hash } from 'components/Hash'
+import Tooltip, { MouseoverTooltip, TooltipProps } from 'components/Tooltip'
+import { TooltippedAmount } from 'components/TooltippedAmount'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -31,9 +26,10 @@ const OptionGrid = styled.div`
 
 const Wrapper = styled(Flex)`
   color: white;
-  padding: 2.5rem 1.6rem;
-  width: 80%;
-  height: 10rem;
+  padding: 1rem;
+  margin: 0.5rem 0 !important;
+  width: 100%;
+  height: fit-content !important;
   background: rgba(0, 0, 0, 0.3);
   border: solid rgba(255, 255, 255, 0.2);
   box-sizing: border-box;
@@ -41,116 +37,137 @@ const Wrapper = styled(Flex)`
   border-radius: 0.5rem;
   justify-content: center;
   flex-direction: column;
+  & > div {
+    margin: 0.5rem 0;
+  }
+`
+
+const AmountText = styled(Text1)`
+  max-width: 200px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`
+
+const RedAmountText = styled(AmountText)`
+  color: red;
+`
+
+const GreenAmountText = styled(AmountText)`
+  color: green;
+`
+
+const StyledCheck = styled(Check)`
+  transform: rotate(90deg) translateX(-22px);
+`
+
+const StyledStatusMark = styled(Box)<{ success: boolean }>`
+  transform: rotate(270deg);
+  height: 0;
+  width: 25px;
+  border-top: 25px solid ${({ success }) => (success ? '#00c6a9' : '#4f4f4f')};
+  border-left: 8px solid transparent;
+  border-bottom: 15px solid transparent;
+  position: absolute;
+  top: -1rem;
+  right: 25px;
 `
 
 export default function TransactionDetailModal() {
   const {
-    application: { setTransactionDetailModalOpen },
+    application: { closeTransactionDetailModal },
   } = useDispatch()
-  const { transactionDetailModalOpen, selectedTransactionId, transactions } = useSelector((state: RootState) => {
-    const { transactionDetailModalOpen, selectedTransactionId, transactions } = state.application
-    return { transactionDetailModalOpen, selectedTransactionId, transactions }
+  const { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs } = useSelector((state: RootState) => {
+    const { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs } = state.application
+    return { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs }
   })
 
-  const srcTx = useMemo(() => {
+  const selectedTx = useMemo(() => {
     return transactions.find((t) => {
-      return t.send_tx_hash === selectedTransactionId
+      return t.send_tx_hash === selectedTransactionId || t.receive_tx_hash === selectedTransactionId
     })
   }, [selectedTransactionId, transactions])
 
-  const destTx = useMemo(() => {
-    return transactions.find((t) => {
-      return t.receive_tx_hash === selectedTransactionId
-    })
-  }, [selectedTransactionId, transactions])
-
-  /*  const destChain = useMemo(() => {
-    return availableChains.get(destChainId)
-  }, [destChainId, availableChains])
-
-  const selectedTokenPairs = useMemo(() => {
-    return bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((e) => e.name === selectedTokenName)
-  }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
-
-  const amount = useMemo(() => {
-    const input = document.getElementById('fromValueInput')
-    if (input) {
-      return (input as HTMLInputElement).value
-    } else {
-      return '0'
+  const tokenInfo = useMemo(() => {
+    if (selectedTx) {
+      return bridgePairs.get(`${selectedTx.src_chain_id}-${selectedTx.dest_chain_id}`)?.tokens.find((e) => e.destToken.address.toLowerCase() === selectedTx.token_address.toLowerCase() || e.srcToken.address.toLowerCase() === selectedTx.token_address.toLowerCase())
     }
-  }, [transferConfirmationModalOpen]) */
+  }, [selectedTx, bridgePairs])
 
   return (
     <UniModal
       isOpen={transactionDetailModalOpen}
       maxHeight={61.8}
+      maxWidth={'35rem'}
       onDismiss={() => {
         console.log('dismiss')
       }}
       closeByKeyboard={true}
-      setIsOpen={setTransactionDetailModalOpen}
+      setIsOpen={closeTransactionDetailModal}
     >
-      <Flex flexDirection="column" width="100%" overflow="hidden" height={'fit-content'}>
+      <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
-            <a>Transfer</a>
+            <a>Transaction Details</a>
           </StyledText>
-          <CircledCloseIcon onClick={() => setTransactionDetailModalOpen(false)} style={{ position: 'absolute' }} />
+          <CircledCloseIcon onClick={closeTransactionDetailModal} style={{ position: 'absolute' }} />
         </Flex>
         <UniModalContentWrapper justifyContent="space-evenly" flexDirection="column">
-          <Wrapper>
-            <Flex>
-              <Text2>You Send</Text2>
-            </Flex>
-            <Flex>
-              <Icon></Icon>
-              <Text1 fontSize={32} fontWeight={900}>
-                Ethereum Mainnet
-              </Text1>
-              <Text1 color="red">amount</Text1>
-            </Flex>
-            <Flex>
-              <Text2>Tx Hash</Text2>
-              <Flex>
-                <Text1>hash</Text1>
-                <Icon />
-              </Flex>
-            </Flex>
-            <Flex>
-              <Text2>Tx Hash</Text2>
-              <Flex>
-                <Text1>hash</Text1>
-                <Icon />
-              </Flex>
-            </Flex>
-          </Wrapper>
-          <Wrapper>
-            <Flex>
-              <Text2>You Send</Text2>
-            </Flex>
-            <Flex>
-              <Icon></Icon>
-              <Text1 fontSize={32} fontWeight={900}>
-                Ethereum Mainnet
-              </Text1>
-              <Text1 color="red">amount</Text1>
-            </Flex>
-            <Flex>
-              <Text2>Tx Hash</Text2>
-              <Flex>
-                <Text1>hash</Text1>
-                <Icon />
-              </Flex>
-            </Flex>
-            <Flex>
-              <Text2>Tx Hash</Text2>
-              <Flex>
-                <Text1>hash</Text1>
-                <Icon />
-              </Flex>
-            </Flex>
-          </Wrapper>
+          {selectedTx && tokenInfo && (
+            <>
+              <Wrapper>
+                <StyledStatusMark success={true}>
+                  <StyledCheck size={12} strokeWidth={6} />
+                </StyledStatusMark>
+                <Flex>
+                  <Text2>You Send</Text2>
+                </Flex>
+                <Flex justifyContent={'space-between'} alignItems={'baseline'}>
+                  <Icon></Icon>
+                  <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
+                    {selectedTx?.src_chain}
+                  </Text1>
+                  {/* 
+                    {new BigNumberJS(balance.toString()).shiftedBy(-currency.decimals).toFixed(4)}
+                  */}
+                  <TooltippedAmount direction={'-'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.srcToken.decimals).toFixed(4)}`} AmountText={RedAmountText} />
+                  <Text1 color="red">&nbsp;{tokenInfo!.srcToken.name.toUpperCase()}</Text1>
+                </Flex>
+                <Flex justifyContent={'space-between'}>
+                  <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
+                  <Hash ellipsis={true} hash={selectedTx.send_tx_hash} copyable={true} />
+                </Flex>
+                <Flex justifyContent={'space-between'}>
+                  <Text2 style={{ whiteSpace: 'nowrap' }}>Sender Address</Text2>
+                  <Hash ellipsis={true} hash={selectedTx.sender} copyable={true} />
+                </Flex>
+              </Wrapper>
+              <Wrapper>
+                <StyledStatusMark success={true}>
+                  <StyledCheck size={12} strokeWidth={6} />
+                </StyledStatusMark>
+                <Flex>
+                  <Text2>To</Text2>
+                </Flex>
+                <Flex justifyContent={'space-between'} alignItems={'baseline'}>
+                  <Icon></Icon>
+                  <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
+                    {selectedTx?.dest_chain}
+                  </Text1>
+                  <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
+                  <Text1 color="green">&nbsp;{tokenInfo!.destToken.name.toUpperCase()}</Text1>
+                </Flex>
+                <Flex justifyContent={'space-between'}>
+                  <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
+                  <Hash ellipsis={true} hash={selectedTx.receive_tx_hash} copyable={true} />
+                </Flex>
+                <Flex justifyContent={'space-between'}>
+                  <Text2 style={{ whiteSpace: 'nowrap' }}>Receiver Address</Text2>
+                  <Hash ellipsis={true} hash={selectedTx.receiver} copyable={true} />
+                </Flex>
+              </Wrapper>
+            </>
+          )}
         </UniModalContentWrapper>
       </Flex>
     </UniModal>
