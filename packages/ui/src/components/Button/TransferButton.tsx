@@ -10,11 +10,11 @@ import { Flex } from 'rebass'
 import { css } from 'styled-components/macro'
 
 const TRANSFER_STATUS_BUTTONS_MAP = {
-  [TRANSFER_STATUS.PENDINGAPPROVE]: 3,
-  [TRANSFER_STATUS.READYTOAPPROVE]: 3,
-  [TRANSFER_STATUS.PENDINGALLOWANCE]: 2,
-  [TRANSFER_STATUS.READYTOTRANSFER]: 2,
-  [TRANSFER_STATUS.NOINPUT]: 1,
+  [TRANSFER_STATUS.PENDING_APPROVE]: 3,
+  [TRANSFER_STATUS.READY_TO_APPROVE]: 3,
+  [TRANSFER_STATUS.PENDING_ALLOWANCE]: 2,
+  [TRANSFER_STATUS.READY_TO_TRANSFER]: 2,
+  [TRANSFER_STATUS.NO_INPUT]: 1,
   [TRANSFER_STATUS.UNCONNECTED]: 0,
 }
 
@@ -50,14 +50,14 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
   }, [transferStatus])
 
   const transfer = useCallback(() => {
-    if (transferStatus === TRANSFER_STATUS.READYTOTRANSFER) {
+    if (transferStatus === TRANSFER_STATUS.READY_TO_TRANSFER) {
       const input = document.getElementById('fromValueInput')
       input && transferTokens({ amount: (input as HTMLInputElement)!.value })
     }
   }, [transferStatus])
 
   const approve = useCallback(() => {
-    if (transferStatus === TRANSFER_STATUS.READYTOAPPROVE) {
+    if (transferStatus === TRANSFER_STATUS.READY_TO_APPROVE) {
       const input = document.getElementById('fromValueInput')
       input && approveAmount({ amount: (input as HTMLInputElement)!.value })
     }
@@ -67,10 +67,10 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
     if (transferStatus === TRANSFER_STATUS.UNCONNECTED) {
       setWalletModalOpen(true)
     }
-    if (transferStatus === TRANSFER_STATUS.READYTOTRANSFER) {
+    if (transferStatus === TRANSFER_STATUS.READY_TO_TRANSFER) {
       setTransferConfirmationModalOpen(true)
     }
-    if (transferStatus === TRANSFER_STATUS.READYTOAPPROVE) {
+    if (transferStatus === TRANSFER_STATUS.READY_TO_APPROVE) {
       approve()
     }
   }, [transferStatus])
@@ -79,13 +79,13 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
     switch (transferStatus) {
       case TRANSFER_STATUS.UNCONNECTED:
         return 'Connect'
-      case TRANSFER_STATUS.NOINPUT:
+      case TRANSFER_STATUS.NO_INPUT:
         return 'Please input your amount.'
-      case TRANSFER_STATUS.PENDINGALLOWANCE:
-      case TRANSFER_STATUS.READYTOTRANSFER:
+      case TRANSFER_STATUS.PENDING_ALLOWANCE:
+      case TRANSFER_STATUS.READY_TO_TRANSFER:
         return 'Transfer'
-      case TRANSFER_STATUS.PENDINGAPPROVE:
-      case TRANSFER_STATUS.READYTOAPPROVE:
+      case TRANSFER_STATUS.PENDING_APPROVE:
+      case TRANSFER_STATUS.READY_TO_APPROVE:
         return 'Approve'
       default:
         return null
@@ -93,11 +93,11 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
   }, [transferStatus])
 
   const pending = useMemo(() => {
-    return transferStatus === TRANSFER_STATUS.PENDINGALLOWANCE || transferStatus === TRANSFER_STATUS.PENDINGAPPROVE
+    return transferStatus === TRANSFER_STATUS.PENDING_ALLOWANCE || transferStatus === TRANSFER_STATUS.PENDING_APPROVE
   }, [transferStatus])
 
   const disabled = useMemo(() => {
-    return transferStatus === TRANSFER_STATUS.UNCONNECTED || transferStatus === TRANSFER_STATUS.NOINPUT
+    return transferStatus === TRANSFER_STATUS.UNCONNECTED || transferStatus === TRANSFER_STATUS.NO_INPUT
   }, [transferStatus])
 
   return (

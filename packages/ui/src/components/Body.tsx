@@ -180,7 +180,7 @@ export default function AppBody({ ...rest }) {
 
   useEffect(() => {
     if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && fromValueInputRef.current.value) {
-      setTransferStatus(TRANSFER_STATUS.PENDINGALLOWANCE)
+      setTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
     }
   }, [ready, fromValueInputRef.current])
 
@@ -192,7 +192,7 @@ export default function AppBody({ ...rest }) {
     if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
       fromValueInputRef.current.value = undefined
     } else if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && !fromValueInputRef.current.value) {
-      setTransferStatus(TRANSFER_STATUS.NOINPUT)
+      setTransferStatus(TRANSFER_STATUS.NO_INPUT)
     }
   }, [ready, fromValueInputRef.current.value])
 
@@ -227,7 +227,7 @@ export default function AppBody({ ...rest }) {
         setInputError(false)
       }
     }
-    setTransferStatus(TRANSFER_STATUS.PENDINGALLOWANCE)
+    setTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
     if (ready) {
       updateAllowance()
     }

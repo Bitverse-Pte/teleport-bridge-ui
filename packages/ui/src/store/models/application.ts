@@ -102,7 +102,7 @@ const initialState: IAppState = {
   // wrongChain: false,
   selectedTokenName: '',
   pageActive: true,
-  transferStatus: Store2.get('connect-status') ? TRANSFER_STATUS.NOINPUT : TRANSFER_STATUS.UNCONNECTED,
+  transferStatus: Store2.get('connect-status') ? TRANSFER_STATUS.NO_INPUT : TRANSFER_STATUS.UNCONNECTED,
   currentTokenBalance: undefined,
   transactions: new FixedSizeQueue(10),
   estimation: {} as Estimation,
@@ -303,14 +303,14 @@ export const application = createModel<RootModel>()({
           receipt
             .wait()
             .then(() => {
-              dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOTRANSFER)
+              dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
               successNoti(`succeeded to get approval ${amount} of ${selectedTokenName} from chain: ${bridge.srcChain.name}!`)
             })
             .catch((err: any) => {
               console.error(err)
               errorNoti(`failed to approve this amount: ${amount} for token: ${selectedTokenName} on chain: ${bridge.srcChain.name},
               the detail is ${err?.message}`)
-              dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOAPPROVE)
+              dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
             })
         }
         infoNoti(`sent request to get approval ${amount} of ${selectedTokenName} from chain: ${bridge!.srcChain.name}!`)
@@ -319,7 +319,7 @@ export const application = createModel<RootModel>()({
         errorNoti(`failed to approve this amount: ${amount} for token: ${selectedTokenName} on chain: ${bridge!.srcChain.name},
         the detail is ${(err as any)?.message}`)
       } finally {
-        dispatch.application.setTransferStatus(TRANSFER_STATUS.PENDINGAPPROVE)
+        dispatch.application.setTransferStatus(TRANSFER_STATUS.PENDING_APPROVE)
         dispatch.application.setWaitWallet(false)
       }
     },
@@ -523,18 +523,18 @@ export const application = createModel<RootModel>()({
         try {
           const result: EtherBigNumber = await erc20Contract.allowance(account!, bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.transfer.address)
           if (result.gte(parseEther(value))) {
-            dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOTRANSFER)
+            dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
           } else {
-            dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOAPPROVE)
+            dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
           }
         } catch (err) {
           console.error(err)
           errorNoti(`failed to get allowance for token: ${tokenInfo.name} on chain: ${bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.name},
           detail is ${(err as any)?.message}}`)
-          dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOAPPROVE)
+          dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
         }
       } else {
-        dispatch.application.setTransferStatus(TRANSFER_STATUS.READYTOTRANSFER)
+        dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
       }
     },
     async saveCurrentTokenBalance(rest = {}, state) {

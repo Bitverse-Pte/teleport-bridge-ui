@@ -81,7 +81,7 @@ export const TransferConfirmationButton = function () {
   }, [buttonStatus])
 
   const transfer = useCallback(() => {
-    if (transferStatus === TRANSFER_STATUS.READYTOTRANSFER) {
+    if (transferStatus === TRANSFER_STATUS.READY_TO_TRANSFER) {
       const input = document.getElementById('fromValueInput')
       input && transferTokens({ amount: (input as HTMLInputElement)!.value })
     }
