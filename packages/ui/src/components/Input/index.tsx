@@ -4,6 +4,7 @@ import styled from 'styled-components'
 export const CurrencyInput = styled.input<{ error?: boolean }>`
   font-size: 1.25rem;
   outline: none;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   border: none;
   flex: 1 1 auto;
   width: 0;

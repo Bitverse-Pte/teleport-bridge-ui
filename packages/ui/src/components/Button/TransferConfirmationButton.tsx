@@ -12,7 +12,7 @@ import styled, { css } from 'styled-components/macro'
 import { darken } from 'polished'
 import { getBalance } from 'helpers/web3'
 
-const StyledAnimatedBtn = styled(animated.button)`
+const StyledAnimatedBtn = styled(animated.button)<{ backgroundColor: string }>`
   border-radius: 0.5rem;
   width: 100%;
   font-weight: 900;

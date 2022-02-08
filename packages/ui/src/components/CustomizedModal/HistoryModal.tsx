@@ -43,6 +43,7 @@ export default function HistoryModal() {
         <UniModalContentWrapper>
           <Flex
             css={css`
+              padding-top: 2rem;
               &::-webkit-scrollbar {
                 width: 0.618rem;
                 background-color: rgba(0, 0, 0, 0);

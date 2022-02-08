@@ -1,12 +1,10 @@
-import { Text2, Text3 } from 'components/Text'
-import React, { useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Flex, FlexProps, Text } from 'rebass'
 import { RootState } from 'store'
 import styled, { css } from 'styled-components'
+import { Text2, Text3 } from 'components/Text'
 import { HelpIcon } from 'components/Icon/HelpIcon'
-import { Icon } from 'components/Icon'
-import erc20 from 'assets/erc20.svg'
 import { MouseoverTooltip, MouseoverTooltipContent } from 'components/Tooltip'
 import { TransitionSpinnerMask } from 'components/Spinner'
 
@@ -15,22 +13,23 @@ const EstimationRow = styled(Flex)`
 `
 
 export function EstimationBlock({ ...rest }: FlexProps) {
-  const { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName, estimationUpdating } = useSelector((state: RootState) => {
-    const { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName, estimationUpdating } = state.application
-    return { estimation, srcChainId, destChainId, bridgePairs, availableChains, selectedTokenName, estimationUpdating }
+  const { /* estimation, srcChainId, destChainId, bridgePairs, availableChains, */ selectedTokenName, estimationUpdating } = useSelector((state: RootState) => {
+    const { /* estimation, srcChainId, destChainId, bridgePairs, availableChains, */ selectedTokenName, estimationUpdating } = state.application
+    return { /* estimation, srcChainId, destChainId, bridgePairs, availableChains, */ selectedTokenName, estimationUpdating }
   })
-  const srcChain = useMemo(() => {
+  /* const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
   }, [srcChainId, availableChains])
   const destChain = useMemo(() => {
     return availableChains.get(destChainId)
-  }, [destChainId, availableChains])
-  const amount = useMemo(() => {
+  }, [destChainId, availableChains]) */
+  const [amount, setAmount] = useState<string | number>('')
+  useEffect(() => {
     const input = document.getElementById('fromValueInput')
     if (input) {
-      return (input as HTMLInputElement).value
-    } else {
-      return '0'
+      input.addEventListener('keyup', function () {
+        setAmount(parseFloat((input as HTMLInputElement).value))
+      })
     }
   }, [])
   return (
@@ -51,11 +50,11 @@ export function EstimationBlock({ ...rest }: FlexProps) {
       {...rest}
     >
       <TransitionSpinnerMask show={estimationUpdating} />
-      <EstimationRow>
+      {/*    <EstimationRow>
         <Text2>Rate</Text2>
         <Text3>
           {isNaN(estimation.rate) ? (
-            NaN
+            '-'
           ) : (
             <>
               1&nbsp;{selectedTokenName}&nbsp;on&nbsp;
@@ -66,7 +65,7 @@ export function EstimationBlock({ ...rest }: FlexProps) {
             </>
           )}
         </Text3>
-      </EstimationRow>
+      </EstimationRow> */}
       <EstimationRow>
         <Text2>
           Fee&nbsp;
@@ -74,7 +73,15 @@ export function EstimationBlock({ ...rest }: FlexProps) {
             <HelpIcon size={12} />
           </MouseoverTooltip>
         </Text2>
-        <Text3>{estimation.fee}</Text3>
+        <Text3>
+          {amount ? (
+            <>
+              {0}&nbsp;{selectedTokenName}
+            </>
+          ) : (
+            <>-</>
+          )}
+        </Text3>
       </EstimationRow>
       <EstimationRow>
         <Text2>
@@ -83,17 +90,25 @@ export function EstimationBlock({ ...rest }: FlexProps) {
             <HelpIcon size={12} />
           </MouseoverTooltip>
         </Text2>
-        <Text3>{estimation.minReceived || amount}</Text3>
+        <Text3>
+          {amount ? (
+            <>
+              {amount}&nbsp;{selectedTokenName}
+            </>
+          ) : (
+            <>-</>
+          )}
+        </Text3>
       </EstimationRow>
-      <EstimationRow>
+      {/*   <EstimationRow>
         <Text2>
           Slippage&nbsp;
           <MouseoverTooltip text={<Text>transfer is free for your in test period</Text>}>
             <HelpIcon size={12} />
           </MouseoverTooltip>
         </Text2>
-        <Text3>{estimation.slippage}</Text3>
-      </EstimationRow>
+        <Text3>{estimation.slippage ?? '-'}&nbsp;%</Text3>
+      </EstimationRow> */}
     </Flex>
   )
 }

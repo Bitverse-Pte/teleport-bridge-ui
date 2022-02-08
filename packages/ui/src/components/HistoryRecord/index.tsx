@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { darken } from 'polished'
 import { ChevronRight } from 'react-feather'
+import { Textfit } from 'react-textfit'
+
 import { Text, Box, Flex } from 'rebass'
 import BigNumber from 'bignumber.js'
 import { GreyCard, DarkGreyCard } from 'components/Card'
@@ -15,6 +17,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { useDispatch } from 'hooks'
 import { HistoryGrayDetailText, HistoryGrayText } from 'components/Text'
+import { WrappedLink } from 'components/Link'
 import { TooltippedAmount } from 'components/TooltippedAmount'
 
 interface LoosedIChainData {
@@ -142,6 +145,9 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
     application: { openTransactionDetailModal },
   } = useDispatch()
 
+  const srcChainLabelRef = useRef<any>()
+  const destChainLabelRef = useRef<any>()
+
   const [srcChain, destChain] = useMemo(() => {
     let sc, dc
     for (const chain of availableChains.values()) {
@@ -164,6 +170,20 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
       return {}
     }
   }, [transaction.src_chain_id, transaction.dest_chain_id, transaction.token, bridgePairs])
+
+  const jumpToSrcChainBrowserUrl = useMemo(() => {
+    if (srcChain?.explorers[0] && transaction.send_tx_hash && srcChain && window) {
+      const url = `${srcChain!.explorers[0]!.url}/tx/${transaction!.send_tx_hash}`
+      return url
+    }
+  }, [srcChain, transaction])
+  const jumpToDestChainBrowserUrl = useMemo(() => {
+    if (destChain?.explorers[0] && transaction.receive_tx_hash && destChain && window) {
+      const url = `${destChain!.explorers[0]!.url}/tx/${transaction!.receive_tx_hash}`
+      return url
+    }
+  }, [destChain, transaction])
+
   return (
     <>
       {srcToken && destToken && (
@@ -172,18 +192,24 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
             <Text width="fit-content">From</Text>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <ButtonLight maxWidth="15rem" height="2rem">
-              <SelectorLogo interactive={true} src={srcChain!.icon} />
-              <SelectorLabel>{srcChain!.name}</SelectorLabel>
+            <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
+              <SelectorLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} interactive={true} src={srcChain!.icon} />
+              <Textfit mode="single" min={2} max={20} style={{ maxWidth: '61.8%' }}>
+                <SelectorLabel ref={srcChainLabelRef}>{srcChain!.name}</SelectorLabel>
+              </Textfit>
+              <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToSrcChainBrowserUrl} />
             </ButtonLight>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'end', paddingRight: '0.5rem', alignItems: 'center' }}>
             <Text>To</Text>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <ButtonLight maxWidth="15rem" height="2rem">
-              <SelectorLogo interactive={true} src={destChain!.icon} />
-              <SelectorLabel>{destChain!.name}</SelectorLabel>
+            <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
+              <SelectorLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} interactive={true} src={destChain!.icon} />
+              <Textfit mode="single" min={2} max={20} style={{ maxWidth: '61.8%' }}>
+                <SelectorLabel ref={destChainLabelRef}>{destChain!.name}</SelectorLabel>
+              </Textfit>
+              <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToDestChainBrowserUrl} />
             </ButtonLight>
           </Box>
           {(() => {

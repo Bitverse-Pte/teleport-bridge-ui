@@ -97,6 +97,13 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
       }
     },
   }) */
+
+  const fadeTransition = useTransition(isOpen, {
+    config: { duration: 200 },
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+  })
   useEffect(() => {
     if (closeByKeyboard) {
       document.addEventListener('keyup', escapeOnEscUp)
@@ -107,13 +114,6 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
       }
     }
   }, [isOpen])
-
-  const fadeTransition = useTransition(isOpen, {
-    config: { duration: 200 },
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-  })
   const escapeOnEscUp = useCallback(
     (event: KeyboardEvent) => {
       if (event.which == 27 && isOpen && setIsOpen) {
@@ -123,29 +123,33 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
     [isOpen]
   )
 
-  return fadeTransition(
-    (styles, item) =>
-      item && (
-        <StyledDialogOverlay /* key={key}  */ style={styles} onDismiss={onDismiss} initialFocusRef={initialFocusRef} unstable_lockFocusAcrossFrames={false}>
-          <StyledDialogContent
-            // {...(isMobile
-            //   ? {
-            //       ...bind(),
-            //       style: { transform: y.interpolate((y) => `translateY(${(y as number) > 0 ? y : 0}px)`) },
-            //     }
-            //   : {})}
-            aria-label="dialog content"
-            maxWidth={maxWidth}
-            minHeight={minHeight}
-            maxHeight={maxHeight}
-            mobile={false}
-          >
-            {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}
-            {/* {!initialFocusRef && false ? <div tabIndex={1} /> : null} */}
-            {children}
-          </StyledDialogContent>
-        </StyledDialogOverlay>
-      )
+  return (
+    <>
+      {fadeTransition(
+        (styles, item) =>
+          item && (
+            <StyledDialogOverlay /* key={key}  */ style={styles} onDismiss={onDismiss} initialFocusRef={initialFocusRef} unstable_lockFocusAcrossFrames={false}>
+              <StyledDialogContent
+                // {...(isMobile
+                //   ? {
+                //       ...bind(),
+                //       style: { transform: y.interpolate((y) => `translateY(${(y as number) > 0 ? y : 0}px)`) },
+                //     }
+                //   : {})}
+                aria-label="dialog content"
+                maxWidth={maxWidth}
+                minHeight={minHeight}
+                maxHeight={maxHeight}
+                mobile={false}
+              >
+                {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}
+                {/* {!initialFocusRef && false ? <div tabIndex={1} /> : null} */}
+                {children}
+              </StyledDialogContent>
+            </StyledDialogOverlay>
+          )
+      )}
+    </>
   )
 }
 

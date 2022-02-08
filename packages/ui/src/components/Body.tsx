@@ -227,6 +227,8 @@ export default function AppBody({ ...rest }) {
       } else {
         setInputError(false)
       }
+    } else {
+      setInputError(false)
     }
     setTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
     if (ready) {
