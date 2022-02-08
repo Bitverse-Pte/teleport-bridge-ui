@@ -82,12 +82,12 @@ const Web3ProviderNetwork = createWeb3ReactRoot(NetworkContextName)
 
 ReactDOM.render(
   <>
+    <GlobalStyle />
     <Provider store={store}>
       <Web3ReactProvider getLibrary={getLibrary}>
         <Web3ProviderNetwork getLibrary={getLibrary}>
           <Web3Manager>
             <ThemeProvider>
-              <GlobalStyle />
               <WrappedApp />
             </ThemeProvider>
           </Web3Manager>
