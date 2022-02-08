@@ -102,7 +102,7 @@ export default function TransferConfirmationModal() {
                 </Flex>
                 <Flex flexDirection={'column'} alignItems={'start'}>
                   <Text1 fontWeight={600}>{destChain?.name}</Text1>
-                  <Text4 fontSize={'0.5rem'}>Source Chain</Text4>
+                  <Text4 fontSize={'0.5rem'}>Destination Chain</Text4>
                 </Flex>
               </Flex>
               <Flex flexDirection={'column'}>
