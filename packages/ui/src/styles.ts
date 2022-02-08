@@ -106,8 +106,8 @@ export const globalStyle = `
   }
 
   html, body, #root {
-    height: 100%;
-    width: 100%;
+    height: 100% !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     font-size: 16px;
