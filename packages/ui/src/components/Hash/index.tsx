@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import { Copy } from 'react-feather'
+import { Textfit } from 'react-textfit'
 import styled from 'styled-components/macro'
 import { Text, Flex } from 'rebass'
 import { infoNoti } from 'helpers/notifaction'
@@ -22,7 +23,12 @@ export function Hash({ hash, copyable = false, color, ellipsis = false, ...rest 
   }, [hash])
   return (
     <Flex>
-      <ColorfulText color={color}>{ellipsis ? `${hash.substring(0, 8)}...${hash.substring(hash.length - 8, hash.length)}` : hash}</ColorfulText>
+      <ColorfulText color={color}>
+        <Textfit max={20} min={2} mode="single">
+          {ellipsis ? `${hash.substring(0, 8)}...${hash.substring(hash.length - 8, hash.length)}` : hash}
+        </Textfit>
+      </ColorfulText>
+
       {copyable && hash && (
         <>
           &nbsp;

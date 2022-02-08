@@ -67,10 +67,10 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
         chainId && chainId !== srcChainId && changeNetwork({ chainId: chainId })
       } else {
         // changeNetwork({ chainId: availableChains.values().next().value.chainId })
-        setNetworkModalMode(NetworkSelectModalMode.SRC)
+        connectStatus && setNetworkModalMode(NetworkSelectModalMode.SRC)
       }
     }
-  }, [pageActive, active, chainId, availableChains])
+  }, [pageActive, active, chainId, availableChains, connectStatus])
 
   useEffect(() => {
     setLibrary(library)
@@ -98,7 +98,7 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
   useInactiveListener(false)
 
   // if the account context isn't active, and there's an error on the network context, it's an irrecoverable error
-  if (triedEager && !active && networkError) {
+  /* if (triedEager && !active && networkError) {
     return (
       <MessageWrapper>
         <Message>
@@ -107,6 +107,6 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
       </MessageWrapper>
     )
   }
-
+ */
   return children
 }

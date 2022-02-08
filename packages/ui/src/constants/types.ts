@@ -311,7 +311,19 @@ export interface Chain {
   icon: string
   rpc: string[]
   isTele: boolean
-  transfer: {
+  transfer?: {
+    address: string
+    abi: ContractInterface
+  }
+  multicall?: {
+    address: string
+    abi: ContractInterface
+  }
+  agent?: {
+    address: string
+    abi: ContractInterface
+  }
+  proxy?: {
     address: string
     abi: ContractInterface
   }

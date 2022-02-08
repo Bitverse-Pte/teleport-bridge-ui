@@ -1,14 +1,11 @@
-import { transitions } from './../../styles'
-import { getBalance } from 'helpers/web3'
-
 import { BigNumber as EtherBigNumber } from '@ethersproject/bignumber'
 import { isAddress } from '@ethersproject/address'
 import { parseEther } from '@ethersproject/units'
-import ethers from 'ethers'
+import { AbiItem } from 'web3-utils'
 import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
-import { toast } from 'react-toastify'
 import axios from 'axios'
+
 import {
   AVAILABLE_CHAINS_URL,
   DEFAULT_DESTINATION_CHAIN,
@@ -27,6 +24,7 @@ import {
   Estimation,
   ESTIMATION_URL,
 } from 'constants/index'
+import { getBalance } from 'helpers/web3'
 import { getContract } from 'helpers'
 import Store2 from 'store2'
 import type { RootModel } from '.'
@@ -53,6 +51,45 @@ function fillRpc(chain: Chain) {
 
 if (!Store2.has('connect-status')) {
   Store2.set('connect-status', false)
+}
+
+const sendFunctionFragment: AbiItem = {
+  name: 'send',
+  type: 'function',
+  inputs: [
+    {
+      components: [
+        {
+          internalType: 'address',
+          name: 'tokenAddress',
+          type: 'address',
+        },
+        {
+          internalType: 'string',
+          name: 'receiver',
+          type: 'string',
+        },
+        {
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+        {
+          internalType: 'string',
+          name: 'destChain',
+          type: 'string',
+        },
+        {
+          internalType: 'string',
+          name: 'relayChain',
+          type: 'string',
+        },
+      ],
+      internalType: 'struct TransferDataTypes.ERC20TransferData',
+      name: 'transferData',
+      type: 'tuple',
+    },
+  ],
 }
 
 let estimationClockId: number
@@ -312,8 +349,9 @@ export const application = createModel<RootModel>()({
       const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName)?.srcToken
       try {
         if (bridge && tokenInfo) {
+          const targetAddress = bridge.srcChain.isTele || bridge.destChain.isTele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
           const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
-          const receipt = await erc20Contract.approve(bridge.srcChain.transfer.address, parseEther(amount))
+          const receipt = await erc20Contract.approve(targetAddress, parseEther(amount))
           receipt
             .wait()
             .then(() => {
@@ -343,66 +381,52 @@ export const application = createModel<RootModel>()({
       const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
-      const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName)?.srcToken
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+      const { srcToken, destToken } = bridge?.tokens.find((e) => e.name === selectedTokenName)!
       const cachedTokenName = selectedTokenName
       let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
       try {
-        if (bridge && tokenInfo) {
-          // if (bridge.srcChain.isTele || bridge.destChain.isTele) {
-          const composedContract = getContract(bridge.srcChain.transfer.address, bridge.srcChain.transfer.abi, library!, account!)
-          if (tokenInfo?.isNative) {
-            transaction = await composedContract.sendTransferBase(
-              {
-                receiver: account,
-                // destChain: 'tss-eth',
-                destChain: bridge.destChain.name,
-                relayChain: '',
-              },
-              { value: parseEther(amount) }
-            )
+        if (bridge && srcToken) {
+          if (bridge.srcChain.isTele || bridge.destChain.isTele) {
+            const composedContract = getContract(bridge.srcChain.transfer!.address, bridge.srcChain.transfer!.abi, library!, account!)
+            if (srcToken?.isNative) {
+              transaction = await composedContract.sendTransferBase(
+                {
+                  receiver: account,
+                  // destChain: 'tss-eth',
+                  destChain: bridge.destChain.name,
+                  relayChain: '',
+                },
+                { value: parseEther(amount) }
+              )
+            } else {
+              transaction = await composedContract.sendTransferERC20(
+                {
+                  tokenAddress: srcToken.address,
+                  receiver: account,
+                  amount: parseEther(amount),
+                  destChain: bridge.destChain.name,
+                  relayChain: '',
+                },
+                { value: parseEther('0') }
+              )
+            }
           } else {
-            transaction = await composedContract.sendTransferERC20(
-              {
-                tokenAddress: tokenInfo.address,
-                receiver: account,
-                amount: parseEther(amount),
-                destChain: bridge.destChain.name,
-                relayChain: '',
-              },
-              { value: parseEther('0') }
-            )
-          }
-          // } else {
-          /*  const multiCallFactory = await ethers.getContractFactory('MultiCall')
-            const multiCall = await multiCallFactory.attach('0xb628aa11d7ba62af1386be90cde6c0eb9d731625')
-
-            // eth.0xe127bd251ab5a499e57034644ef41726c931b45b => teleport.0xd9a41dbe13386c6674d871021106266ea7b27f5c
             const ERC20TransferData = {
-              tokenAddress: '0xe127bd251ab5a499e57034644ef41726c931b45b',
-              receiver: '0x0000000000000000000000000000000010000007',
-              amount: 100000000000000,
+              tokenAddress: srcToken.address,
+              receiver: bridge.srcChain.agent?.address, // agent address
+              amount: 1000,
             }
-            const ERC20TransferDataAbi = ethers.utils.defaultAbiCoder.encode(['tuple(address,string,uint256)'], [[ERC20TransferData.tokenAddress, ERC20TransferData.receiver, ERC20TransferData.amount]])
-
-            // teleport.0xd9a41dbe13386c6674d871021106266ea7b27f5c => bsc.0xe9a6bd7ca0fcbe36c2d003872284bbcd47fda8b0
-            const dataByte = Buffer.from(
-              'efb509250000000000000000000000000000000000000000000000000000000000000020000000000000000000000000d9a41dbe13386c6674d871021106266ea7b27f5c00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000005af3107a400000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000002a307865396136626437636130666362653336633264303033383732323834626263643437666461386230000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008746573742d6273630000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-              'hex'
-            )
-            const RCCData = {
-              contractAddress: '0x0000000000000000000000000000000010000007',
-              data: dataByte,
-            }
-            const RCCDataAbi = utils.defaultAbiCoder.encode(['tuple(string,bytes)'], [[RCCData.contractAddress, RCCData.data]])
-
-            const MultiCallData = {
-              destChain: 'teleport',
+            const rccTransfer = {
+              tokenAddress: '', // erc20 in teleport
+              receiver: account!,
+              amount: 1000,
+              destChain: bridge.destChain.name, // double jump destChain
               relayChain: '',
-              functions: [BigNumber.from(0), BigNumber.from(2)],
-              data: [ERC20TransferDataAbi, RCCDataAbi],
             }
-            const res = await multiCall.multiCall(MultiCallData) */
-          // }
+            const proxyContract = getContract(bridge.srcChain.proxy!.address!, bridge.srcChain.proxy!.abi!, library!, account!)
+            transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer) // destChainName : teleport
+          }
 
           const transactionDetail = {
             src_chain: `${sourceChain?.name}`,
@@ -415,7 +439,7 @@ export const application = createModel<RootModel>()({
             receive_tx_hash: '',
             amount: parseEther(amount).toHexString(),
             token: selectedTokenName,
-            token_address: tokenInfo?.isNative ? '' : tokenInfo.address,
+            token_address: srcToken?.isNative ? '' : srcToken.address,
             status: TRANSACTION_STATUS.PENDING,
           } as TransactionDetail
           transactions.push(transactionDetail)
@@ -534,11 +558,14 @@ export const application = createModel<RootModel>()({
       }
     },
     async judgeAllowance({ value, tokenInfo }: { value: string; tokenInfo: TokenInfo }, state) {
-      const { library, account, bridgePairs, srcChainId, destChainId } = state.application
-      if (!tokenInfo.isNative) {
+      const { library, account, bridgePairs, srcChainId, destChainId } = store.getState().application
+      const bridge = bridgePairs.get(`${srcChainId}-${destChainId}`)
+
+      if (!tokenInfo.isNative && bridge) {
+        const targetAddress = bridge.srcChain.isTele || bridge.destChain.isTele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
         const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
         try {
-          const result: EtherBigNumber = await erc20Contract.allowance(account!, bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.transfer.address)
+          const result: EtherBigNumber = await erc20Contract.allowance(account!, targetAddress)
           if (result.gte(parseEther(value))) {
             dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
           } else {
@@ -609,7 +636,7 @@ export const application = createModel<RootModel>()({
       try {
         // const { data: estimation } = await axios.get<Estimation>(`${ESTIMATION_URL}/${srcChainId}/${destChainId}/${selectedTokenName}/${parseEther(amount)}`)
         await new Promise((res) => {
-          setTimeout(() => res(undefined), 2000)
+          setTimeout(() => res(undefined), 1000)
         })
         dispatch.application.setEstimation({
           id: Date.now(),

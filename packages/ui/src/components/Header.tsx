@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react'
 import { darken } from 'polished'
 import { useSelector } from 'react-redux'
+import { Textfit } from 'react-textfit'
 import styled, { css } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
 import { pick } from 'lodash'
@@ -18,6 +19,7 @@ import WalletSelectModal from 'components/CustomizedModal/WalletSelectModal'
 import HistoryModal from 'components/CustomizedModal/HistoryModal'
 import { Icon } from 'components/Icon'
 import { HistoryButton } from './Button/HistoryButton'
+import { Hash } from './Hash'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -109,20 +111,20 @@ export default function Header() {
           <>
             <Flex>
               <HistoryButton disabled={!ready} />
-              {/* <ButtonDropdown style={{ backgroundColor: 'transparent' }} disabled={!ready} onClick={() => setHistoryModalOpen(true)}>
-                <Icon src={HistorySvg} />
-                <Text1>History</Text1>
-              </ButtonDropdown> */}
             </Flex>
-            <Web3StatusConnected>
+            <Web3StatusConnected style={{ width: 'unset', maxWidth: 'unset' }}>
               <Flex alignItems="center">
                 <SBlockie address={address} />
-                <StyledText>{`${address.substring(0, 4)}...${address.substring(38)}`}</StyledText>
+                <Hash ellipsis={true} hash={address} copyable={false} />
               </Flex>
             </Web3StatusConnected>
           </>
         )}
-        <PrimaryButton onClick={() => (ready ? logout() : setWalletModalOpen(true))}>{ready ? 'Logout' : 'Connect'}</PrimaryButton>
+        <PrimaryButton onClick={() => (ready ? logout() : setWalletModalOpen(true))}>
+          <Textfit max={20} min={2} mode="single">
+            {ready ? 'Logout' : 'Connect'}
+          </Textfit>
+        </PrimaryButton>
       </Flex>
       <WalletSelectModal />
       <HistoryModal />

@@ -49,13 +49,6 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
     setIndex(TRANSFER_STATUS_BUTTONS_MAP[transferStatus])
   }, [transferStatus])
 
-  const transfer = useCallback(() => {
-    if (transferStatus === TRANSFER_STATUS.READY_TO_TRANSFER) {
-      const input = document.getElementById('fromValueInput')
-      input && transferTokens({ amount: (input as HTMLInputElement)!.value })
-    }
-  }, [transferStatus])
-
   const approve = useCallback(() => {
     if (transferStatus === TRANSFER_STATUS.READY_TO_APPROVE) {
       const input = document.getElementById('fromValueInput')

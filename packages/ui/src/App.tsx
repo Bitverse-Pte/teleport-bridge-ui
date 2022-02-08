@@ -16,6 +16,7 @@ import Spinner from 'components/Spinner'
 import { TextPrimary1 } from 'components/Text'
 import { useActiveWeb3React, useDispatch } from 'hooks'
 import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
+import { demo } from 'helpers/demo'
 
 const SLayout = styled(Flex)`
   width: 100%;
@@ -61,10 +62,14 @@ function App() {
     super(props) */
   const { account } = useActiveWeb3React()
   const {
-    application: { initChains, initTransactions },
+    application: { initChains, initTransactions, saveConnectStatus },
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
+
+  useEffect(() => {
+    window.demo = demo
+  }, [])
 
   useEffect(() => {
     Promise.all([initChains()])
@@ -77,6 +82,7 @@ function App() {
   }, [])
   useEffect(() => {
     account && initTransactions(account)
+    !account && saveConnectStatus(false)
   }, [account])
 
   const showBody = useCallback(() => {

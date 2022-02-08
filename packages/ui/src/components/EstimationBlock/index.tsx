@@ -26,10 +26,17 @@ export function EstimationBlock({ ...rest }: FlexProps) {
   const [amount, setAmount] = useState<string | number>('')
   useEffect(() => {
     const input = document.getElementById('fromValueInput')
+    const onInput = function () {
+      setAmount(parseFloat((input as HTMLInputElement).value))
+    }
     if (input) {
-      input.addEventListener('keyup', function () {
-        setAmount(parseFloat((input as HTMLInputElement).value))
-      })
+      setAmount(parseFloat((input as HTMLInputElement).value))
+      input.addEventListener('keyup', onInput)
+    }
+    return () => {
+      if (input) {
+        input?.removeEventListener('keyup', onInput)
+      }
     }
   }, [])
   return (

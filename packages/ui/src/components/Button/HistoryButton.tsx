@@ -9,6 +9,7 @@ import { RootState } from 'store/store'
 import HistorySvg from 'assets/history.svg'
 import { TRANSACTION_STATUS } from 'constants/index'
 import { TransitionSpinner } from 'components/Spinner'
+import { Textfit } from 'react-textfit'
 
 const Wrapper = styled.div`
   position: relative;
@@ -88,7 +89,11 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
             )
           })}
         </Wrapper>
-        <Text1>History</Text1>
+        <Text1>
+          <Textfit max={20} min={2} mode="single">
+            History
+          </Textfit>
+        </Text1>
       </ButtonDropdown>
     </>
   )
