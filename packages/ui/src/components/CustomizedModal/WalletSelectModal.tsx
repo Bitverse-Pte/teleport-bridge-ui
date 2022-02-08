@@ -18,6 +18,7 @@ import styled from 'styled-components'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store'
 import { useActiveWeb3React } from 'hooks/web3'
+import { errorNoti } from 'helpers/notifaction'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -34,7 +35,10 @@ export default function WalletSelectModal() {
   const {
     application: { saveConnectStatus, setWalletModalOpen, setWaitWallet },
   } = useDispatch()
-  const { connectStatus, walletModalOpen } = useSelector((state: RootState) => pick(state.application, 'connectStatus', 'walletModalOpen'))
+  const { connectStatus, walletModalOpen, availableChains } = useSelector((state: RootState) => {
+    const { connectStatus, walletModalOpen, availableChains } = state.application
+    return { connectStatus, walletModalOpen, availableChains }
+  })
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
 
   const tryActivation = useCallback(
@@ -70,13 +74,15 @@ export default function WalletSelectModal() {
               .then(() => setWalletModalOpen(false))
             // logMonitoringEvent({ walletAddress })
           })
-          .catch((error) => {
-            if (error instanceof UnsupportedChainIdError) {
+          .catch((error: any) => {
+            errorNoti(
+              `Unabled to connect to your selection, please use another wallet or connected to a available chains:${Array.from(availableChains.values())
+                .map((e) => e.name)
+                .join(', ')}`
+            )
+            /* if (error instanceof UnsupportedChainIdError) {
               activate(connector) // a little janky...can't use setError because the connector isn't set
-            } else {
-              // setPendingError(true)
-              console.error(error)
-            }
+            } */
           })
           .finally(() => setWaitWallet(false))
       // eslint-disable-next-line @typescript-eslint/no-empty-function
