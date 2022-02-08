@@ -108,8 +108,8 @@ export const globalStyle = `
   html, body, #root {
     height: 100%;
     width: 100%;
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     font-size: 16px;
     font-variant: none;
     -webkit-font-smoothing: antialiased;
