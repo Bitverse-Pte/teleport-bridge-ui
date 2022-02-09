@@ -31,9 +31,9 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
     application: { /* setDestinationChain, */ setLibrary, setAccount, setPageActive, changeNetwork, setNetworkModalMode, setSrcChainId },
   } = useDispatch()
 
-  const { connectStatus, availableChains, pageActive, srcChainId } = useSelector((state: RootState) => {
-    const { connectStatus, availableChains, pageActive, srcChainId } = state.application
-    return { connectStatus, availableChains, pageActive, srcChainId }
+  const { connectStatus, availableChains, pageActive, srcChainId, networkModalMode } = useSelector((state: RootState) => {
+    const { connectStatus, availableChains, pageActive, srcChainId, networkModalMode } = state.application
+    return { connectStatus, availableChains, pageActive, srcChainId, networkModalMode }
   })
   const { active, chainId, account, library, active: networkActive, error: networkError, activate: activateNetwork, chainId: networkChainId } = useActiveWeb3React()
   // try to eagerly connect to an injected provider, if it exists and has granted access already
@@ -63,12 +63,15 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
 
   useEffect(() => {
     if (pageActive && active && chainId && availableChains.size) {
-      if (availableChains.has(chainId)) {
+      if (chainId && chainId !== srcChainId && !networkModalMode) {
+        connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
+      }
+      /*    if (availableChains.has(chainId)) {
         chainId && chainId !== srcChainId && changeNetwork({ chainId: chainId })
       } else {
         // changeNetwork({ chainId: availableChains.values().next().value.chainId })
-        connectStatus && setNetworkModalMode(NetworkSelectModalMode.SRC)
-      }
+        connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
+      } */
     }
   }, [pageActive, active, chainId, availableChains, connectStatus])
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { darken } from 'polished'
 import { useSelector } from 'react-redux'
 import { Textfit } from 'react-textfit'
@@ -21,6 +21,7 @@ import { Icon } from 'components/Icon'
 import { MouseoverTooltip } from 'components/Tooltip'
 import { HistoryButton } from './Button/HistoryButton'
 import { Hash } from './Hash'
+import { MEDIA_WIDTHS } from 'theme'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -44,7 +45,21 @@ const Web3StatusConnected = styled(Web3StatusGeneric)<{ pending?: boolean }>`
   :hover,
   :focus {
     border: 1px solid ${({ theme }) => darken(0.05, theme.bg3)};
+    :focus {
+      border: 1px solid ${({ pending, theme }) => (pending ? darken(0.1, theme.primary1) : darken(0.1, theme.bg2))};
+    }
+  }
+`
 
+const NetworkStatus = styled(Web3StatusGeneric)<{ pending?: boolean; error?: boolean }>`
+  max-width: 25vw;
+  background-color: ${({ error }) => (error ? 'red' : 'transparent')};
+  border: 1px solid ${({ pending, theme }) => (pending ? theme.primary1 : theme.bg1)};
+  color: ${({ theme }) => theme.white};
+  font-weight: 500;
+  :hover,
+  :focus {
+    border: 1px solid ${({ theme }) => darken(0.05, theme.bg3)};
     :focus {
       border: 1px solid ${({ pending, theme }) => (pending ? darken(0.1, theme.primary1) : darken(0.1, theme.bg2))};
     }
@@ -75,15 +90,51 @@ export const AutoColumn = styled.div<{
   justify-items: ${({ justify }) => justify && justify};
 `
 
+const FlyoutMenu = styled.div`
+  align-items: flex-start;
+  background-color: ${({ theme }) => theme.bg0};
+  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 24px 32px rgba(0, 0, 0, 0.01);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  overflow: auto;
+  padding: 16px 8px;
+  position: absolute;
+  top: 64px;
+  width: 100%;
+  z-index: 99;
+  & > *:not(:last-child) {
+    margin-bottom: 12px;
+  }
+  @media screen and (min-width: ${MEDIA_WIDTHS.upToSmall}px) {
+    top: 50px;
+  }
+`
+
+const ActiveRowWrapper = styled.div`
+  background-color: ${({ theme }) => theme.bg1};
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px;
+  width: 100%;
+`
+
 export default function Header() {
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const {
     application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen },
   } = useDispatch()
-  const { connectStatus, historyModalOpen, walletModalOpen } = useSelector((state: RootState) => {
-    const { connectStatus, historyModalOpen, walletModalOpen } = state.application
-    return { connectStatus, historyModalOpen, walletModalOpen }
+  const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = useSelector((state: RootState) => {
+    const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = state.application
+    return { connectStatus, historyModalOpen, walletModalOpen, availableChains }
   })
+  const connectedChain = useMemo(() => {
+    if (chainId) {
+      return availableChains.get(chainId)
+    }
+  }, [availableChains, chainId])
+  const [flyoutMenuShow, setFlyoutMenuShow] = useState(false)
   const address = useMemo(() => account ?? '', [account])
   const ready = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account])
 
@@ -116,24 +167,80 @@ export default function Header() {
             <Flex>
               <HistoryButton disabled={!ready} />
             </Flex>
-            <Web3StatusConnected style={{ width: 'unset', maxWidth: 'unset' }}>
+            <NetworkStatus error={!connectedChain} style={{ cursor: 'default', width: 'unset', maxWidth: 'unset', minWidth: '20%', justifyContent: 'space-around' }}>
+              {connectedChain && (
+                <>
+                  <Icon src={connectedChain?.icon}></Icon>
+                  <Textfit max={20} min={2} mode="single">
+                    {connectedChain?.shortName}
+                  </Textfit>
+                </>
+              )}
+              {!connectedChain && (
+                <Textfit max={20} min={2} mode="single" style={{ fontWeight: 800 }}>
+                  Wrong Network
+                </Textfit>
+              )}
+            </NetworkStatus>
+            <Web3StatusConnected
+              style={{ width: 'unset', maxWidth: 'unset' }}
+              onMouseOver={() => {
+                setFlyoutMenuShow(true)
+              }}
+            >
               <Flex alignItems="center">
                 <SBlockie address={address} />
-                <MouseoverTooltip text={address}>
-                  <Hash ellipsis={true} hash={address} copyable={false} showCounts={4} />
-                </MouseoverTooltip>
+                {/* <MouseoverTooltip text={address}> */}
+                <Hash ellipsis={true} hash={address} copyable={false} showCounts={4} />
+                {/* </MouseoverTooltip> */}
               </Flex>
+              {flyoutMenuShow && (
+                <FlyoutMenu
+                  onMouseLeave={() => {
+                    setFlyoutMenuShow(false)
+                  }}
+                >
+                  <ActiveRowWrapper
+                    onClick={() => {
+                      setWalletModalOpen(true)
+                    }}
+                  >
+                    Change Wallet
+                  </ActiveRowWrapper>
+                  <ActiveRowWrapper
+                    onClick={() => {
+                      logout()
+                    }}
+                  >
+                    Logout
+                  </ActiveRowWrapper>
+                </FlyoutMenu>
+              )}
             </Web3StatusConnected>
           </>
         )}
-        <PrimaryButton onClick={() => (ready ? logout() : setWalletModalOpen(true))} style={{ margin: '0 0.5rem' }}>
-          <Textfit max={20} min={2} mode="single">
-            {ready ? 'Logout' : 'Connect'}
-          </Textfit>
-        </PrimaryButton>
+        {!ready && (
+          <PrimaryButton onClick={() => setWalletModalOpen(true)} style={{ margin: '0 0.5rem' }}>
+            <Textfit max={20} min={2} mode="single">
+              Connect
+            </Textfit>
+          </PrimaryButton>
+        )}
       </Flex>
       {walletModalOpen && <WalletSelectModal />}
       {historyModalOpen && <HistoryModal />}
     </SHeader>
   )
 }
+
+/* 
+  <FlyoutMenu onMouseLeave={toggle}>
+          <FlyoutHeader>
+            <Trans>Select a network</Trans>
+          </FlyoutHeader>
+          <Row onSelectChain={handleRowClick} targetChain={SupportedChainId.MAINNET} />
+          <Row onSelectChain={handleRowClick} targetChain={SupportedChainId.POLYGON} />
+          <Row onSelectChain={handleRowClick} targetChain={SupportedChainId.OPTIMISM} />
+          <Row onSelectChain={handleRowClick} targetChain={SupportedChainId.ARBITRUM_ONE} />
+        </FlyoutMenu>
+*/

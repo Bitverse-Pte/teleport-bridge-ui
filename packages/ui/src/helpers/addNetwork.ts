@@ -2,6 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { hexStripZeros } from '@ethersproject/bytes'
 import { Web3Provider } from '@ethersproject/providers'
 import { SupportedChainId, Chain } from 'constants/index'
+import { errorNoti } from './notifaction'
 
 interface AddNetworkArguments {
   library: Web3Provider
@@ -31,5 +32,6 @@ export async function addNetwork({ library, chainId, info }: AddNetworkArguments
     })
   } catch (error) {
     console.error('error adding eth network: ', chainId, info, error)
+    errorNoti(`failed to add network ${info.name} as ${(error as any).message}`)
   }
 }

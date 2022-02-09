@@ -161,7 +161,12 @@ export default function AppBody({ ...rest }) {
   const fromValueInputRef = useRef<any>({})
   const toValueInputRef = useRef<any>({})
   const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
-  const ready = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account])
+  const connectedChain = useMemo(() => {
+    if (chainId) {
+      return availableChains.get(chainId)
+    }
+  }, [availableChains, chainId])
+  const ready = useMemo(() => connectStatus && active && connectedChain && !!account, [connectStatus, active, account])
   const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
   }, [availableChains, srcChainId])
@@ -271,7 +276,7 @@ export default function AppBody({ ...rest }) {
                 <Flex justifyContent="space-between" padding={'0.5rem'}>
                   <BalanceWrapper clickable={!!(ready && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
                     <DarkGreenText>{'Max ≈'}&nbsp;</DarkGreenText>
-                    {ready && selectedTokenName && selectedTokenPair && currentTokenBalance ? <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} /> : connectStatus && account ? <Loader size={17} color="white" /> : <DarkGreenText>N/A</DarkGreenText>}
+                    {ready && selectedTokenName && selectedTokenPair && currentTokenBalance ? <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} /> : ready && connectStatus && account ? <Loader size={17} color="white" /> : <DarkGreenText>N/A</DarkGreenText>}
                   </BalanceWrapper>
                 </Flex>
               </Flex>
@@ -307,7 +312,7 @@ export default function AppBody({ ...rest }) {
                   <DarkenedSelectorButton
                     labelContent={`${selectedTokenPair ? selectedTokenPair!.srcToken.name ?? '' : ''}`}
                     logoSrc={selectedTokenPair && selectedTokenPair!.srcToken.logoURI}
-                    disabled={!(connectStatus && account) || !selectedTokenPair}
+                    disabled={!ready || !(connectStatus && account) || !selectedTokenPair}
                     interactive={false}
                     width="10rem"
                     fontWeight={600}
@@ -341,6 +346,7 @@ export default function AppBody({ ...rest }) {
                     width="10rem"
                     fontSize="1rem"
                     lineHeight="1.3125rem"
+                    disabled={!ready}
                     labelContent={`${destChain!.name.length > 10 ? destChain?.shortName : destChain?.name || 'Unavailable'}`}
                     logoSrc={destChain && destChain!.icon}
                     interactive={true}

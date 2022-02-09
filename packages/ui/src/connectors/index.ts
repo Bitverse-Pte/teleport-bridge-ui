@@ -50,13 +50,13 @@ export function getNetworkLibrary(): Web3Provider {
 } */
 
 export const injected = new InjectedConnector({
-  supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
+  // supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
 })
 
 export const gnosisSafe = new SafeAppConnector()
 
 export const walletconnect = new WalletConnectConnector({
-  supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
+  // supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
   rpc: NETWORK_URLS,
   qrcode: true,
 })
