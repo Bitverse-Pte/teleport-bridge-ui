@@ -199,7 +199,10 @@ export default function Header() {
               <Flex alignItems="center">
                 <SBlockie address={address} />
                 {/* <MouseoverTooltip text={address}> */}
-                <Hash ellipsis={true} hash={address} copyable={false} showCounts={4} />
+                {/* <Hash ellipsis={true} hash={address} copyable={false} showCounts={4} /> */}
+                <Textfit max={20} min={2} mode="single" style={{ fontWeight: 600, width: '80%' }}>
+                  {`${address.substring(0, 4)}...${address.substring(address.length - 4, address.length)}`}
+                </Textfit>
                 {/* </MouseoverTooltip> */}
               </Flex>
               {flyoutMenuShow && (
@@ -213,14 +216,18 @@ export default function Header() {
                       setWalletModalOpen(true)
                     }}
                   >
-                    Change Wallet
+                    <Textfit max={20} min={2} mode="single" style={{ fontWeight: 800, width: '100%' }}>
+                      Change Wallet
+                    </Textfit>
                   </ActiveRowWrapper>
                   <ActiveRowWrapper
                     onClick={() => {
                       logout()
                     }}
                   >
-                    Logout
+                    <Textfit max={20} min={2} mode="single" style={{ fontWeight: 800, width: '100%' }}>
+                      Logout
+                    </Textfit>
                   </ActiveRowWrapper>
                 </FlyoutMenu>
               )}
