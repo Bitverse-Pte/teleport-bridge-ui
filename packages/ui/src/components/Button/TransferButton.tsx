@@ -69,6 +69,9 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
   }, [transferStatus])
 
   const text = useMemo(() => {
+    if (error) {
+      return 'Insufficient Balance'
+    }
     switch (transferStatus) {
       case TRANSFER_STATUS.UNCONNECTED:
         return 'Connect'
@@ -83,11 +86,14 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
       default:
         return null
     }
-  }, [transferStatus])
+  }, [transferStatus, error])
 
   const pending = useMemo(() => {
+    if (error) {
+      return false
+    }
     return transferStatus === TRANSFER_STATUS.PENDING_ALLOWANCE || transferStatus === TRANSFER_STATUS.PENDING_APPROVE
-  }, [transferStatus])
+  }, [transferStatus, error])
 
   const disabled = useMemo(() => {
     return transferStatus === TRANSFER_STATUS.UNCONNECTED || transferStatus === TRANSFER_STATUS.NO_INPUT

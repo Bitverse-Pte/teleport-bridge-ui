@@ -179,13 +179,13 @@ export default function Header() {
               {connectedChain && (
                 <>
                   <Icon src={connectedChain?.icon}></Icon>
-                  <Textfit max={20} min={2} mode="single" style={{ marginLeft: '0.5rem' }}>
+                  <Textfit max={20} min={2} mode="single" style={{ marginLeft: '0.5rem', width: '60%' }}>
                     {connectedChain?.name}
                   </Textfit>
                 </>
               )}
               {!connectedChain && (
-                <Textfit max={20} min={2} mode="single" style={{ fontWeight: 800 }}>
+                <Textfit max={20} min={2} mode="single" style={{ fontWeight: 800, width: '60%' }}>
                   Wrong Network
                 </Textfit>
               )}
@@ -229,7 +229,7 @@ export default function Header() {
         )}
         {!ready && (
           <PrimaryButton onClick={() => setWalletModalOpen(true)} style={{ margin: '0 0.5rem' }}>
-            <Textfit max={20} min={2} mode="single">
+            <Textfit max={20} min={2} mode="single" style={{ width: '60%' }}>
               Connect
             </Textfit>
           </PrimaryButton>

@@ -67,6 +67,7 @@ function App() {
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
+  const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
 
   /*   useEffect(() => {
     window.demo = demo
@@ -83,9 +84,9 @@ function App() {
       })
   }, [])
   useEffect(() => {
-    account && initTransactions(account)
+    connectStatus && account && initTransactions(account)
     // saveConnectStatus(!!account)
-  }, [account])
+  }, [account, connectStatus])
 
   const showBody = useCallback(() => {
     switch (initStatus) {

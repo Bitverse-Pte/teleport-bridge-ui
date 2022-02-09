@@ -5,7 +5,6 @@ import styled, { css } from 'styled-components'
 import { Flex } from 'rebass'
 import { debounce } from 'lodash'
 import BigNumber from 'bignumber.js'
-import { BigNumber as EtherBigNumber } from '@ethersproject/bignumber'
 import { NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'
 import { SelectorButton, ButtonGray, PrimaryButton } from 'components/Button'
@@ -118,7 +117,7 @@ const DarkenedSelectorButton = styled(SelectorButton)`
   border-radius: 6rem;
   font-family: IBM Plex Sans;
   font-style: normal;
-  text-transform: capitalize;
+  // text-transform: capitalize;
 `
 
 const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`

@@ -89,7 +89,7 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
             )
           })}
         </Wrapper>
-        <Text1>
+        <Text1 width={'50%'}>
           <Textfit max={20} min={2} mode="single">
             History
           </Textfit>
