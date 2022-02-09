@@ -151,10 +151,9 @@ export default function AppBody({ ...rest }) {
   const {
     application: { stopUpdateEstimation, startUpdateEstimation, setTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, updateBridgeInfo, turnOverSrcAndDestChain },
   } = useDispatch()
-  const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId } = useSelector((state: RootState) => {
-    const { currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId } = state.application
-    const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode } = state.application // avoid to make a too long line
-    return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId }
+  const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen } = useSelector((state: RootState) => {
+    const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId, transferStatus, transferConfirmationModalOpen, transactionDetailModalOpen } = state.application // avoid to make a too long line
+    return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen }
   })
   const [pending, setPending] = useState(false)
   const [inputError, setInputError] = useState(false)
@@ -391,10 +390,10 @@ export default function AppBody({ ...rest }) {
         </BodyWrapper>
         <EstimationBlock style={{ width: '44vw', maxWidth: '512px', borderRadius: '0 0 0.5rem 0.5rem', borderWidth: '0px 1px 1px 1px' }} />
       </Flex>
-      <NetworkSelectModal />
-      <CurrencySelectModal />
-      <TransferConfirmationModal />
-      <TransactionDetailModal />
+      {networkModalMode && <NetworkSelectModal />}
+      {currencySelectModalOpen && <CurrencySelectModal />}
+      {transferConfirmationModalOpen && <TransferConfirmationModal />}
+      {transactionDetailModalOpen && <TransactionDetailModal />}
     </>
   )
 }

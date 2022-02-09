@@ -39,7 +39,7 @@ const MenuItem = styled(SpaceBetweenRow)`
 function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number; style: CSSProperties }) {
   const { account, library } = useActiveWeb3React()
   const {
-    application: { setSelectedTokenName },
+    application: { changeToken },
   } = useDispatch()
   const selectedTokenName = useSelector((state: RootState) => state.application.selectedTokenName)
   const token = data[index].srcToken
@@ -51,7 +51,7 @@ function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number;
   }, [token.name])
   // only show add or remove buttons if not on selected list
   return (
-    <MenuItem style={style} className={`token-item-${key}`} onClick={() => (isSelected ? null : setSelectedTokenName(token.name))} disabled={isSelected} selected={isSelected}>
+    <MenuItem style={style} className={`token-item-${key}`} onClick={() => (isSelected ? null : changeToken(token.name))} disabled={isSelected} selected={isSelected}>
       <StyledLogo size={'1.5rem'} srcs={[token.logoURI!]} alt={`${token?.symbol ?? 'token'} logo`} />
       <Column>
         <ThemedText.Main>{token.symbol}</ThemedText.Main>

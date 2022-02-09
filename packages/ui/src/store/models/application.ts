@@ -325,6 +325,10 @@ export const application = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
+    changeToken(selectedTokenName: string) {
+      dispatch.application.setSelectedTokenName(selectedTokenName)
+      dispatch.application.setCurrencySelectModalOpen(false)
+    },
     loggedIn() {
       Store2.set('connect-status', true)
       dispatch.application.setConnectStatus(true)
@@ -543,6 +547,7 @@ export const application = createModel<RootModel>()({
         console.error(err)
       } finally {
         dispatch.application.setWaitWallet(false)
+        dispatch.application.setNetworkModalMode(NetworkSelectModalMode.CLOSE)
       }
     },
     async updateBridgeInfo({ srcChainId, destChainId }: { srcChainId: number; destChainId: number }, state) {

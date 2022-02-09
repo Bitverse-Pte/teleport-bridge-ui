@@ -80,7 +80,10 @@ export default function Header() {
   const {
     application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen },
   } = useDispatch()
-  const { connectStatus } = useSelector((state: RootState) => pick(state.application, 'connectStatus'))
+  const { connectStatus, historyModalOpen, walletModalOpen } = useSelector((state: RootState) => {
+    const { connectStatus, historyModalOpen, walletModalOpen } = state.application
+    return { connectStatus, historyModalOpen, walletModalOpen }
+  })
   const address = useMemo(() => account ?? '', [account])
   const ready = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account])
 
@@ -129,8 +132,8 @@ export default function Header() {
           </Textfit>
         </PrimaryButton>
       </Flex>
-      <WalletSelectModal />
-      <HistoryModal />
+      {walletModalOpen && <WalletSelectModal />}
+      {historyModalOpen && <HistoryModal />}
     </SHeader>
   )
 }

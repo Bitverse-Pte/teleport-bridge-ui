@@ -113,6 +113,7 @@ export default function Spinner({ warning = false, size = '2rem', children }: { 
         height: 100%;
         backdrop-filter: blur(10px);
         z-index: 999;
+        use-select: none;
       `}
       justifyContent="center"
       flexDirection={'column'}
