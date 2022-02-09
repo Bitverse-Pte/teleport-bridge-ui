@@ -122,6 +122,10 @@ export const globalStyle = `
   }
 
   body {
+    height: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     font-family: ${fonts.family.OpenSans};
     font-style: normal;
     font-stretch: normal;

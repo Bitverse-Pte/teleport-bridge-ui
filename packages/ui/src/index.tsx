@@ -8,15 +8,15 @@ import { createGlobalStyle } from 'styled-components'
 
 import App from './App'
 import ThemeProvider from 'theme'
-import { globalStyle } from './styles'
+// import { globalStyle } from './styles'
 import { store } from './store'
 import { RootState, Dispatch } from 'store/store'
 import getLibrary from 'helpers/getLibrary'
 import Web3Manager from 'components/Web3Manager'
 import { NetworkContextName } from 'constants/misc'
-const GlobalStyle = createGlobalStyle`
-  ${globalStyle}
-`
+// const GlobalStyle = createGlobalStyle`
+//   ${globalStyle}
+// `
 
 // const Web3ProviderNetwork = createWeb3ReactRoot(NetworkContextName)
 
@@ -82,7 +82,7 @@ const Web3ProviderNetwork = createWeb3ReactRoot(NetworkContextName)
 
 ReactDOM.render(
   <>
-    <GlobalStyle />
+    {/* <GlobalStyle /> */}
     <Provider store={store}>
       <Web3ReactProvider getLibrary={getLibrary}>
         <Web3ProviderNetwork getLibrary={getLibrary}>
