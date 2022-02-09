@@ -43,7 +43,6 @@ export default function HistoryModal() {
         <UniModalContentWrapper>
           <Flex
             css={css`
-              padding-top: 2rem;
               &::-webkit-scrollbar {
                 width: 0.618rem;
                 background-color: rgba(0, 0, 0, 0);
@@ -58,7 +57,7 @@ export default function HistoryModal() {
             maxHeight={'61.8vh'}
             overflowX={'hidden'}
             overflowY={'auto'}
-            justifyContent={'center'}
+            justifyContent={'flex-start'}
             alignItems={'center'}
           >
             {[...transactions].map((transaction) => {
