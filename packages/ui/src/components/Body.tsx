@@ -115,7 +115,6 @@ const DarkenedSelectorButton = styled(SelectorButton)`
   ${({ lineHeight }) => lineHeight && `line-height: ${String(lineHeight)};`}
   box-shadow: 0px 0px 4px 2px #222529;
   border-radius: 6rem;
-  font-family: IBM Plex Sans;
   font-style: normal;
   // text-transform: capitalize;
 `
@@ -123,7 +122,6 @@ const DarkenedSelectorButton = styled(SelectorButton)`
 const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
   // background: #018d79;
   color: #018d79;
-  font-family: IBM Plex Sans;
   font-style: normal;
   font-weight: normal;
   font-size: 14px;

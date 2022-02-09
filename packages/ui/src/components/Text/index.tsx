@@ -4,7 +4,6 @@ import { Text } from 'rebass'
 import { ThemedText } from 'theme'
 
 export const Text1 = styled(Text)`
-  font-family: IBM Plex Sans;
   font-style: normal;
   font-size: 1.25rem;
   line-height: 1.625rem;
@@ -13,7 +12,6 @@ export const Text1 = styled(Text)`
 `
 
 export const Text2 = styled(Text)`
-  font-family: IBM Plex Sans;
   font-style: normal;
   font-weight: normal;
   font-size: 1.125rem;
@@ -23,7 +21,6 @@ export const Text2 = styled(Text)`
 `
 
 export const Text3 = styled(Text)`
-  font-family: IBM Plex Sans;
   font-style: normal;
   font-size: 1.25rem;
   line-height: 1.625rem;
@@ -32,7 +29,6 @@ export const Text3 = styled(Text)`
 `
 
 export const Text4 = styled(Text)`
-  font-family: IBM Plex Sans;
   font-style: normal;
   font-size: 1.25rem;
   line-height: 1.625rem;
@@ -57,7 +53,6 @@ export const TextPrimary1 = styled(Text)`
 `
 
 export const PrimaryText = styled(Text)`
-  font-family: IBM Plex Sans;
   font-style: normal;
   font-weight: ${({ fontWeight }) => String(fontWeight) ?? 500};
   font-size: ${({ fontSize }) => String(fontSize) ?? '26px'};

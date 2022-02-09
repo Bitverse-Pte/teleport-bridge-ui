@@ -6,7 +6,6 @@ import { Text, Flex } from 'rebass'
 import { infoNoti } from 'helpers/notifaction'
 
 const ColorfulText = styled(Text)<{ color?: string }>`
-  font-family: IBM Plex Sans;
   font-style: normal;
   font-size: 1.25rem;
   line-height: 1.625rem;
