@@ -166,7 +166,7 @@ export default function AppBody({ ...rest }) {
       return availableChains.get(chainId)
     }
   }, [availableChains, chainId])
-  const ready = useMemo(() => connectStatus && active && connectedChain && !!account, [connectStatus, active, account])
+  const ready = useMemo(() => connectStatus && active && connectedChain && !!account, [connectedChain, connectStatus, active, account])
   const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
   }, [availableChains, srcChainId])

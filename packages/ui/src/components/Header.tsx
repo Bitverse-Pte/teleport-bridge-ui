@@ -167,11 +167,11 @@ export default function Header() {
             <Flex>
               <HistoryButton disabled={!ready} />
             </Flex>
-            <NetworkStatus error={!connectedChain} style={{ cursor: 'default', width: 'unset', maxWidth: 'unset', minWidth: '20%', justifyContent: 'space-around' }}>
+            <NetworkStatus error={!connectedChain} style={{ cursor: 'default', width: 'unset', maxWidth: 'unset', minWidth: '20%', justifyContent: 'center' }}>
               {connectedChain && (
                 <>
                   <Icon src={connectedChain?.icon}></Icon>
-                  <Textfit max={20} min={2} mode="single">
+                  <Textfit max={20} min={2} mode="single" style={{ marginLeft: '0.5rem' }}>
                     {connectedChain?.shortName}
                   </Textfit>
                 </>
