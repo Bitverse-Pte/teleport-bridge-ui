@@ -306,11 +306,12 @@ export interface Explorer {
 }
 
 export interface Chain {
+  chain_id: number
   name: string
   chain: string
   icon: string
   rpc: string[]
-  isTele: boolean
+  is_tele: boolean
   transfer?: {
     address: string
     abi: ContractInterface

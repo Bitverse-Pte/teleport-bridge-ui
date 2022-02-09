@@ -353,7 +353,7 @@ export const application = createModel<RootModel>()({
       const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName)?.srcToken
       try {
         if (bridge && tokenInfo) {
-          const targetAddress = bridge.srcChain.isTele || bridge.destChain.isTele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
+          const targetAddress = bridge.srcChain.is_tele || bridge.destChain.is_tele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
           const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
           const receipt = await erc20Contract.approve(targetAddress, parseEther(amount))
           receipt
@@ -391,7 +391,7 @@ export const application = createModel<RootModel>()({
       let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
       try {
         if (bridge && srcToken) {
-          if (bridge.srcChain.isTele || bridge.destChain.isTele) {
+          if (bridge.srcChain.is_tele || bridge.destChain.is_tele) {
             const composedContract = getContract(bridge.srcChain.transfer!.address, bridge.srcChain.transfer!.abi, library!, account!)
             if (srcToken?.isNative) {
               transaction = await composedContract.sendTransferBase(
@@ -566,7 +566,7 @@ export const application = createModel<RootModel>()({
       const bridge = bridgePairs.get(`${srcChainId}-${destChainId}`)
 
       if (!tokenInfo.isNative && bridge) {
-        const targetAddress = bridge.srcChain.isTele || bridge.destChain.isTele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
+        const targetAddress = bridge.srcChain.is_tele || bridge.destChain.is_tele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
         const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
         try {
           const result: EtherBigNumber = await erc20Contract.allowance(account!, targetAddress)
