@@ -33,7 +33,7 @@ const OptionGrid = styled.div`
 
 export default function WalletSelectModal() {
   const {
-    application: { saveConnectStatus, setWalletModalOpen, setWaitWallet },
+    application: { loggedIn, setWalletModalOpen, setWaitWallet },
   } = useDispatch()
   const { connectStatus, walletModalOpen, availableChains } = useSelector((state: RootState) => {
     const { connectStatus, walletModalOpen, availableChains } = state.application
@@ -69,7 +69,7 @@ export default function WalletSelectModal() {
           .then(() => {
             return Promise.resolve()
               .then(() => {
-                saveConnectStatus(true)
+                loggedIn()
               })
               .then(() => setWalletModalOpen(false))
             // logMonitoringEvent({ walletAddress })

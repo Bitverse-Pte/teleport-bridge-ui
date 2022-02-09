@@ -12,7 +12,6 @@ import styled, { StyledComponent } from 'styled-components'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
 import { Hash } from 'components/Hash'
-import Tooltip, { MouseoverTooltip, TooltipProps } from 'components/Tooltip'
 import { TooltippedAmount } from 'components/TooltippedAmount'
 
 const OptionGrid = styled.div`

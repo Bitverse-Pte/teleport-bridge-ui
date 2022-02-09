@@ -18,6 +18,7 @@ import HistorySvg from 'assets/history.svg'
 import WalletSelectModal from 'components/CustomizedModal/WalletSelectModal'
 import HistoryModal from 'components/CustomizedModal/HistoryModal'
 import { Icon } from 'components/Icon'
+import { MouseoverTooltip } from 'components/Tooltip'
 import { HistoryButton } from './Button/HistoryButton'
 import { Hash } from './Hash'
 
@@ -77,7 +78,7 @@ export const AutoColumn = styled.div<{
 export default function Header() {
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const {
-    application: { setHistoryModalOpen, saveConnectStatus, setWalletModalOpen },
+    application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen },
   } = useDispatch()
   const { connectStatus } = useSelector((state: RootState) => pick(state.application, 'connectStatus'))
   const address = useMemo(() => account ?? '', [account])
@@ -85,7 +86,7 @@ export default function Header() {
 
   const logout = useCallback(() => {
     deactivate()
-    saveConnectStatus(false)
+    manuallyLogout()
   }, [])
 
   return (
@@ -115,12 +116,14 @@ export default function Header() {
             <Web3StatusConnected style={{ width: 'unset', maxWidth: 'unset' }}>
               <Flex alignItems="center">
                 <SBlockie address={address} />
-                <Hash ellipsis={true} hash={address} copyable={false} />
+                <MouseoverTooltip text={address}>
+                  <Hash ellipsis={true} hash={address} copyable={false} showCounts={4} />
+                </MouseoverTooltip>
               </Flex>
             </Web3StatusConnected>
           </>
         )}
-        <PrimaryButton onClick={() => (ready ? logout() : setWalletModalOpen(true))}>
+        <PrimaryButton onClick={() => (ready ? logout() : setWalletModalOpen(true))} style={{ margin: '0 0.5rem' }}>
           <Textfit max={20} min={2} mode="single">
             {ready ? 'Logout' : 'Connect'}
           </Textfit>

@@ -16,6 +16,7 @@ import Spinner from 'components/Spinner'
 import { TextPrimary1 } from 'components/Text'
 import { useActiveWeb3React, useDispatch } from 'hooks'
 import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
+import { errorNoti } from 'helpers/notifaction'
 // import { demo } from 'helpers/demo'
 
 const SLayout = styled(Flex)`
@@ -62,7 +63,7 @@ function App() {
     super(props) */
   const { account } = useActiveWeb3React()
   const {
-    application: { initChains, initTransactions, saveConnectStatus },
+    application: { initChains, initTransactions },
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
@@ -77,12 +78,13 @@ function App() {
         setInitStatus(INIT_STATUS.initialized)
       })
       .catch((err) => {
+        errorNoti(`failed to load essential data`)
         setInitStatus(INIT_STATUS.error)
       })
   }, [])
   useEffect(() => {
     account && initTransactions(account)
-    !account && saveConnectStatus(false)
+    // saveConnectStatus(!!account)
   }, [account])
 
   const showBody = useCallback(() => {
@@ -96,7 +98,7 @@ function App() {
           </ErrorBody>
         )
       default:
-        return null
+        return <Spinner />
     }
   }, [waitWallet, initStatus])
 

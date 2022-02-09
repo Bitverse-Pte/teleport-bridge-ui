@@ -14,18 +14,18 @@ const ColorfulText = styled(Text)<{ color?: string }>`
   color: ${({ color }) => color ?? '#ffffff'};
 `
 
-export function Hash({ hash, copyable = false, color, ellipsis = false, ...rest }: { hash: string; color?: string; ellipsis?: boolean; copyable?: boolean }) {
+export function Hash({ hash, copyable = false, color, ellipsis = false, showCounts = 8, ...rest }: { showCounts?: number; hash: string; color?: string; ellipsis?: boolean; copyable?: boolean }) {
   const coptToClipBoard = useCallback(() => {
     hash &&
       navigator.clipboard.writeText(hash).then(() => {
-        infoNoti(`${hash.substring(0, 8)}...${hash.substring(hash.length - 8, hash.length)} has been copied to your clipboard.`)
+        infoNoti(`${hash.substring(0, showCounts)}...${hash.substring(hash.length - showCounts, hash.length)} has been copied to your clipboard.`)
       })
   }, [hash])
   return (
     <Flex>
       <ColorfulText color={color}>
         <Textfit max={20} min={2} mode="single">
-          {ellipsis ? `${hash.substring(0, 8)}...${hash.substring(hash.length - 8, hash.length)}` : hash}
+          {ellipsis ? `${hash.substring(0, showCounts)}...${hash.substring(hash.length - showCounts, hash.length)}` : hash}
         </Textfit>
       </ColorfulText>
 

@@ -325,9 +325,13 @@ export const application = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    saveConnectStatus(connectStatus: boolean) {
-      Store2.set('connect-status', connectStatus)
-      dispatch.application.setConnectStatus(connectStatus)
+    loggedIn() {
+      Store2.set('connect-status', true)
+      dispatch.application.setConnectStatus(true)
+    },
+    manuallyLogout() {
+      Store2.set('connect-status', false)
+      dispatch.application.setConnectStatus(false)
     },
     async initTransactions(account: string) {
       try {
