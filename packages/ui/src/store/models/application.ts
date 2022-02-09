@@ -325,6 +325,10 @@ export const application = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
+    saveDestChainId(chainId: number) {
+      dispatch.application.setDestChainId(chainId)
+      dispatch.application.setNetworkModalMode(NetworkSelectModalMode.CLOSE)
+    },
     changeToken(selectedTokenName: string) {
       dispatch.application.setSelectedTokenName(selectedTokenName)
       dispatch.application.setCurrencySelectModalOpen(false)

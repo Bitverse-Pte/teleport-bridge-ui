@@ -33,7 +33,7 @@ export default function NetworkSelectModal() {
     return { waitWallet, networkModalMode, availableChains, srcChainId, destChainId, connectStatus }
   })
   const {
-    application: { setWaitWallet, setNetworkModalMode, setDestChainId, setSrcChainId, changeNetwork },
+    application: { setWaitWallet, setNetworkModalMode, saveDestChainId, setSrcChainId, changeNetwork },
   } = useDispatch()
   // const fromChainList = useFromChainList()
 
@@ -62,7 +62,7 @@ export default function NetworkSelectModal() {
             <Option
               id={`connect-${chain.name}`}
               onClick={() => {
-                setDestChainId(chain.chainId)
+                saveDestChainId(chain.chainId)
               }}
               key={chain.chainId}
               active={destChainId == chain.chainId}
