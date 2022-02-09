@@ -60,7 +60,7 @@ const NetworkStatus = styled(Web3StatusGeneric)<{ pending?: boolean; error?: boo
   font-weight: 500;
   :hover,
   :focus {
-    ${({ error }) => `background-color: ${darken(0.1, 'red')};`}
+    ${({ error }) => (error ? `background-color: ${darken(0.1, 'red')};` : '')}
     border: 1px solid ${({ theme }) => darken(0.05, theme.bg3)};
     :focus {
       border: 1px solid ${({ pending, theme }) => (pending ? darken(0.1, theme.primary1) : darken(0.1, theme.bg2))};
@@ -180,7 +180,7 @@ export default function Header() {
                 <>
                   <Icon src={connectedChain?.icon}></Icon>
                   <Textfit max={20} min={2} mode="single" style={{ marginLeft: '0.5rem' }}>
-                    {connectedChain?.shortName}
+                    {connectedChain?.name}
                   </Textfit>
                 </>
               )}
