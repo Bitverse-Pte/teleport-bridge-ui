@@ -155,17 +155,16 @@ export default function AppBody({ ...rest }) {
     const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId, transferStatus, transferConfirmationModalOpen, transactionDetailModalOpen } = state.application // avoid to make a too long line
     return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen }
   })
-  const [pending, setPending] = useState(false)
   const [inputError, setInputError] = useState(false)
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
   const fromValueInputRef = useRef<any>({})
   const toValueInputRef = useRef<any>({})
-  const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
+  // const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
   const connectedChain = useMemo(() => {
-    if (chainId) {
+    if (chainId && srcChainId == chainId) {
       return availableChains.get(chainId)
     }
-  }, [availableChains, chainId])
+  }, [availableChains, chainId, srcChainId])
   const ready = useMemo(() => connectStatus && active && connectedChain && !!account, [connectedChain, connectStatus, active, account])
   const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
@@ -203,11 +202,9 @@ export default function AppBody({ ...rest }) {
 
   const updateAllowance = useCallback(
     debounce(async () => {
-      setPending(true)
       if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && selectedTokenPair) {
         fromValueInputRef.current.value && (await judgeAllowance({ value: fromValueInputRef.current.value, tokenInfo: selectedTokenPair?.srcToken }))
       }
-      setPending(false)
     }, 400),
     [fromValueInputRef, selectedTokenPair]
   )

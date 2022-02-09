@@ -22,6 +22,7 @@ import { MouseoverTooltip } from 'components/Tooltip'
 import { HistoryButton } from './Button/HistoryButton'
 import { Hash } from './Hash'
 import { MEDIA_WIDTHS } from 'theme'
+import { NetworkSelectModalMode } from 'constants/types'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -59,6 +60,7 @@ const NetworkStatus = styled(Web3StatusGeneric)<{ pending?: boolean; error?: boo
   font-weight: 500;
   :hover,
   :focus {
+    ${({ error }) => `background-color: ${darken(0.1, 'red')};`}
     border: 1px solid ${({ theme }) => darken(0.05, theme.bg3)};
     :focus {
       border: 1px solid ${({ pending, theme }) => (pending ? darken(0.1, theme.primary1) : darken(0.1, theme.bg2))};
@@ -123,7 +125,7 @@ const ActiveRowWrapper = styled.div`
 export default function Header() {
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
   const {
-    application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen },
+    application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen, setNetworkModalMode },
   } = useDispatch()
   const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = useSelector((state: RootState) => {
     const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = state.application
@@ -167,7 +169,13 @@ export default function Header() {
             <Flex>
               <HistoryButton disabled={!ready} />
             </Flex>
-            <NetworkStatus error={!connectedChain} style={{ cursor: 'default', width: 'unset', maxWidth: 'unset', minWidth: '20%', justifyContent: 'center' }}>
+            <NetworkStatus
+              error={!connectedChain}
+              onClick={() => {
+                !connectedChain && setNetworkModalMode(NetworkSelectModalMode.SRC)
+              }}
+              style={{ cursor: !connectedChain ? 'pointer' : 'default', width: 'unset', maxWidth: 'unset', minWidth: '20%', justifyContent: 'center' }}
+            >
               {connectedChain && (
                 <>
                   <Icon src={connectedChain?.icon}></Icon>

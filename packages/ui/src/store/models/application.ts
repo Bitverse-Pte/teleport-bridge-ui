@@ -603,7 +603,7 @@ export const application = createModel<RootModel>()({
           } catch (err) {
             console.error(err)
             dispatch.application.setCurrentTokenBalance(undefined)
-            warnNoti(`failed to get balance for token: ${selectedTokenPair.srcToken.name} on chain: ${pair.srcChain.name}, will retry.`, 'get-current-token-failed')
+            // warnNoti(`failed to get balance for token: ${selectedTokenPair.srcToken.name} on chain: ${pair.srcChain.name}, will retry.`, 'get-current-token-failed')
             await new Promise((res) => {
               setTimeout(() => {
                 res(undefined)

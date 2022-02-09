@@ -63,7 +63,7 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
 
   useEffect(() => {
     if (pageActive && active && chainId && availableChains.size) {
-      if (chainId && chainId !== srcChainId && !networkModalMode) {
+      if (chainId && chainId !== srcChainId && networkModalMode !== NetworkSelectModalMode.SRC) {
         connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
       }
       /*    if (availableChains.has(chainId)) {

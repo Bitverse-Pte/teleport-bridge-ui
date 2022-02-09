@@ -12,6 +12,7 @@ import { RootState } from 'store/store'
 import { IS_IN_IFRAME, NetworkContextName } from 'constants/misc'
 import { isMobile } from 'helpers/userAgent'
 import { switchToNetwork } from 'helpers/switchToNetwork'
+import { store } from 'store/store'
 
 export function useActiveWeb3React() {
   const context = useWeb3React<Web3Provider>()
@@ -114,9 +115,9 @@ export function useEagerConnect() {
  */
 export function useInactiveListener(suppress = false) {
   const { active, error, activate, library, connector } = useWeb3React()
-  /*   const {
-    application: { setDestChainId, setSrcChainId, setWrongChain },
-  } = useDispatch() */
+  const {
+    application: { setDestChainId, setSrcChainId },
+  } = useDispatch()
   const { srcChainId, destChainId, availableChains } = useSelector((state: RootState) => {
     const { srcChainId, destChainId, availableChains } = state.application
     return { srcChainId, destChainId, availableChains }
@@ -133,13 +134,11 @@ export function useInactiveListener(suppress = false) {
         switchToNetwork({ library, chainId: destinationChain.chain_id })
       } */
 
-      /*   if (chainId != srcChainId) {
-        if (!availableChains.has(parseInt(`${chainId}`))) {
-          setWrongChain(true)
-        } else {
+      if (chainId != srcChainId) {
+        if (store.getState().application.availableChains.has(parseInt(`${chainId}`))) {
           setSrcChainId(parseInt(`${chainId}`))
         }
-      } */
+      }
       activate(injected)
     },
     [srcChainId, availableChains]
