@@ -185,7 +185,7 @@ export default function Header() {
                 </>
               )}
               {!connectedChain && (
-                <Textfit max={20} min={2} mode="single" style={{ fontWeight: 800, width: '60%' }}>
+                <Textfit max={20} min={2} mode="single" style={{ fontWeight: 800, width: '100%' }}>
                   Wrong Network
                 </Textfit>
               )}
