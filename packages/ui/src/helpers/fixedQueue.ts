@@ -25,6 +25,10 @@ export class FixedSizeQueue<T> {
     return this.container[index]
   }
 
+  public isEmpty(): boolean {
+    return !this.container.length
+  }
+
   public push(item: T) {
     if (this.container.length < this.maxSize) {
       this.container.push(item)

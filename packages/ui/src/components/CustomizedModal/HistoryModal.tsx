@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react'
-import { Flex } from 'rebass'
+import { Flex, Text } from 'rebass'
 import { css } from 'styled-components/macro'
 
-import { CircledCloseIcon } from 'components/Icon'
+import { CircledCloseIcon, Icon } from 'components/Icon'
 import { StyledText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { useDispatch } from 'hooks'
 import HistoryRecord from 'components/HistoryRecord'
+import Empty from 'assets/empty.svg'
 
 export default function HistoryModal() {
   const { historyModalOpen, transactionDetailModalOpen, transactions } = useSelector((state: RootState) => {
@@ -53,16 +54,35 @@ export default function HistoryModal() {
               }
             `}
             width="100%"
+            height="100%"
             flexDirection={'column'}
             maxHeight={'61.8vh'}
             overflowX={'hidden'}
             overflowY={'auto'}
-            justifyContent={'flex-start'}
+            justifyContent={transactions.isEmpty() ? 'center' : 'flex-start'}
             alignItems={'center'}
           >
-            {[...transactions].map((transaction) => {
-              return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
-            })}
+            {transactions.isEmpty() && (
+              <>
+                <Icon src={Empty} size={100}></Icon>
+                <Text
+                  css={css`
+                    font-style: normal;
+                    font-size: 1.25rem;
+                    line-height: 1.625rem;
+                    text-transform: capitalize;
+                    color: gray;
+                    font-weight: 700;
+                  `}
+                >
+                  No Data
+                </Text>
+              </>
+            )}
+            {!transactions.isEmpty() &&
+              [...transactions].map((transaction) => {
+                return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
+              })}
           </Flex>
         </UniModalContentWrapper>
       </Flex>
