@@ -28,38 +28,31 @@ const Message = styled.h2`
 
 export default function Web3Manager({ children }: { children: JSX.Element }) {
   const {
-    application: { /* setDestinationChain, */ setLibrary, setAccount, setPageActive, changeNetwork, setNetworkModalMode, setSrcChainId },
+    application: { /* setDestinationChain, */ setLibrary, setAccount, changeNetwork, setNetworkModalMode, setSrcChainId },
   } = useDispatch()
 
-  const { connectStatus, availableChains, pageActive, srcChainId, networkModalMode } = useSelector((state: RootState) => {
-    const { connectStatus, availableChains, pageActive, srcChainId, networkModalMode } = state.application
-    return { connectStatus, availableChains, pageActive, srcChainId, networkModalMode }
+  const { connectStatus, availableChains, srcChainId, networkModalMode } = useSelector((state: RootState) => {
+    const { connectStatus, availableChains, srcChainId, networkModalMode } = state.application
+    return { connectStatus, availableChains, srcChainId, networkModalMode }
   })
   const { active, chainId, account, library, active: networkActive, error: networkError, activate: activateNetwork, chainId: networkChainId } = useActiveWeb3React()
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect()
 
-  const handleVisibilityChange = useCallback(() => {
+  /*  const handleVisibilityChange = useCallback(() => {
     if (document.visibilityState === 'visible') {
       setPageActive(true)
     } else {
       setPageActive(false)
     }
-    /* if (active && chainId) {
-      if (availableChains.has(chainId)) {
-        setSrcChainId(chainId)
-      } else {
-        changeNetwork({ chainId: availableChains.values().next().value.chainId })
-      }
-    } */
-  }, [])
+  }, []) */
 
-  useEffect(() => {
+  /* useEffect(() => {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [])
+  }, []) */
 
   useEffect(() => {
     if (active && chainId && availableChains.size) {

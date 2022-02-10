@@ -111,7 +111,6 @@ type IAppState = {
   account: string | null | undefined
   // wrongChain: boolean
   selectedTokenName: string
-  pageActive: boolean
   transferStatus: TRANSFER_STATUS
   currentTokenBalance: EtherBigNumber | undefined
   transactions: FixedSizeQueue<TransactionDetail>
@@ -138,7 +137,6 @@ const initialState: IAppState = {
   account: undefined,
   // wrongChain: false,
   selectedTokenName: '',
-  pageActive: true,
   transferStatus: Store2.get('connect-status') ? TRANSFER_STATUS.NO_INPUT : TRANSFER_STATUS.UNCONNECTED,
   currentTokenBalance: undefined,
   transactions: new FixedSizeQueue(10),
@@ -253,12 +251,6 @@ export const application = createModel<RootModel>()({
         ...state,
         destChainId: state.srcChainId,
         srcChainId: state.destChainId,
-      }
-    },
-    setPageActive(state, pageActive: boolean) {
-      return {
-        ...state,
-        pageActive,
       }
     },
     setTransferStatus(state, transferStatus: TRANSFER_STATUS) {
@@ -599,7 +591,7 @@ export const application = createModel<RootModel>()({
       const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
       if (pair) {
         const { tokens } = pair
-        const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName) || tokens[0]
+        const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName) || tokens[0]
         if (selectedTokenPair) {
           try {
             const result = await getBalance(selectedTokenPair.srcToken, library!, account!)

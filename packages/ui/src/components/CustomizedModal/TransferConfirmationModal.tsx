@@ -19,6 +19,7 @@ import CurrencyList from '../Currency/CurrencyList'
 import { getChainData } from 'helpers/chains'
 import { EstimationBlock } from 'components/EstimationBlock'
 import { TransferConfirmationButton } from 'components/Button/TransferConfirmationButton'
+import { StyledLogo } from 'components/Logo'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -81,7 +82,7 @@ export default function TransferConfirmationModal() {
             <Flex justifyContent={'space-between'} color={'white'} width="100%">
               <Flex>
                 <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
-                  <Icon src={sourceChain?.icon} />
+                  {sourceChain?.icon && <StyledLogo size={'1.5rem'} srcs={[sourceChain.icon!]} />}
                 </Flex>
                 <Flex flexDirection={'column'} alignItems={'start'}>
                   <Text1 fontWeight={600}>{sourceChain?.name}</Text1>
@@ -98,7 +99,7 @@ export default function TransferConfirmationModal() {
             <Flex justifyContent={'space-between'} color={'white'} width="100%">
               <Flex>
                 <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
-                  <Icon src={destChain?.icon} />
+                  {destChain?.icon && <StyledLogo size={'1.5rem'} srcs={[destChain.icon!]} />}
                 </Flex>
                 <Flex flexDirection={'column'} alignItems={'start'}>
                   <Text1 fontWeight={600}>{destChain?.name}</Text1>

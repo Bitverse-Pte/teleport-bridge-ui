@@ -8,7 +8,7 @@ import { Text, Box, Flex } from 'rebass'
 import BigNumber from 'bignumber.js'
 import { GreyCard, DarkGreyCard } from 'components/Card'
 import { IChainData, ICurrency, Overwrite, TransactionDetail, TRANSACTION_STATUS } from 'constants/index'
-import { SelectorLogo } from 'components/Logo'
+import { StyledLogo } from 'components/Logo'
 import { ButtonLight } from 'components/Button'
 import { SupportedChains } from 'constants/chains'
 import { useActiveWeb3React } from 'hooks/web3'
@@ -164,7 +164,8 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
   const { srcToken, destToken } = useMemo(() => {
     if (bridgePairs.has(`${transaction.src_chain_id}-${transaction.dest_chain_id}`)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      const { srcToken, destToken } = bridgePairs.get(`${transaction.src_chain_id}-${transaction.dest_chain_id}`)?.tokens.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase() || e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())!
+      const tokens = bridgePairs.get(`${transaction.src_chain_id}-${transaction.dest_chain_id}`)?.tokens
+      const { srcToken, destToken } = tokens!.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase() || e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())!
       return { srcToken, destToken }
     } else {
       return {}
@@ -193,7 +194,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
-              <SelectorLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} interactive={true} src={srcChain!.icon} />
+              <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[srcChain!.icon]} />
               <Textfit mode="single" min={2} max={20} style={{ maxWidth: '61.8%' }}>
                 <SelectorLabel ref={srcChainLabelRef}>{srcChain!.name}</SelectorLabel>
               </Textfit>
@@ -205,7 +206,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
-              <SelectorLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} interactive={true} src={destChain!.icon} />
+              <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[destChain!.icon]} />
               <Textfit mode="single" min={2} max={20} style={{ maxWidth: '61.8%' }}>
                 <SelectorLabel ref={destChainLabelRef}>{destChain!.name}</SelectorLabel>
               </Textfit>

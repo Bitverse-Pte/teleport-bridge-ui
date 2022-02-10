@@ -18,7 +18,7 @@ const TRANSFER_STATUS_BUTTONS_MAP = {
   [TRANSFER_STATUS.UNCONNECTED]: 0,
 }
 
-export const TransferButton = function ({ error }: { error?: boolean }) {
+export const TransferButton = function ({ error, ready }: { error?: boolean; ready: boolean }) {
   const { transferStatus } = useSelector((state: RootState) => {
     const { transferStatus } = state.application
     return { transferStatus }
@@ -100,7 +100,7 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
   }, [transferStatus])
 
   return (
-    <PrimaryButton disabled={disabled || error} width="100%" fontWeight={900} onClick={clickHandler}>
+    <PrimaryButton disabled={!ready || disabled || error} width="100%" fontWeight={900} onClick={clickHandler}>
       <TransitionSpinner style={{ position: 'absolute', left: 'calc(50% - 4rem)' }} show={pending} />
       <Flex
         css={css`

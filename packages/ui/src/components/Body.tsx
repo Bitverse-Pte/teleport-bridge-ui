@@ -162,7 +162,7 @@ export default function AppBody({ ...rest }) {
       return availableChains.get(chainId)
     }
   }, [availableChains, chainId, srcChainId])
-  const ready = useMemo(() => connectStatus && active && connectedChain && !!account, [connectedChain, connectStatus, active, account])
+  const ready = useMemo(() => Boolean(connectStatus && active && connectedChain && !!account), [connectedChain, connectStatus, active, account])
   const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
   }, [availableChains, srcChainId])
@@ -175,7 +175,7 @@ export default function AppBody({ ...rest }) {
     const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
     if (pair) {
       const { tokens } = pair
-      return tokens.find((e) => e.name === selectedTokenName) || tokens[0]
+      return tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName) || tokens[0]
     }
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
@@ -187,6 +187,15 @@ export default function AppBody({ ...rest }) {
 
   useEffect(() => {
     updateBridgeInfo({ srcChainId, destChainId })
+    //update inputs value
+    const fromInput = document.getElementById('fromValueInput')
+    const toInput = document.getElementById('toValueInput')
+    if (fromInput) {
+      ;(fromInput as HTMLInputElement).value = ''
+    }
+    if (toInput) {
+      ;(toInput as HTMLInputElement).value = ''
+    }
   }, [srcChainId, destChainId, bridgePairs])
 
   useEffect(() => {
@@ -213,7 +222,7 @@ export default function AppBody({ ...rest }) {
     }
   }, [srcChainId, destChainId, bridgePairs, selectedTokenName, fromValueInputRef])
 
-  const fromInputChange = useCallback(() => {
+  const judgeBalance = useCallback(() => {
     if (!selectedTokenPair) {
       return
     }
@@ -228,6 +237,17 @@ export default function AppBody({ ...rest }) {
     } else {
       setInputError(false)
     }
+  }, [fromValueInputRef, selectedTokenPair, currentTokenBalance])
+
+  useEffect(() => {
+    judgeBalance()
+  }, [selectedTokenPair, fromValueInputRef, currentTokenBalance])
+
+  const fromInputChange = useCallback(() => {
+    if (!selectedTokenPair) {
+      return
+    }
+    judgeBalance()
     setTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
     if (ready) {
       updateAllowance()
@@ -283,6 +303,7 @@ export default function AppBody({ ...rest }) {
                     interactive={false}
                     width="10rem"
                     onClick={() => setNetworkModalMode(NetworkSelectModalMode.SRC)}
+                    fontWeight={600}
                     fontSize="1rem"
                     lineHeight="1.3125rem"
                     disabled={!ready}
@@ -304,7 +325,7 @@ export default function AppBody({ ...rest }) {
                 </Flex>
                 <Flex>
                   <DarkenedSelectorButton
-                    labelContent={`${selectedTokenPair ? selectedTokenPair!.srcToken.name ?? '' : ''}`}
+                    labelContent={`${selectedTokenPair ? selectedTokenPair!.srcToken.symbol ?? '' : ''}`}
                     logoSrc={selectedTokenPair && selectedTokenPair!.srcToken.logoURI}
                     disabled={!ready || !(connectStatus && account) || !selectedTokenPair}
                     interactive={false}
@@ -343,6 +364,7 @@ export default function AppBody({ ...rest }) {
                     disabled={!ready}
                     labelContent={`${destChain!.name.length > 10 ? destChain?.shortName : destChain?.name || 'Unavailable'}`}
                     logoSrc={destChain && destChain!.icon}
+                    fontWeight={600}
                     interactive={true}
                     onClick={() => setNetworkModalMode(NetworkSelectModalMode.DEST)}
                     // disabled={!ready}
@@ -362,7 +384,7 @@ export default function AppBody({ ...rest }) {
                 </Flex>
                 <Flex>
                   <DarkenedSelectorButton
-                    labelContent={`${selectedTokenPair ? selectedTokenPair!.destToken.name ?? '' : ''}`}
+                    labelContent={`${selectedTokenPair ? selectedTokenPair!.destToken.symbol ?? '' : ''}`}
                     logoSrc={selectedTokenPair && selectedTokenPair!.destToken.logoURI}
                     disabled={true}
                     interactive={false}
@@ -384,7 +406,7 @@ export default function AppBody({ ...rest }) {
                 {pending && <BaseSpinner warning={false} size={'1rem'}></BaseSpinner>}
                 {connectStatus ? 'Transfer' : 'Connect'}
               </PrimaryButton> */}
-              <TransferButton error={inputError} />
+              <TransferButton error={inputError} ready={ready} />
             </Flex>
           </Flex>
         </BodyWrapper>
