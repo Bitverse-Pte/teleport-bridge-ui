@@ -285,7 +285,7 @@ export default function AppBody({ ...rest }) {
             <Container hideInput={false}>
               <Flex width="100%" justifyContent="space-between" height="40px">
                 <Flex alignItems="center" minWidth="60px">
-                  <Text1 fontWeight={600}>Send</Text1>
+                  <Text1 fontWeight={600}>From</Text1>
                 </Flex>
                 <Flex justifyContent="space-between" padding={'0.5rem'}>
                   <BalanceWrapper clickable={!!(ready && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
