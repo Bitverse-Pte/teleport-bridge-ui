@@ -386,7 +386,8 @@ export const application = createModel<RootModel>()({
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      const { srcToken, destToken } = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)!
+      const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)!
+      const { srcToken, destToken } = selectedTokenPair
       const cachedTokenName = selectedTokenName
       let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
       try {
@@ -418,13 +419,13 @@ export const application = createModel<RootModel>()({
           } else {
             const ERC20TransferData = {
               tokenAddress: srcToken.address,
-              receiver: bridge.srcChain.agent?.address, // agent address
-              amount: 1000,
+              receiver: bridge.agent_address, // agent address
+              amount: parseEther(amount),
             }
             const rccTransfer = {
-              tokenAddress: '', // erc20 in teleport
+              tokenAddress: selectedTokenPair.relayToken, // erc20 in teleport
               receiver: account!,
-              amount: 1000,
+              amount: parseEther(amount),
               destChain: bridge.destChain.name, // double jump destChain
               relayChain: '',
             }

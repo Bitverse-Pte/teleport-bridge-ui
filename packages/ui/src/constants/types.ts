@@ -349,12 +349,14 @@ export interface BridgePair {
   destChain: Chain
   srcChain: Chain
   tokens: TokenPair[]
+  agent_address?: string
 }
 
 export interface TokenPair {
   destToken: TokenInfo
   srcToken: TokenInfo
   name: string
+  relayToken?: string
 }
 
 export enum NetworkSelectModalMode {
