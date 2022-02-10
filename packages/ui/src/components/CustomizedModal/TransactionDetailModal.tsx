@@ -13,6 +13,7 @@ import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
 import { Hash } from 'components/Hash'
 import { TooltippedAmount } from 'components/TooltippedAmount'
+import { StyledLogo } from 'components/Logo'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -76,9 +77,9 @@ export default function TransactionDetailModal() {
   const {
     application: { closeTransactionDetailModal },
   } = useDispatch()
-  const { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs } = useSelector((state: RootState) => {
-    const { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs } = state.application
-    return { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs }
+  const { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs, availableChains } = useSelector((state: RootState) => {
+    const { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs, availableChains } = state.application
+    return { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs, availableChains }
   })
 
   const selectedTx = useMemo(() => {
@@ -122,15 +123,18 @@ export default function TransactionDetailModal() {
                   <Text2>You Send</Text2>
                 </Flex>
                 <Flex justifyContent={'space-between'} alignItems={'baseline'}>
-                  <Icon></Icon>
-                  <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
-                    {selectedTx?.src_chain}
-                  </Text1>
+                  <Flex justifyContent={'space-between'} alignItems={'baseline'}>
+                    <StyledLogo size={'1.5rem'} srcs={[availableChains.get(selectedTx.src_chain_id)!.icon!]} />
+                    &nbsp;
+                    <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
+                      {selectedTx?.src_chain}
+                    </Text1>
+                  </Flex>
                   {/* 
                     {new BigNumberJS(balance.toString()).shiftedBy(-currency.decimals).toFixed(4)}
                   */}
                   <TooltippedAmount direction={'-'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.srcToken.decimals).toFixed(4)}`} AmountText={RedAmountText} />
-                  <Text1 color="red">&nbsp;{tokenInfo!.srcToken.name.toUpperCase()}</Text1>
+                  <Text1 color="red">&nbsp;{tokenInfo!.srcToken.symbol.toUpperCase()}</Text1>
                 </Flex>
                 <Flex justifyContent={'space-between'}>
                   <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
@@ -149,12 +153,15 @@ export default function TransactionDetailModal() {
                   <Text2>To</Text2>
                 </Flex>
                 <Flex justifyContent={'space-between'} alignItems={'baseline'}>
-                  <Icon></Icon>
-                  <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
-                    {selectedTx?.dest_chain}
-                  </Text1>
+                  <Flex justifyContent={'space-between'} alignItems={'baseline'}>
+                    <StyledLogo size={'1.5rem'} srcs={[availableChains.get(selectedTx.dest_chain_id)!.icon!]} />
+                    &nbsp;
+                    <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
+                      {selectedTx?.dest_chain}
+                    </Text1>
+                  </Flex>
                   <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
-                  <Text1 color="green">&nbsp;{tokenInfo!.destToken.name.toUpperCase()}</Text1>
+                  <Text1 color="green">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
                 </Flex>
                 <Flex justifyContent={'space-between'}>
                   <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>

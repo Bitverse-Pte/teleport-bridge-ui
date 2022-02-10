@@ -350,7 +350,7 @@ export const application = createModel<RootModel>()({
       const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChain?.destChains.find((e) => e.chainId === destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
-      const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName)?.srcToken
+      const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)!.srcToken
       try {
         if (bridge && tokenInfo) {
           const targetAddress = bridge.srcChain.is_tele || bridge.destChain.is_tele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
@@ -386,7 +386,7 @@ export const application = createModel<RootModel>()({
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      const { srcToken, destToken } = bridge?.tokens.find((e) => e.name === selectedTokenName)!
+      const { srcToken, destToken } = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)!
       const cachedTokenName = selectedTokenName
       let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
       try {
