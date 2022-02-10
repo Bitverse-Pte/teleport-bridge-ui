@@ -256,7 +256,7 @@ export default function Header() {
           </>
         )}
         {!ready && (
-          <PrimaryButton onClick={() => setWalletModalOpen(true)} style={{ margin: '0 0.5rem' }}>
+          <PrimaryButton onClick={() => setWalletModalOpen(true)} style={{ margin: '0 0.5rem', width: '30%', minWidth: 'fit-content' }}>
             <Text1 /*  max={20} min={2} mode="single" */ style={{ width: '60%' }}>Connect</Text1>
           </PrimaryButton>
         )}
