@@ -3,7 +3,7 @@ import { Box, Flex } from 'rebass'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 
-import Option from 'components/Option'
+import Option, { OPTION_TYPE } from 'components/Option'
 import { CircledCloseIcon } from 'components/Icon'
 import { PrimaryText, StyledText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
@@ -53,6 +53,7 @@ export default function NetworkSelectModal() {
               header={chain.name}
               subheader={null} //use option.descriptio to bring back multi-line
               icon={chain.icon}
+              type={OPTION_TYPE.NETWORK}
             />
           )
         })
@@ -70,6 +71,7 @@ export default function NetworkSelectModal() {
               header={chain.name}
               subheader={null} //use option.descriptio to bring back multi-line
               icon={chain.icon}
+              type={OPTION_TYPE.NETWORK}
             />
           )
         })

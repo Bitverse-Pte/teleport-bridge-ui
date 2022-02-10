@@ -10,7 +10,7 @@ import MetamaskIcon from 'assets/images/metamask.png'
 import { CircledCloseIcon } from 'components/Icon'
 import { StyledText, PrimaryText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
-import Option from 'components/Option'
+import Option, { OPTION_TYPE } from 'components/Option'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected, portis } from 'connectors'
 import { isMobile } from 'helpers/userAgent'
@@ -118,6 +118,7 @@ export default function WalletSelectModal() {
               header={option.name}
               subheader={null}
               icon={option.iconURL}
+              type={OPTION_TYPE.WALLET}
             />
           )
         }
@@ -129,7 +130,7 @@ export default function WalletSelectModal() {
         // don't show injected if there's no injected provider
         if (!(window.web3 || window.ethereum)) {
           if (option.name === 'MetaMask') {
-            return <Option id={`connect-${key}`} key={key} color={'#E8831D'} header={<Text>Install Metamask</Text>} subheader={null} link={'https://metamask.io/'} icon={MetamaskIcon} />
+            return <Option id={`connect-${key}`} type={OPTION_TYPE.WALLET} key={key} color={'#E8831D'} header={<Text>Install Metamask</Text>} subheader={null} link={'https://metamask.io/'} icon={MetamaskIcon} />
           } else {
             return null //dont want to return install twice
           }
@@ -160,6 +161,7 @@ export default function WalletSelectModal() {
             header={option.name}
             subheader={null} //use option.descriptio to bring back multi-line
             icon={option.iconURL}
+            type={OPTION_TYPE.WALLET}
           />
         )
       )

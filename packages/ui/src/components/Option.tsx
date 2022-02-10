@@ -102,6 +102,11 @@ const IconWrapper = styled.div<{ size?: number | null }>`
   `};
 `
 
+export enum OPTION_TYPE {
+  WALLET = 'WALLET',
+  NETWORK = 'NETWORK',
+}
+
 export default function Option({
   link = null,
   clickable = true,
@@ -113,6 +118,7 @@ export default function Option({
   icon,
   active = false,
   id,
+  type,
 }: {
   link?: string | null
   clickable?: boolean
@@ -124,6 +130,7 @@ export default function Option({
   icon: string
   active?: boolean
   id: string
+  type: OPTION_TYPE
 }) {
   const content = (
     <OptionCardClickable id={id} onClick={onClick} clickable={clickable && !active} active={active}>
@@ -144,9 +151,12 @@ export default function Option({
         </HeaderText>
         {subheader && <SubHeader>{subheader}</SubHeader>}
       </OptionCardLeft>
-      <IconWrapper size={size}>
-        <img src={icon} alt={'Icon'} />
-      </IconWrapper>
+      {type === OPTION_TYPE.WALLET && (
+        <IconWrapper size={size}>
+          <img src={icon} alt={'Icon'} />
+        </IconWrapper>
+      )}
+      {type === OPTION_TYPE.NETWORK && <StyledLogo size={'1.5rem'} srcs={[icon]}></StyledLogo>}
     </OptionCardClickable>
   )
   if (link) {
