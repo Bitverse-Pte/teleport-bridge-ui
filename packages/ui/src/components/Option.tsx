@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components/macro'
 import ExternalLink from './ExternalLink'
+import { StyledLogo } from 'components/Logo'
 
 const InfoCard = styled.button<{ active?: boolean }>`
   background-color: ${({ theme, active }) => (active ? theme.bg3 : theme.bg2)};
@@ -104,7 +105,7 @@ const IconWrapper = styled.div<{ size?: number | null }>`
 export default function Option({
   link = null,
   clickable = true,
-  size,
+  size = '1.5rem',
   onClick = null,
   color,
   header,
@@ -115,7 +116,7 @@ export default function Option({
 }: {
   link?: string | null
   clickable?: boolean
-  size?: number | null
+  size?: number | string | null
   onClick?: null | (() => void)
   color: string
   header: React.ReactNode
@@ -143,9 +144,7 @@ export default function Option({
         </HeaderText>
         {subheader && <SubHeader>{subheader}</SubHeader>}
       </OptionCardLeft>
-      <IconWrapper size={size}>
-        <img src={icon} alt={'Icon'} />
-      </IconWrapper>
+      <StyledLogo srcs={[icon]} size={`${size}`}></StyledLogo>
     </OptionCardClickable>
   )
   if (link) {

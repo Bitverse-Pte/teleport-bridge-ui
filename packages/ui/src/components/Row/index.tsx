@@ -27,6 +27,9 @@ export const SpaceBetweenRow = styled(Row)`
 export const HorizontalCenterRow = styled(Row)`
   justify-content: center;
 `
+export const HorizontalSpaceAroundRow = styled(Row)`
+  justify-content: space-around;
+`
 
 export const RowFixed = styled(Row)<{ gap?: string; justify?: string }>`
   width: fit-content;
