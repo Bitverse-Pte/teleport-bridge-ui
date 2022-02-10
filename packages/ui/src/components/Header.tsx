@@ -199,7 +199,7 @@ export default function Header() {
             <NetworkStatus
               error={!connectedChain}
               onClick={() => {
-                !connectedChain && setNetworkModalMode(NetworkSelectModalMode.SRC)
+                setNetworkModalMode(NetworkSelectModalMode.SRC)
               }}
               style={{ width: '30%', cursor: !connectedChain ? 'pointer' : 'default', justifyContent: 'center' }}
             >
@@ -237,13 +237,13 @@ export default function Header() {
                   ref={flyoutMenuRef}
                   style={{ overflow: 'hidden' }}
                 >
-                  <ActiveRowWrapper
+                  {/*    <ActiveRowWrapper
                     onClick={() => {
                       setWalletModalOpen(true)
                     }}
                   >
-                    <Text1 /* max={20} min={2} mode="single" */ style={{ fontWeight: 800, width: '100%' }}>Change Wallet</Text1>
-                  </ActiveRowWrapper>
+                    <Text1  style={{ fontWeight: 800, width: '100%' }}>Change Wallet</Text1>
+                  </ActiveRowWrapper> */}
                   <ActiveRowWrapper
                     onClick={() => {
                       logout()
