@@ -114,14 +114,15 @@ export function useEagerConnect() {
  * and out after checking what network theyre on
  */
 export function useInactiveListener(suppress = false) {
-  const { active, error, activate, library, connector } = useWeb3React()
+  const { active, error, activate, account, library, connector } = useWeb3React()
   const {
-    application: { setDestChainId, setSrcChainId },
+    application: { setDestChainId, setSrcChainId, resetWhenAccountChange },
   } = useDispatch()
   const { srcChainId, destChainId, availableChains } = useSelector((state: RootState) => {
     const { srcChainId, destChainId, availableChains } = state.application
     return { srcChainId, destChainId, availableChains }
   })
+  const [cachedAccount, setCachedAccount] = useState('')
   const handleConnect = useCallback(() => {
     console.log("Handling 'connect' event")
     activate(injected)
@@ -153,6 +154,14 @@ export function useInactiveListener(suppress = false) {
     console.log("Handling 'networkChanged' event with payload", networkId)
     activate(injected)
   }, [])
+
+  useEffect(() => {
+    if (account && account != cachedAccount) {
+      resetWhenAccountChange(undefined)
+    }
+    account && setCachedAccount(account)
+  }, [account, cachedAccount])
+
   useEffect(() => {
     const { ethereum } = window
     if (ethereum && ethereum.on) {

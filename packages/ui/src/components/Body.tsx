@@ -285,7 +285,7 @@ export default function AppBody({ ...rest }) {
                     onClick={() => setNetworkModalMode(NetworkSelectModalMode.SRC)}
                     fontSize="1rem"
                     lineHeight="1.3125rem"
-                    // disabled={!ready}
+                    disabled={!ready}
                   />
                 </Flex>
                 <Flex flex={1} padding="0 1rem">

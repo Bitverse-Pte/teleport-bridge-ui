@@ -64,7 +64,14 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
   useEffect(() => {
     if (pageActive && active && chainId && availableChains.size) {
       if (chainId && chainId !== srcChainId && networkModalMode !== NetworkSelectModalMode.SRC) {
-        connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
+        if (!(window.web3 || window.ethereum)) {
+          return
+        }
+        if (availableChains.has(chainId)) {
+          changeNetwork({ chainId: chainId })
+          return
+        }
+        account && connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
       }
       /*    if (availableChains.has(chainId)) {
         chainId && chainId !== srcChainId && changeNetwork({ chainId: chainId })
@@ -73,7 +80,7 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
         connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
       } */
     }
-  }, [pageActive, active, chainId, availableChains, connectStatus])
+  }, [pageActive, active, chainId, availableChains, connectStatus, account])
 
   useEffect(() => {
     setLibrary(library)

@@ -695,6 +695,18 @@ export const application = createModel<RootModel>()({
       }
       dispatch.application.setTransactions(transactions)
     },
+    resetWhenAccountChange(rest = {}, state) {
+      dispatch.application.setCurrentTokenBalance(undefined)
+      dispatch.application.saveCurrentTokenBalance(undefined)
+      const fromInput = document.getElementById('fromValueInput')
+      const toInput = document.getElementById('toValueInput')
+      if (fromInput) {
+        ;(fromInput as HTMLInputElement).value = ''
+      }
+      if (toInput) {
+        ;(toInput as HTMLInputElement).value = ''
+      }
+    },
   }),
 })
 
