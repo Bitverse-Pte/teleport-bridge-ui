@@ -142,7 +142,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
   })
 
   const {
-    application: { openTransactionDetailModal },
+    application: { openTransactionDetailModal, updateBridgeInfo },
   } = useDispatch()
 
   const srcChainLabelRef = useRef<any>()
@@ -162,10 +162,12 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
   }, [availableChains, transaction])
 
   const { srcToken, destToken } = useMemo(() => {
-    if (bridgePairs.has(`${transaction.src_chain_id}-${transaction.dest_chain_id}`)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      const tokens = bridgePairs.get(`${transaction.src_chain_id}-${transaction.dest_chain_id}`)?.tokens
-      const { srcToken, destToken } = tokens!.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase() || e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())!
+    const key = `${transaction.src_chain_id}-${transaction.dest_chain_id}`
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    const tokens = bridgePairs.get(key)?.tokens
+    const target = tokens!.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase() || e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())!
+    if (target) {
+      const { srcToken, destToken } = target
       return { srcToken, destToken }
     } else {
       return {}

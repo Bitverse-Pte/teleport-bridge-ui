@@ -48,12 +48,12 @@ enum TransferConfirmButtonStatus {
 }
 
 export const TransferConfirmationButton = function () {
-  const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account } = useSelector((state: RootState) => {
-    const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account } = state.application
-    return { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account }
+  const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account, currentTokenBalance } = useSelector((state: RootState) => {
+    const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account, currentTokenBalance } = state.application
+    return { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account, currentTokenBalance }
   })
   const {
-    application: { transferTokens },
+    application: { transferTokens, saveCurrentTokenBalance },
   } = useDispatch()
   const [lastEstimationId, setLastEstimationId] = useState(0)
   useEffect(() => {
@@ -118,7 +118,9 @@ export const TransferConfirmationButton = function () {
     } else {
       setButtonStatus(TransferConfirmButtonStatus.MANUALLY_ACCEPTED)
     }
-    const selectedToken = bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((token) => token.name === selectedTokenName)?.srcToken
+
+    saveCurrentTokenBalance(undefined)
+    /*  const selectedToken = bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((token) => token.name === selectedTokenName)?.srcToken
     getBalance(selectedToken, library!, account!).then((balance) => {
       const input = document.getElementById('fromValueInput') as HTMLInputElement
       if (input) {
@@ -128,8 +130,20 @@ export const TransferConfirmationButton = function () {
           setButtonStatus(TransferConfirmButtonStatus.INVALID_BALANCE)
         }
       }
-    })
+    }) */
   }, [lastEstimationId, estimation?.id])
+
+  useEffect(() => {
+    const input = document.getElementById('fromValueInput') as HTMLInputElement
+    if (input && currentTokenBalance) {
+      const selectedToken = bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((token) => token.name === selectedTokenName || token.srcToken.name === selectedTokenName || token.destToken.name === selectedTokenName)?.srcToken
+      const parsedCurrentTokenBalance = new BigNumber(currentTokenBalance!.toHexString()).div(`1e+${selectedToken!.decimals}`)
+      const parsedInputValue = new BigNumber(input.value)
+      if (parsedCurrentTokenBalance.isLessThan(parsedInputValue) || parsedInputValue.isNegative()) {
+        setButtonStatus(TransferConfirmButtonStatus.INVALID_BALANCE)
+      }
+    }
+  }, [currentTokenBalance, selectedTokenName, srcChainId, destChainId])
 
   return (
     <Wrapper>

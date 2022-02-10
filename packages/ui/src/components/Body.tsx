@@ -146,7 +146,7 @@ const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { stopUpdateEstimation, startUpdateEstimation, setTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, updateBridgeInfo, turnOverSrcAndDestChain },
+    application: { stopUpdateEstimation, startUpdateEstimation, setTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, turnOverSrcAndDestChain },
   } = useDispatch()
   const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen } = useSelector((state: RootState) => {
     const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId, transferStatus, transferConfirmationModalOpen, transactionDetailModalOpen } = state.application // avoid to make a too long line
@@ -186,7 +186,7 @@ export default function AppBody({ ...rest }) {
   }, [ready, fromValueInputRef.current])
 
   useEffect(() => {
-    updateBridgeInfo({ srcChainId, destChainId })
+    // updateBridgeInfo({ srcChainId, destChainId })
     //update inputs value
     const fromInput = document.getElementById('fromValueInput')
     const toInput = document.getElementById('toValueInput')
@@ -196,7 +196,7 @@ export default function AppBody({ ...rest }) {
     if (toInput) {
       ;(toInput as HTMLInputElement).value = ''
     }
-  }, [srcChainId, destChainId, bridgePairs])
+  }, [srcChainId, destChainId])
 
   useEffect(() => {
     if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {

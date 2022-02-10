@@ -105,7 +105,7 @@ const IconWrapper = styled.div<{ size?: number | null }>`
 export default function Option({
   link = null,
   clickable = true,
-  size = '1.5rem',
+  size = 24,
   onClick = null,
   color,
   header,
@@ -116,7 +116,7 @@ export default function Option({
 }: {
   link?: string | null
   clickable?: boolean
-  size?: number | string | null
+  size?: number | null
   onClick?: null | (() => void)
   color: string
   header: React.ReactNode
@@ -144,7 +144,9 @@ export default function Option({
         </HeaderText>
         {subheader && <SubHeader>{subheader}</SubHeader>}
       </OptionCardLeft>
-      <StyledLogo srcs={[icon]} size={`${size}`}></StyledLogo>
+      <IconWrapper size={size}>
+        <img src={icon} alt={'Icon'} />
+      </IconWrapper>
     </OptionCardClickable>
   )
   if (link) {

@@ -501,6 +501,7 @@ export const application = createModel<RootModel>()({
       const map = new Map<number, ExtChain>()
       dispatch.application.setSrcChainId(chains[0].chainId)
       try {
+        const subTasks: Promise<void>[] = []
         await Promise.all(
           chains.map(async (chain) => {
             fillRpc(chain)
@@ -509,6 +510,7 @@ export const application = createModel<RootModel>()({
               .then(({ data: destChains }) => {
                 for (const destChain of destChains) {
                   fillRpc(destChain)
+                  subTasks.push(dispatch.application.updateBridgeInfo({ srcChainId: chain.chainId, destChainId: destChain.chainId, extendedUpdate: false }))
                 }
                 map.set(chain.chainId, chain as ExtChain)
                 ;(chain as ExtChain).destChains = destChains
@@ -519,8 +521,10 @@ export const application = createModel<RootModel>()({
               })
           })
         )
-        dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
+        await Promise.all(subTasks)
         dispatch.application.setAvailableChains(map)
+        dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
+        dispatch.application.setSelectedTokenName(store.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
       } catch (err) {
         errorNoti(`failed to load source info from ${AVAILABLE_CHAINS_URL},
               the detail is ${(err as any)?.message}`)
@@ -546,7 +550,8 @@ export const application = createModel<RootModel>()({
         dispatch.application.setNetworkModalMode(NetworkSelectModalMode.CLOSE)
       }
     },
-    async updateBridgeInfo({ srcChainId, destChainId }: { srcChainId: number; destChainId: number }, state) {
+    async updateBridgeInfo({ srcChainId, destChainId, extendedUpdate = true }: { srcChainId: number; destChainId: number; extendedUpdate?: boolean }) {
+      const state = store.getState()
       const key = `${srcChainId}-${destChainId}`
       if (!state.application.bridgePairs.has(key)) {
         const {
@@ -558,8 +563,10 @@ export const application = createModel<RootModel>()({
           }
         })
         state.application.bridgePairs.set(key, { tokens, srcChain, destChain } as BridgePair)
-        dispatch.application.setBridgesPairs(new Map(state.application.bridgePairs))
-        dispatch.application.setSelectedTokenName(tokens[0].name)
+        if (extendedUpdate) {
+          dispatch.application.setBridgesPairs(new Map(state.application.bridgePairs))
+          dispatch.application.setSelectedTokenName(tokens[0].name)
+        }
       }
     },
     async judgeAllowance({ value, tokenInfo }: { value: string; tokenInfo: TokenInfo }, state) {
