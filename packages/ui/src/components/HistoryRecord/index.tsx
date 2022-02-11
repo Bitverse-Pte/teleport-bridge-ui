@@ -145,9 +145,6 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
     application: { openTransactionDetailModal, updateBridgeInfo },
   } = useDispatch()
 
-  const srcChainLabelRef = useRef<any>()
-  const destChainLabelRef = useRef<any>()
-
   const [srcChain, destChain] = useMemo(() => {
     let sc, dc
     for (const chain of availableChains.values()) {
@@ -165,6 +162,9 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
     const key = `${transaction.src_chain_id}-${transaction.dest_chain_id}`
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const tokens = bridgePairs.get(key)?.tokens
+    if (!tokens) {
+      return {}
+    }
     const target = tokens!.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase() || e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())!
     if (target) {
       const { srcToken, destToken } = target
@@ -197,8 +197,8 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
               <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[srcChain!.icon]} />
-              <Textfit mode="single" min={2} max={20} style={{ maxWidth: '61.8%' }}>
-                <SelectorLabel ref={srcChainLabelRef}>{srcChain!.name}</SelectorLabel>
+              <Textfit mode="single" min={2} max={20} style={{ width: '61.8%' }}>
+                {srcChain!.name}
               </Textfit>
               <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToSrcChainBrowserUrl} />
             </ButtonLight>
@@ -209,8 +209,8 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
               <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[destChain!.icon]} />
-              <Textfit mode="single" min={2} max={20} style={{ maxWidth: '61.8%' }}>
-                <SelectorLabel ref={destChainLabelRef}>{destChain!.name}</SelectorLabel>
+              <Textfit mode="single" min={2} max={20} style={{ width: '61.8%' }}>
+                {destChain!.name}
               </Textfit>
               <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToDestChainBrowserUrl} />
             </ButtonLight>

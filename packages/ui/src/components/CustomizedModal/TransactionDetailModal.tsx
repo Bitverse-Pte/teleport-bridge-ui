@@ -124,7 +124,7 @@ export default function TransactionDetailModal() {
                 </Flex>
                 <Flex justifyContent={'space-between'} alignItems={'center'}>
                   <Flex justifyContent={'flex-start'} alignItems={'center'} width="50%">
-                    <StyledLogo size={'1rem'} srcs={[availableChains.get(selectedTx.src_chain_id)!.icon!]} />
+                    <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.src_chain_id)!.icon!]} />
                     &nbsp;
                     <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
                       {selectedTx?.src_chain}
@@ -157,7 +157,7 @@ export default function TransactionDetailModal() {
                 </Flex>
                 <Flex justifyContent={'space-between'} alignItems={'center'}>
                   <Flex justifyContent={'flex-start'} alignItems={'center'} width="50%">
-                    <StyledLogo size={'1rem'} srcs={[availableChains.get(selectedTx.dest_chain_id)!.icon!]} />
+                    <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.dest_chain_id)!.icon!]} />
                     &nbsp;
                     <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
                       {selectedTx?.dest_chain}
