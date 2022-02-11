@@ -45,12 +45,12 @@ const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, mobile, is
     ${({ maxHeight }) =>
       maxHeight &&
       css`
-        max-height: ${maxHeight}vh;
+        max-height: ${typeof maxHeight === 'number' ? maxHeight + 'vh' : maxHeight};
       `}
     ${({ minHeight }) =>
       minHeight &&
       css`
-        min-height: ${minHeight}vh;
+        min-height: ${typeof minHeight === 'number' ? minHeight + 'vh' : minHeight};
       `}
     display: flex;
     border-radius: 20px;
@@ -76,9 +76,9 @@ const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, mobile, is
 interface ModalProps {
   isOpen: boolean
   onDismiss: () => void
-  minHeight?: number | false
+  minHeight?: number | false | string
   maxWidth?: number | string
-  maxHeight?: number
+  maxHeight?: number | string
   initialFocusRef?: React.RefObject<any>
   children?: React.ReactNode
   closeByKeyboard?: boolean

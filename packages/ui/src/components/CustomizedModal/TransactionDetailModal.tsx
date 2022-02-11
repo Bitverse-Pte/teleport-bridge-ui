@@ -97,7 +97,7 @@ export default function TransactionDetailModal() {
   return (
     <UniModal
       isOpen={transactionDetailModalOpen}
-      maxHeight={61.8}
+      maxHeight={'500px'}
       maxWidth={'35rem'}
       onDismiss={() => {
         console.log('dismiss')
