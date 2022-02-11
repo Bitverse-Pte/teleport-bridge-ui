@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { Flex, FlexProps, Text } from 'rebass'
 import { RootState } from 'store'
@@ -13,9 +13,9 @@ const EstimationRow = styled(Flex)`
 `
 
 export function EstimationBlock({ ...rest }: FlexProps) {
-  const { /* estimation, srcChainId, destChainId, bridgePairs, availableChains, */ selectedTokenName, estimationUpdating } = useSelector((state: RootState) => {
-    const { /* estimation, srcChainId, destChainId, bridgePairs, availableChains, */ selectedTokenName, estimationUpdating } = state.application
-    return { /* estimation, srcChainId, destChainId, bridgePairs, availableChains, */ selectedTokenName, estimationUpdating }
+  const { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating } = useSelector((state: RootState) => {
+    const { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating } = state.application
+    return { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating }
   })
   /* const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
@@ -39,6 +39,16 @@ export function EstimationBlock({ ...rest }: FlexProps) {
       }
     }
   }, [])
+  const selectedToken = useMemo(() => {
+    const key = `${srcChainId}-${destChainId}`
+    if (bridgePairs.has(key)) {
+      const targetTokenPair = bridgePairs.get(key)?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)
+      if (targetTokenPair) {
+        return targetTokenPair?.srcToken
+      }
+    }
+  }, [srcChainId, destChainId, bridgePairs, selectedTokenName])
+
   return (
     <Flex
       css={css`
@@ -81,9 +91,9 @@ export function EstimationBlock({ ...rest }: FlexProps) {
           </MouseoverTooltip>
         </Text2>
         <Text3>
-          {amount ? (
+          {amount && selectedToken ? (
             <>
-              {0}&nbsp;{selectedTokenName}
+              {0}&nbsp;{selectedToken?.symbol}
             </>
           ) : (
             <>-</>
@@ -98,9 +108,9 @@ export function EstimationBlock({ ...rest }: FlexProps) {
           </MouseoverTooltip>
         </Text2>
         <Text3>
-          {amount ? (
+          {amount && selectedToken ? (
             <>
-              {amount}&nbsp;{selectedTokenName}
+              {amount}&nbsp;{selectedToken?.symbol}
             </>
           ) : (
             <>-</>

@@ -261,18 +261,11 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           <Box></Box>
           <Flex justifyContent="center" alignItems="center">
             <TooltippedAmount amount={new BigNumber(transaction.amount).shiftedBy(-srcToken.decimals).toFixed(4)} AmountText={AmountText} />
-            {/* <HistoryGrayText>
-              {new BigNumber(transaction.amount).shiftedBy(-srcToken.decimals).toFixed(4)}&nbsp;{srcToken.name}
-            </HistoryGrayText> */}
             <UnitText color="green">&nbsp;{srcToken!.name.toUpperCase()}</UnitText>
           </Flex>
           <Box></Box>
           <Flex justifyContent="center" alignItems="center">
             <TooltippedAmount amount={new BigNumber(transaction.amount).shiftedBy(-destToken.decimals).toFixed(4)} AmountText={AmountText} />
-            {/* 
-            <HistoryGrayText>
-              {new BigNumber(transaction.amount).shiftedBy(-destToken.decimals).toFixed(4)}&nbsp;{srcToken.name}
-            </HistoryGrayText> */}
             <UnitText color="green">&nbsp;{destToken!.name.toUpperCase()}</UnitText>
           </Flex>
           <Flex justifyContent={'center'} alignItems={'center'}>

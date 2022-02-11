@@ -93,7 +93,7 @@ export default function TransferConfirmationModal() {
                 <Text1 fontWeight={600} color="red">
                   -{amount}
                 </Text1>
-                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.name}</Text4>
+                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
               </Flex>
             </Flex>
             <Flex justifyContent={'space-between'} color={'white'} width="100%">
@@ -110,7 +110,7 @@ export default function TransferConfirmationModal() {
                 <Text1 fontWeight={600} color="green">
                   +{amount}
                 </Text1>
-                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.destToken.name}</Text4>
+                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.destToken.symbol}</Text4>
               </Flex>
             </Flex>
             <EstimationBlock width="100%" margin={'1rem 0'} />
