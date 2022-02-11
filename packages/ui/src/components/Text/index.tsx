@@ -17,7 +17,7 @@ export const Text2 = styled(Text)`
   font-size: 1.125rem;
   line-height: 1.4375rem;
   text-transform: capitalize;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.6);
 `
 
 export const Text3 = styled(Text)`

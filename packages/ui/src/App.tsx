@@ -15,7 +15,7 @@ import { RootState } from 'store'
 import Spinner from 'components/Spinner'
 import { TextPrimary1 } from 'components/Text'
 import { useActiveWeb3React, useDispatch } from 'hooks'
-import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
+import { BodyWrapper } from 'components/BodyWrapper'
 import { errorNoti } from 'helpers/notifaction'
 // import { demo } from 'helpers/demo'
 
@@ -40,8 +40,7 @@ const SLayout = styled(Flex)`
 
 const ErrorBody = function ({ children }: { children: ReactNode | ReactNode[] }) {
   return (
-    <Flex flex={1} flexDirection={'column'} justifyContent={'flex-start'} alignItems={'center'}>
-      <MarginTopForBodyContent />
+    <Flex flex={1} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
       <BodyWrapper>{children}</BodyWrapper>
     </Flex>
   )
@@ -95,7 +94,9 @@ function App() {
       case INIT_STATUS.error:
         return (
           <ErrorBody>
-            <TextPrimary1>Error</TextPrimary1>
+            <Flex minHeight={'100%'} width={'100%'} justifyContent={'center'} alignItems={'center'}>
+              <TextPrimary1>Error</TextPrimary1>
+            </Flex>
           </ErrorBody>
         )
       default:

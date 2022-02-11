@@ -19,7 +19,7 @@ import { CurrencyInput } from 'components/Input'
 import { Text1, Text2, DarkGreenText } from 'components/Text'
 import WormHole from 'assets/wormhole.svg'
 import SwitchSvg from 'assets/switch.svg'
-import { BodyWrapper, MarginTopForBodyContent } from 'components/BodyWrapper'
+import { BodyWrapper } from 'components/BodyWrapper'
 import { TransferButton } from 'components/Button/TransferButton'
 import TransferConfirmationModal from 'components/CustomizedModal/TransferConfirmationModal'
 import TransactionDetailModal from 'components/CustomizedModal/TransactionDetailModal'
@@ -278,8 +278,7 @@ export default function AppBody({ ...rest }) {
 
   return (
     <>
-      <Flex flex={1} flexDirection={'column'} justifyContent={'flex-start'} alignItems={'center'}>
-        <MarginTopForBodyContent />
+      <Flex flex={1} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
         <BodyWrapper {...rest}>
           <Flex width="100%" flexDirection="column" justifyContent="space-between">
             <Container hideInput={false}>
