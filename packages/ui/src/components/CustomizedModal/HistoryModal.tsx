@@ -41,7 +41,7 @@ export default function HistoryModal() {
           </StyledText>
           <CircledCloseIcon onClick={() => setHistoryModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
-        <UniModalContentWrapper>
+        <UniModalContentWrapper flex={1}>
           <Flex
             css={css`
               &::-webkit-scrollbar {

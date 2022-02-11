@@ -53,9 +53,9 @@ export function EstimationBlock({ ...rest }: FlexProps) {
     <Flex
       css={css`
         color: white;
-        padding: 2.5rem 1.6rem;
+        padding: 1.6rem 1.6rem;
         width: 80%;
-        height: 10rem;
+        height: 'fit-content';
         background: rgba(0, 0, 0, 0.3);
         border: solid rgba(255, 255, 255, 0.2);
         box-sizing: border-box;

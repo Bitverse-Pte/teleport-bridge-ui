@@ -6,6 +6,8 @@ import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
 import axios from 'axios'
 
+axios.defaults.timeout = 5000
+
 import {
   AVAILABLE_CHAINS_URL,
   DEFAULT_DESTINATION_CHAIN,
@@ -392,6 +394,7 @@ export const application = createModel<RootModel>()({
       let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
       try {
         if (bridge && srcToken) {
+          const parsedAmount = parseEther(amount)
           if (bridge.srcChain.is_tele || bridge.destChain.is_tele) {
             const composedContract = getContract(bridge.srcChain.transfer!.address, bridge.srcChain.transfer!.abi, library!, account!)
             if (srcToken?.isNative) {
@@ -402,14 +405,14 @@ export const application = createModel<RootModel>()({
                   destChain: bridge.destChain.name,
                   relayChain: '',
                 },
-                { value: parseEther(amount) }
+                { value: parsedAmount }
               )
             } else {
               transaction = await composedContract.sendTransferERC20(
                 {
                   tokenAddress: srcToken.address,
                   receiver: account,
-                  amount: parseEther(amount),
+                  amount: parsedAmount,
                   destChain: bridge.destChain.name,
                   relayChain: '',
                 },
@@ -420,12 +423,12 @@ export const application = createModel<RootModel>()({
             const ERC20TransferData = {
               tokenAddress: srcToken.address,
               receiver: bridge.agent_address, // agent address
-              amount: parseEther(amount),
+              amount: parsedAmount,
             }
             const rccTransfer = {
               tokenAddress: selectedTokenPair.relayToken, // erc20 in teleport
               receiver: account!,
-              amount: parseEther(amount),
+              amount: parsedAmount,
               destChain: bridge.destChain.name, // double jump destChain
               relayChain: '',
             }
@@ -442,7 +445,7 @@ export const application = createModel<RootModel>()({
             send_tx_hash: transaction!.hash,
             receiver: account,
             receive_tx_hash: '',
-            amount: parseEther(amount).toHexString(),
+            amount: parsedAmount.toHexString(),
             token: selectedTokenName,
             token_address: srcToken?.isNative ? '' : srcToken.address,
             status: TRANSACTION_STATUS.PENDING,
