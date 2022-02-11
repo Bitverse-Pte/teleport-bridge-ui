@@ -123,18 +123,21 @@ export default function TransactionDetailModal() {
                   <Text2>You Send</Text2>
                 </Flex>
                 <Flex justifyContent={'space-between'} alignItems={'baseline'}>
-                  <Flex justifyContent={'space-between'} alignItems={'baseline'}>
+                  <Flex justifyContent={'flex-start'} alignItems={'baseline'} width="50%">
                     <StyledLogo size={'1.5rem'} srcs={[availableChains.get(selectedTx.src_chain_id)!.icon!]} />
                     &nbsp;
-                    <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
+                    <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={600}>
                       {selectedTx?.src_chain}
                     </Text1>
                   </Flex>
                   {/* 
                     {new BigNumberJS(balance.toString()).shiftedBy(-currency.decimals).toFixed(4)}
                   */}
-                  <TooltippedAmount direction={'-'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.srcToken.decimals).toFixed(4)}`} AmountText={RedAmountText} />
-                  <Text1 color="red">&nbsp;{tokenInfo!.srcToken.symbol.toUpperCase()}</Text1>
+                  <Flex justifyContent={'flex-end'} alignItems={'baseline'} width="50%">
+                    <TooltippedAmount direction={'-'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.srcToken.decimals).toFixed(4)}`} AmountText={RedAmountText} />
+                    &nbsp;
+                    <Text1 color="red">&nbsp;{tokenInfo!.srcToken.symbol.toUpperCase()}</Text1>
+                  </Flex>
                 </Flex>
                 <Flex justifyContent={'space-between'}>
                   <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
@@ -153,15 +156,17 @@ export default function TransactionDetailModal() {
                   <Text2>To</Text2>
                 </Flex>
                 <Flex justifyContent={'space-between'} alignItems={'baseline'}>
-                  <Flex justifyContent={'space-between'} alignItems={'baseline'}>
+                  <Flex justifyContent={'flex-start'} alignItems={'baseline'} width="50%">
                     <StyledLogo size={'1.5rem'} srcs={[availableChains.get(selectedTx.dest_chain_id)!.icon!]} />
                     &nbsp;
-                    <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={900}>
+                    <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={32} fontWeight={600}>
                       {selectedTx?.dest_chain}
                     </Text1>
                   </Flex>
-                  <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
-                  <Text1 color="green">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
+                  <Flex justifyContent={'flex-end'} alignItems={'baseline'} width="50%">
+                    <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
+                    <Text1 color="green">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
+                  </Flex>
                 </Flex>
                 <Flex justifyContent={'space-between'}>
                   <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
