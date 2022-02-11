@@ -80,7 +80,7 @@ export default function HistoryModal() {
               </>
             )}
             {!transactions.isEmpty() &&
-              [...transactions].map((transaction) => {
+              [...transactions].reverse().map((transaction) => {
                 return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
               })}
           </Flex>
