@@ -62,7 +62,7 @@ function App() {
     super(props) */
   const { account } = useActiveWeb3React()
   const {
-    application: { initChains, initTransactions },
+    application: { initChains, initTransactions, setWaitWallet },
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
@@ -100,9 +100,9 @@ function App() {
           </ErrorBody>
         )
       default:
-        return <Spinner />
+        return <Spinner closable={false} showSpinner={true} />
     }
-  }, [waitWallet, initStatus])
+  }, [initStatus])
 
   return (
     <Flex
@@ -120,11 +120,9 @@ function App() {
         <Flex className={'bg2'} flex={1} flexDirection={'column'} justifyContent={'space-between'}>
           <Header />
           {showBody()}
-          {waitWallet && (
-            <Spinner>
-              <TextPrimary1>This DApp is awaiting response from your wallet.</TextPrimary1>
-            </Spinner>
-          )}
+          <Spinner closable={true} showSpinner={waitWallet} setShowSpinner={setWaitWallet}>
+            <TextPrimary1>This DApp is awaiting response from your wallet.</TextPrimary1>
+          </Spinner>
           <ToastContainer pauseOnFocusLoss={true} limit={8} draggable={true} autoClose={10000} theme="dark" />
         </Flex>
       </SLayout>

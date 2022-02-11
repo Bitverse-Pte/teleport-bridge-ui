@@ -1,9 +1,12 @@
 import { PrimaryButton } from 'components/Button'
-import React, { HTMLProps, ReactPropTypes } from 'react'
+import React, { HTMLProps, ReactPropTypes, useEffect, useState } from 'react'
 import { useTransition, config, animated } from '@react-spring/web'
-import reactVirtualizedAutoSizer from 'react-virtualized-auto-sizer'
 import { Flex } from 'rebass'
 import styled, { keyframes, css } from 'styled-components'
+import { useDispatch } from 'hooks'
+import { CloseIcon } from 'components/Icon'
+import { useSelector } from 'react-redux'
+import { RootState } from 'store/store'
 
 const rotate360 = keyframes`
 from {
@@ -103,26 +106,84 @@ export const TransitionSpinnerMask = function ({ show, children, ...rest }: { sh
   )
 }
 
-export default function Spinner({ warning = false, size = '2rem', children }: { warning?: boolean; size?: string | number } & { children?: React.ReactNode }) {
+export default function Spinner({ showSpinner, setShowSpinner, closable = false, warning = false, size = '2rem', children }: { showSpinner: boolean; setShowSpinner?: (showSpinner: boolean) => void; closable?: boolean; warning?: boolean; size?: string | number } & { children?: React.ReactNode }) {
+  const [show, setShow] = useState(false)
+  const [timerId, setTimerId] = useState<number>()
+  const transitions = useTransition(showSpinner, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+    // reverse: show,
+    config: config.molasses,
+    // onRest: () => setPending(!pending),
+  })
+  const closeTransitions = useTransition(show, {
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+    // reverse: show,
+    config: config.molasses,
+    // onRest: () => setPending(!pending),
+  })
+  useEffect(() => {
+    if (!showSpinner) {
+      window.clearTimeout(timerId)
+      setShow(false)
+      setTimerId(0)
+    }
+    if (showSpinner && !timerId) {
+      const timer = window.setTimeout(() => {
+        setShow(true)
+        setTimerId(0)
+      }, 10 * 1000)
+      setTimerId(timer)
+    }
+    return () => {
+      window.clearTimeout(timerId)
+    }
+  }, [showSpinner, timerId])
+
   return (
-    <Flex
-      css={css`
-        position: absolute;
-        background-color: rgba(0, 0, 0, 0.425);
-        width: 100%;
-        height: 100%;
-        backdrop-filter: blur(10px);
-        z-index: 999;
-        > * {
-          use-select: none;
-        }
-      `}
-      justifyContent="center"
-      flexDirection={'column'}
-      alignItems="center"
-    >
-      <BaseSpinner warning={warning} size={`${size}`} />
-      {children && children}
-    </Flex>
+    <>
+      {transitions(({ opacity }, item) => {
+        return (
+          item && (
+            <animated.div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                alignItems: 'center',
+                position: 'absolute',
+                backgroundColor: 'rgba(0, 0, 0, 0.425)',
+                width: '100%',
+                height: '100%',
+                backdropFilter: 'blur(10px)',
+                zIndex: 999,
+                opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1] }),
+              }}
+            >
+              <BaseSpinner warning={warning} size={`${size}`} />
+              <Flex width={'100%'} height={'1rem'}></Flex>
+              {children && children}
+              {closable &&
+                closeTransitions(
+                  ({ opacity: innerOpacity }, innerItem) =>
+                    innerItem && (
+                      <animated.div style={{ opacity: innerOpacity.to({ range: [0.0, 1.0], output: [0, 1] }) }}>
+                        <CloseIcon
+                          onClick={() => {
+                            setShow(false)
+                            setShowSpinner && setShowSpinner(false)
+                          }}
+                        />
+                      </animated.div>
+                    )
+                )}
+            </animated.div>
+          )
+        )
+      })}
+    </>
   )
 }

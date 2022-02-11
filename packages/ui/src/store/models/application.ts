@@ -374,12 +374,13 @@ export const application = createModel<RootModel>()({
             })
         }
         infoNoti(`sent request to get approval ${amount} of ${selectedTokenName} from chain: ${bridge!.srcChain.name}!`)
+        dispatch.application.setTransferStatus(TRANSFER_STATUS.PENDING_APPROVE)
       } catch (err) {
         console.error(err)
         errorNoti(`failed to approve this amount: ${amount} for token: ${selectedTokenName} on chain: ${bridge!.srcChain.name},
         the detail is ${(err as any)?.message}`)
+        dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
       } finally {
-        dispatch.application.setTransferStatus(TRANSFER_STATUS.PENDING_APPROVE)
         dispatch.application.setWaitWallet(false)
       }
     },
@@ -478,7 +479,7 @@ export const application = createModel<RootModel>()({
           setTimeout(() => {
             dispatch.application.openTransactionDetailModal(transactionDetail.send_tx_hash)
             dispatch.application.setTransactionDetailModalOpen(true)
-          }, 100)
+          }, 0)
           infoNoti(`sent request to transfer ${amount} of ${selectedTokenName} from chain: ${bridge.srcChain.name} to chain ${bridge.destChain.name}!`, transaction!.hash) as number
           const fromInput = document.getElementById('fromValueInput')
           const toInput = document.getElementById('toValueInput')
