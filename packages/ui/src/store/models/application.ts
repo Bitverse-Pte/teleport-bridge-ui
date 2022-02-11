@@ -6,6 +6,8 @@ import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
 import axios from 'axios'
 
+import { ZERO_ADDRESS } from 'constants/misc'
+
 axios.defaults.timeout = 5000
 
 import {
@@ -447,7 +449,7 @@ export const application = createModel<RootModel>()({
             receive_tx_hash: '',
             amount: parsedAmount.toHexString(),
             token: selectedTokenName,
-            token_address: srcToken?.isNative ? '' : srcToken.address,
+            token_address: srcToken?.isNative ? ZERO_ADDRESS : srcToken.address,
             status: TRANSACTION_STATUS.PENDING,
           } as TransactionDetail
           transactions.push(transactionDetail)
@@ -562,7 +564,7 @@ export const application = createModel<RootModel>()({
           data: { tokens, srcChain, destChain, agent_address },
         } = await axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${srcChainId}/${destChainId}`)
         tokens.forEach((token, index) => {
-          if (!isAddress(tokens[index].srcToken.address)) {
+          if (!isAddress(tokens[index].srcToken.address) || ZERO_ADDRESS == tokens[index].srcToken.address) {
             tokens[index].srcToken.isNative = true
           }
         })
