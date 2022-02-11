@@ -556,14 +556,14 @@ export const application = createModel<RootModel>()({
       const key = `${srcChainId}-${destChainId}`
       if (!state.application.bridgePairs.has(key)) {
         const {
-          data: { tokens, srcChain, destChain },
+          data: { tokens, srcChain, destChain, agent_address },
         } = await axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${srcChainId}/${destChainId}`)
         tokens.forEach((token, index) => {
           if (!isAddress(tokens[index].srcToken.address)) {
             tokens[index].srcToken.isNative = true
           }
         })
-        state.application.bridgePairs.set(key, { tokens, srcChain, destChain } as BridgePair)
+        state.application.bridgePairs.set(key, { tokens, srcChain, destChain, agent_address } as BridgePair)
         if (extendedUpdate) {
           dispatch.application.setBridgesPairs(new Map(state.application.bridgePairs))
           dispatch.application.setSelectedTokenName(tokens[0].name)

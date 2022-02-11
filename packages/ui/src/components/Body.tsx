@@ -141,6 +141,11 @@ const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
         `}
 `
 
+const ShadowIcon = styled(Icon)`
+  box-shadow: 0 0 1px 1px rgb(0 198 169 / 50%);
+  border-radius: ${({ size }) => size / 4 + 'px'};
+`
+
 /**
  * The styled container element that wraps the content of most pages and the tabs.
  */
@@ -339,7 +344,7 @@ export default function AppBody({ ...rest }) {
             </Container>
             <WormHoleWrapper paddingRight="1.5rem">
               <ArrowWrapper clickable={!!connectStatus} onClick={() => turnOverSrcAndDestChain(undefined)}>
-                <Icon size={32} src={SwitchSvg} />
+                <ShadowIcon size={48} src={SwitchSvg} />
               </ArrowWrapper>
             </WormHoleWrapper>
             <Container hideInput={false}>
