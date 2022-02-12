@@ -117,6 +117,7 @@
     "react-app-polyfill": "^2.0.0",
     "react-dev-utils": "^11.0.1",
     "react-dom": "^17.0.2",
+    "react-error-boundary": "^3.1.4",
     "react-feather": "^2.0.9",
     "react-ga": "^3.3.0",
     "react-popper": "^2.2.5",

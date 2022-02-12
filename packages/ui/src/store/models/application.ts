@@ -8,8 +8,6 @@ import axios from 'axios'
 
 import { ZERO_ADDRESS } from 'constants/misc'
 
-axios.defaults.timeout = 5000
-
 import {
   AVAILABLE_CHAINS_URL,
   DEFAULT_DESTINATION_CHAIN,
@@ -529,6 +527,7 @@ export const application = createModel<RootModel>()({
           })
         )
         await Promise.all(subTasks)
+        axios.defaults.timeout = 10000
         dispatch.application.setAvailableChains(map)
         dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
         dispatch.application.setSelectedTokenName(store.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
@@ -712,6 +711,15 @@ export const application = createModel<RootModel>()({
       if (toInput) {
         ;(toInput as HTMLInputElement).value = ''
       }
+    },
+    resetApp(rest = {}, state) {
+      const { setWalletModalOpen, setTransferConfirmationModalOpen, setNetworkModalMode, setHistoryModalOpen, setCurrencySelectModalOpen, setTransactionDetailModalOpen } = dispatch.application
+      setWalletModalOpen(false)
+      setTransferConfirmationModalOpen(false)
+      setNetworkModalMode(NetworkSelectModalMode.CLOSE)
+      setHistoryModalOpen(false)
+      setCurrencySelectModalOpen(false)
+      setTransactionDetailModalOpen(false)
     },
   }),
 })

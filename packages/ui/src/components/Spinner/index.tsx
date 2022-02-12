@@ -114,7 +114,7 @@ export default function Spinner({ showSpinner, setShowSpinner, closable = false,
     enter: { opacity: 1 },
     leave: { opacity: 0 },
     // reverse: show,
-    config: config.molasses,
+    config: config.gentle,
     // onRest: () => setPending(!pending),
   })
   const closeTransitions = useTransition(show, {
@@ -122,7 +122,7 @@ export default function Spinner({ showSpinner, setShowSpinner, closable = false,
     enter: { opacity: 1 },
     leave: { opacity: 0 },
     // reverse: show,
-    config: config.molasses,
+    config: config.gentle,
     // onRest: () => setPending(!pending),
   })
   useEffect(() => {

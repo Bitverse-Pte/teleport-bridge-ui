@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
 import { useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -52,6 +53,21 @@ enum INIT_STATUS {
   error = 'error',
 }
 
+function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  const [showSpinner, setShowSpinner] = useState(true)
+  useEffect(() => {
+    if (!showSpinner) {
+      resetErrorBoundary()
+    }
+  }, [showSpinner])
+  return (
+    <Spinner closable={true} showSpinner={showSpinner} setShowSpinner={setShowSpinner}>
+      <TextPrimary1>TelePort Bridge has encounter some unexpected issue, we recommand you refresh the page, or you can close this mask after 10 seconds.</TextPrimary1>
+      <pre>{error.message}</pre>
+    </Spinner>
+  )
+}
+
 function App() {
   // useConnectStatus()
   // @ts-ignore
@@ -62,7 +78,7 @@ function App() {
     super(props) */
   const { account } = useActiveWeb3React()
   const {
-    application: { initChains, initTransactions, setWaitWallet },
+    application: { initChains, initTransactions, setWaitWallet, resetApp },
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
@@ -90,7 +106,17 @@ function App() {
   const showBody = useCallback(() => {
     switch (initStatus) {
       case INIT_STATUS.initialized:
-        return <Body />
+        return (
+          <ErrorBoundary
+            FallbackComponent={ErrorFallback}
+            onReset={() => {
+              resetApp(undefined)
+              // reset the state of your app so the error doesn't happen again
+            }}
+          >
+            <Body />
+          </ErrorBoundary>
+        )
       case INIT_STATUS.error:
         return (
           <ErrorBody>
