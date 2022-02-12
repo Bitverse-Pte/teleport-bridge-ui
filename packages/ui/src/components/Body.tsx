@@ -151,7 +151,7 @@ const ShadowIcon = styled(Icon)`
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { stopUpdateEstimation, startUpdateEstimation, setTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, turnOverSrcAndDestChain },
+    application: { setSelectedTokenName, stopUpdateEstimation, startUpdateEstimation, setTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, turnOverSrcAndDestChain },
   } = useDispatch()
   const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen } = useSelector((state: RootState) => {
     const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId, transferStatus, transferConfirmationModalOpen, transactionDetailModalOpen } = state.application // avoid to make a too long line
@@ -191,6 +191,13 @@ export default function AppBody({ ...rest }) {
   }, [ready, fromValueInputRef.current])
 
   useEffect(() => {
+    const pairKey = `${srcChainId}-${destChainId}`
+    if (bridgePairs.has(pairKey)) {
+      const selectedPair = bridgePairs.get(pairKey)
+      if (selectedPair && !selectedPair?.tokens.some((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)) {
+        setSelectedTokenName(selectedPair.tokens[0].srcToken.name!)
+      }
+    }
     // updateBridgeInfo({ srcChainId, destChainId })
     //update inputs value
     const fromInput = document.getElementById('fromValueInput')
@@ -201,7 +208,7 @@ export default function AppBody({ ...rest }) {
     if (toInput) {
       ;(toInput as HTMLInputElement).value = ''
     }
-  }, [srcChainId, destChainId])
+  }, [srcChainId, destChainId, bridgePairs, selectedTokenName])
 
   useEffect(() => {
     if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {

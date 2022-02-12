@@ -135,8 +135,9 @@ export const TransferConfirmationButton = function () {
 
   useEffect(() => {
     const input = document.getElementById('fromValueInput') as HTMLInputElement
-    if (input && currentTokenBalance) {
-      const selectedToken = bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((token) => token.name === selectedTokenName || token.srcToken.name === selectedTokenName || token.destToken.name === selectedTokenName)?.srcToken
+    const pairKey = `${srcChainId}-${destChainId}`
+    if (input && currentTokenBalance && bridgePairs.has(pairKey)) {
+      const selectedToken = bridgePairs.get(pairKey)?.tokens.find((token) => token.name === selectedTokenName || token.srcToken.name === selectedTokenName || token.destToken.name === selectedTokenName)?.srcToken
       const parsedCurrentTokenBalance = new BigNumber(currentTokenBalance!.toHexString()).div(`1e+${selectedToken!.decimals}`)
       const parsedInputValue = new BigNumber(input.value)
       if (parsedCurrentTokenBalance.isLessThan(parsedInputValue) || parsedInputValue.isNegative()) {
