@@ -4,8 +4,8 @@ import { RootState } from 'store/store'
 import { useTransition, config, animated, useSprings, useSpringRef, AnimatedProps } from '@react-spring/web'
 import { BaseSpinner, TransitionSpinner } from 'components/Spinner'
 import { PrimaryButton } from '.'
-import { TRANSFER_STATUS } from 'constants/types'
-import { useDispatch } from 'hooks'
+import { NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
+import { useActiveWeb3React, useDispatch } from 'hooks'
 import { Flex } from 'rebass'
 import { css } from 'styled-components/macro'
 
@@ -18,14 +18,28 @@ const TRANSFER_STATUS_BUTTONS_MAP = {
   [TRANSFER_STATUS.UNCONNECTED]: 0,
 }
 
-export const TransferButton = function ({ error, ready }: { error?: boolean; ready: boolean }) {
-  const { transferStatus } = useSelector((state: RootState) => {
-    const { transferStatus } = state.application
-    return { transferStatus }
+export const TransferButton = function ({ error }: { error?: boolean }) {
+  const { account, active, chainId } = useActiveWeb3React()
+  const { transferStatus, connectStatus, availableChains, srcChainId } = useSelector((state: RootState) => {
+    const { transferStatus, connectStatus, availableChains, srcChainId } = state.application
+    return { transferStatus, connectStatus, availableChains, srcChainId }
   })
   const {
-    application: { setWalletModalOpen, setTransferConfirmationModalOpen, transferTokens, approveAmount },
+    application: { setWalletModalOpen, setTransferConfirmationModalOpen, setNetworkModalMode, transferTokens, approveAmount },
   } = useDispatch()
+  const chainReady = useMemo(() => {
+    if (chainId && srcChainId == chainId) {
+      return availableChains.has(+chainId)
+    }
+    return false
+  }, [availableChains, chainId, srcChainId])
+  const walletReady = useMemo(() => transferStatus !== TRANSFER_STATUS.UNCONNECTED, [transferStatus])
+  const btnDisabled = useMemo(() => {
+    if (!walletReady || !chainReady) {
+      return false
+    }
+    return transferStatus === TRANSFER_STATUS.NO_INPUT || error
+  }, [transferStatus, chainReady, walletReady])
 
   const [index, setIndex] = useState(0)
   const transRef = useSpringRef()
@@ -57,8 +71,11 @@ export const TransferButton = function ({ error, ready }: { error?: boolean; rea
   }, [transferStatus])
 
   const clickHandler = useCallback(() => {
-    if (transferStatus === TRANSFER_STATUS.UNCONNECTED) {
+    if (!walletReady) {
       setWalletModalOpen(true)
+    }
+    if (!chainReady) {
+      return setNetworkModalMode(NetworkSelectModalMode.SRC)
     }
     if (transferStatus === TRANSFER_STATUS.READY_TO_TRANSFER) {
       setTransferConfirmationModalOpen(true)
@@ -66,15 +83,19 @@ export const TransferButton = function ({ error, ready }: { error?: boolean; rea
     if (transferStatus === TRANSFER_STATUS.READY_TO_APPROVE) {
       approve()
     }
-  }, [transferStatus])
+  }, [transferStatus, walletReady])
 
   const text = useMemo(() => {
+    if (!walletReady) {
+      return 'Connect'
+    }
+    if (!chainReady) {
+      return 'Choose Available Chain'
+    }
     if (error) {
       return 'Insufficient Balance'
     }
     switch (transferStatus) {
-      case TRANSFER_STATUS.UNCONNECTED:
-        return 'Connect'
       case TRANSFER_STATUS.NO_INPUT:
         return 'Please input your amount.'
       case TRANSFER_STATUS.PENDING_ALLOWANCE:
@@ -86,21 +107,17 @@ export const TransferButton = function ({ error, ready }: { error?: boolean; rea
       default:
         return null
     }
-  }, [transferStatus, error])
+  }, [transferStatus, error, walletReady, chainReady])
 
   const pending = useMemo(() => {
-    if (error) {
+    if (error || !walletReady || !chainReady) {
       return false
     }
     return transferStatus === TRANSFER_STATUS.PENDING_ALLOWANCE || transferStatus === TRANSFER_STATUS.PENDING_APPROVE
-  }, [transferStatus, error])
-
-  const disabled = useMemo(() => {
-    return transferStatus === TRANSFER_STATUS.UNCONNECTED || transferStatus === TRANSFER_STATUS.NO_INPUT
-  }, [transferStatus])
+  }, [transferStatus, error, walletReady, chainReady])
 
   return (
-    <PrimaryButton disabled={!ready || disabled || error} width="100%" fontWeight={900} onClick={clickHandler}>
+    <PrimaryButton disabled={btnDisabled} width="100%" fontWeight={900} onClick={clickHandler}>
       <TransitionSpinner style={{ position: 'absolute', left: 'calc(50% - 4rem)' }} show={pending} />
       <Flex
         css={css`
