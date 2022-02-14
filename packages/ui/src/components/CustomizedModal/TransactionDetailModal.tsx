@@ -116,7 +116,7 @@ export default function TransactionDetailModal() {
           {selectedTx && tokenInfo && (
             <>
               <Wrapper>
-                <StyledStatusMark success={true}>
+                <StyledStatusMark success={!!selectedTx.send_tx_hash}>
                   <StyledCheck size={12} strokeWidth={6} />
                 </StyledStatusMark>
                 <Flex>
@@ -149,7 +149,7 @@ export default function TransactionDetailModal() {
                 </Flex>
               </Wrapper>
               <Wrapper>
-                <StyledStatusMark success={true}>
+                <StyledStatusMark success={!!selectedTx.receive_tx_hash}>
                   <StyledCheck size={12} strokeWidth={6} />
                 </StyledStatusMark>
                 <Flex>
