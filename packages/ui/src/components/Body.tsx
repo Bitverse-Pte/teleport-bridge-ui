@@ -224,7 +224,7 @@ export default function AppBody({ ...rest }) {
         fromValueInputRef.current.value && (await judgeAllowance({ value: fromValueInputRef.current.value, tokenInfo: selectedTokenPair?.srcToken }))
       }
     }, 400),
-    [fromValueInputRef, selectedTokenPair]
+    [fromValueInputRef, selectedTokenPair, ready]
   )
 
   const resetEstimationUpdatePolling = useCallback(() => {
@@ -417,7 +417,7 @@ export default function AppBody({ ...rest }) {
                 {pending && <BaseSpinner warning={false} size={'1rem'}></BaseSpinner>}
                 {connectStatus ? 'Transfer' : 'Connect'}
               </PrimaryButton> */}
-              <TransferButton error={inputError} ready={ready} />
+              <TransferButton error={inputError} />
             </Flex>
           </Flex>
         </BodyWrapper>

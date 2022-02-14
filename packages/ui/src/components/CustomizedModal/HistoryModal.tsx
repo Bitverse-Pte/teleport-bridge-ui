@@ -42,26 +42,7 @@ export default function HistoryModal() {
           <CircledCloseIcon onClick={() => setHistoryModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
         <UniModalContentWrapper flex={1}>
-          <Flex
-            css={css`
-              &::-webkit-scrollbar {
-                width: 0.618rem;
-                background-color: rgba(0, 0, 0, 0);
-              }
-              &::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.15);
-                border-radius: 0.25rem;
-              }
-            `}
-            width="100%"
-            height="100%"
-            flexDirection={'column'}
-            maxHeight={'61.8vh'}
-            overflowX={'hidden'}
-            overflowY={'auto'}
-            justifyContent={transactions.isEmpty() ? 'center' : 'flex-start'}
-            alignItems={'center'}
-          >
+          <Flex width="100%" height="100%" flexDirection={'column'} maxHeight={'61.8vh'} overflowX={'hidden'} overflowY={'auto'} justifyContent={transactions.isEmpty() ? 'center' : 'flex-start'} alignItems={'center'}>
             {transactions.isEmpty() && (
               <>
                 <Icon src={Empty} size={100}></Icon>

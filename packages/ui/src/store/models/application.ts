@@ -397,6 +397,7 @@ export const application = createModel<RootModel>()({
         if (bridge && srcToken) {
           const parsedAmount = parseEther(amount)
           if (bridge.srcChain.is_tele || bridge.destChain.is_tele) {
+            //mono jump
             const composedContract = getContract(bridge.srcChain.transfer!.address, bridge.srcChain.transfer!.abi, library!, account!)
             if (srcToken?.isNative) {
               transaction = await composedContract.sendTransferBase(
@@ -421,20 +422,26 @@ export const application = createModel<RootModel>()({
               )
             }
           } else {
-            const ERC20TransferData = {
-              tokenAddress: srcToken.address,
-              receiver: bridge.agent_address, // agent address
-              amount: parsedAmount,
+            // dual jump
+            if (srcToken.address !== ZERO_ADDRESS || !srcToken.isNative) {
+              //non-native token
+              const ERC20TransferData = {
+                tokenAddress: srcToken.address,
+                receiver: bridge.agent_address, // agent address
+                amount: parsedAmount,
+              }
+              const rccTransfer = {
+                tokenAddress: selectedTokenPair.relayToken, // erc20 in teleport
+                receiver: account!,
+                amount: parsedAmount,
+                destChain: bridge.destChain.name, // double jump destChain
+                relayChain: '',
+              }
+              const proxyContract = getContract(bridge.srcChain.proxy!.address!, bridge.srcChain.proxy!.abi!, library!, account!)
+              transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer) // destChainName : teleport
+            } else {
+              // native token
             }
-            const rccTransfer = {
-              tokenAddress: selectedTokenPair.relayToken, // erc20 in teleport
-              receiver: account!,
-              amount: parsedAmount,
-              destChain: bridge.destChain.name, // double jump destChain
-              relayChain: '',
-            }
-            const proxyContract = getContract(bridge.srcChain.proxy!.address!, bridge.srcChain.proxy!.abi!, library!, account!)
-            transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer) // destChainName : teleport
           }
 
           const transactionDetail = {
@@ -583,7 +590,20 @@ export const application = createModel<RootModel>()({
         const targetAddress = bridge.srcChain.is_tele || bridge.destChain.is_tele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
         const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
         try {
+          let timeoutResolver: (value: any) => void = () => {
+            return void 0
+          }
+          new Promise((resolve, reject) => {
+            timeoutResolver = resolve
+            setTimeout(() => {
+              reject()
+            }, 15 * 1000)
+          }).catch((err) => {
+            warnNoti(`to long time cost by fetching allowance for token: ${tokenInfo.name} on chain: ${bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.name},
+            you'd better reset your amount or refresh the page`)
+          })
           const result: EtherBigNumber = await erc20Contract.allowance(account!, targetAddress)
+          timeoutResolver && timeoutResolver(undefined)
           if (result.gte(parseEther(value))) {
             dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
           } else {
@@ -591,7 +611,7 @@ export const application = createModel<RootModel>()({
           }
         } catch (err) {
           console.error(err)
-          errorNoti(`failed to get allowance for token: ${tokenInfo.name} on chain: ${bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.name},
+          warnNoti(`failed to get allowance for token: ${tokenInfo.name} on chain: ${bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.name},
           detail is ${(err as any)?.message}}`)
           dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
         }
