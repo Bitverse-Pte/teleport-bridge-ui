@@ -50,11 +50,11 @@ const AmountText = styled(Text1)`
 `
 
 const RedAmountText = styled(AmountText)`
-  color: red;
+  color: ${({ theme }) => theme.red1};
 `
 
 const GreenAmountText = styled(AmountText)`
-  color: green;
+  color: ${({ theme }) => theme.green1};
 `
 
 const StyledCheck = styled(Check)`
@@ -90,7 +90,7 @@ export default function TransactionDetailModal() {
 
   const tokenInfo = useMemo(() => {
     if (selectedTx) {
-      return bridgePairs.get(`${selectedTx.src_chain_id}-${selectedTx.dest_chain_id}`)?.tokens.find((e) => e.destToken.address.toLowerCase() === selectedTx.token_address.toLowerCase() || e.srcToken.address.toLowerCase() === selectedTx.token_address.toLowerCase())
+      return bridgePairs.get(`${selectedTx.src_chain_id}-${selectedTx.dest_chain_id}`)?.tokens.find((e) => e.srcToken.address.toLowerCase() === selectedTx.token_address.toLowerCase())
     }
   }, [selectedTx, bridgePairs])
 
@@ -136,7 +136,7 @@ export default function TransactionDetailModal() {
                   <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
                     <TooltippedAmount direction={'-'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.srcToken.decimals).toFixed(4)}`} AmountText={RedAmountText} />
                     &nbsp;
-                    <Text1 color="red">&nbsp;{tokenInfo!.srcToken.symbol.toUpperCase()}</Text1>
+                    <Text1 color="#D25958">&nbsp;{tokenInfo!.srcToken.symbol.toUpperCase()}</Text1>
                   </Flex>
                 </Flex>
                 <Flex justifyContent={'space-between'}>
@@ -165,7 +165,7 @@ export default function TransactionDetailModal() {
                   </Flex>
                   <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
                     <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
-                    <Text1 color="green">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
+                    <Text1 color="#83F2C4">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
                   </Flex>
                 </Flex>
                 <Flex justifyContent={'space-between'}>

@@ -44,7 +44,7 @@ function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number;
   const selectedTokenName = useSelector((state: RootState) => state.application.selectedTokenName)
   const tokenPair = data[index]
   const token = tokenPair.srcToken
-  const isSelected = useMemo(() => tokenPair.name === selectedTokenName || tokenPair.srcToken.name === selectedTokenName || tokenPair.destToken.name === selectedTokenName, [tokenPair, selectedTokenName])
+  const isSelected = useMemo(() => tokenPair.name === selectedTokenName || tokenPair.srcToken.name === selectedTokenName, [tokenPair, selectedTokenName])
   const key = currencyKey(token)
   const [balance, setBalance] = useState<BigNumber | undefined>(undefined)
   useEffect(() => {

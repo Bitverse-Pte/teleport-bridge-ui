@@ -54,7 +54,7 @@ const Web3StatusConnected = styled(Web3StatusGeneric)<{ pending?: boolean }>`
 
 const NetworkStatus = styled(Web3StatusGeneric)<{ pending?: boolean; error?: boolean }>`
   min-width: fit-content;
-  background-color: ${({ error }) => (error ? 'red' : 'transparent')};
+  background-color: ${({ error, theme }) => (error ? theme.red1 : 'transparent')};
   border: 1px solid ${({ pending, theme }) => (pending ? theme.primary1 : theme.bg1)};
   color: ${({ theme }) => theme.white};
   font-weight: 500;

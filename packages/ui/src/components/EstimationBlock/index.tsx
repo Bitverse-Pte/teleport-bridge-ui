@@ -42,7 +42,7 @@ export function EstimationBlock({ ...rest }: FlexProps) {
   const selectedToken = useMemo(() => {
     const key = `${srcChainId}-${destChainId}`
     if (bridgePairs.has(key)) {
-      const targetTokenPair = bridgePairs.get(key)?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)
+      const targetTokenPair = bridgePairs.get(key)?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)
       if (targetTokenPair) {
         return targetTokenPair?.srcToken
       }

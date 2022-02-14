@@ -95,7 +95,7 @@ export const TransferConfirmationButton = function () {
     if (estimation.rate && buttonStatus === TransferConfirmButtonStatus.MANUALLY_ACCEPTED) {
       return 'Confirm'
     } else if (!disabled && buttonStatus === TransferConfirmButtonStatus.NEED_MANUALLY_ACCEPTED) {
-      return 'Accept'
+      return 'Accept(new estimation)'
     } else if (buttonStatus === TransferConfirmButtonStatus.INVALID_BALANCE) {
       return 'Invalid Balance'
     } else {
@@ -137,7 +137,7 @@ export const TransferConfirmationButton = function () {
     const input = document.getElementById('fromValueInput') as HTMLInputElement
     const pairKey = `${srcChainId}-${destChainId}`
     if (input && currentTokenBalance && bridgePairs.has(pairKey)) {
-      const selectedToken = bridgePairs.get(pairKey)?.tokens.find((token) => token.name === selectedTokenName || token.srcToken.name === selectedTokenName || token.destToken.name === selectedTokenName)?.srcToken
+      const selectedToken = bridgePairs.get(pairKey)?.tokens.find((token) => token.name === selectedTokenName || token.srcToken.name === selectedTokenName)?.srcToken
       const parsedCurrentTokenBalance = new BigNumber(currentTokenBalance!.toHexString()).div(`1e+${selectedToken!.decimals}`)
       const parsedInputValue = new BigNumber(input.value)
       if (parsedCurrentTokenBalance.isLessThan(parsedInputValue) || parsedInputValue.isNegative()) {

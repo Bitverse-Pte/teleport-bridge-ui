@@ -135,6 +135,12 @@ export interface TransactionDetail {
 }
 */
 
+export const HistoryChainButton = styled(ButtonLight)`
+  box-shadow: 0 0 0 1pt ${({ theme, disabled }) => !disabled && darken(0.03, theme.bg1)};
+  border: 1px solid ${({ theme }) => theme.bg3};
+  background-color: ${({ theme, disabled }) => !disabled && darken(0.03, theme.bg2)};
+`
+
 export default function HistoryRecord({ transaction }: { transaction: TransactionDetail }) {
   const { availableChains, bridgePairs } = useSelector((state: RootState) => {
     const { availableChains, bridgePairs } = state.application
@@ -195,25 +201,25 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
             <Text width="fit-content">From</Text>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
+            <HistoryChainButton maxWidth="15rem" height="2rem" padding="0.25rem" style={{ cursor: 'default', justifyContent: 'space-around' }}>
               <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[srcChain!.icon]} />
               <Textfit mode="single" min={2} max={20} style={{ width: '61.8%' }}>
                 {srcChain!.name}
               </Textfit>
               <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToSrcChainBrowserUrl} />
-            </ButtonLight>
+            </HistoryChainButton>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'end', paddingRight: '0.5rem', alignItems: 'center' }}>
             <Text>To</Text>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <ButtonLight maxWidth="15rem" height="2rem" padding="0.25rem" style={{ justifyContent: 'space-around' }}>
+            <HistoryChainButton maxWidth="15rem" height="2rem" padding="0.25rem" style={{ cursor: 'default', justifyContent: 'space-around' }}>
               <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[destChain!.icon]} />
               <Textfit mode="single" min={2} max={20} style={{ width: '61.8%' }}>
                 {destChain!.name}
               </Textfit>
               <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToDestChainBrowserUrl} />
-            </ButtonLight>
+            </HistoryChainButton>
           </Box>
           {(() => {
             switch (transaction.status) {
@@ -225,7 +231,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
                         <div />
                       </YellowCircle>
                     </CircleWrapper>
-                    <DarkenedText color="yellow" height="fit-content">
+                    <DarkenedText color="#F2BF6B" height="fit-content">
                       Pending
                     </DarkenedText>
                   </Flex>
@@ -238,7 +244,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
                         <div />
                       </GreenCircle>
                     </CircleWrapper>
-                    <DarkenedText color="green" height="fit-content">
+                    <DarkenedText color="#83F2C4" height="fit-content">
                       Success
                     </DarkenedText>
                   </Flex>
@@ -251,7 +257,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
                         <div />
                       </RedCircle>
                     </CircleWrapper>
-                    <DarkenedText color="red" height="fit-content">
+                    <DarkenedText color="#D25958" height="fit-content">
                       Failed
                     </DarkenedText>
                   </Flex>

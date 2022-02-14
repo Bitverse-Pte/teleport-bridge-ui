@@ -26,7 +26,7 @@ const StyledDialogOverlay = styled(AnimatedDialogOverlay)`
 const AnimatedDialogContent = animated(DialogContent)
 // destructure to not pass custom props to Dialog DOM element
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, mobile, isOpen, ...rest }) => <AnimatedDialogContent {...rest} />).attrs({
+const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, minWidth, mobile, isOpen, ...rest }) => <AnimatedDialogContent {...rest} />).attrs({
   'aria-label': 'dialog',
 })`
   overflow-y: auto;
@@ -42,6 +42,7 @@ const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, mobile, is
     overflow-x: hidden;
     align-self: ${({ mobile }) => (mobile ? 'flex-end' : 'center')};
     max-width: ${({ maxWidth }) => maxWidth ?? '420px'};
+    ${({ minWidth }) => (minWidth ? `min-width: ${minWidth}` : '')};
     ${({ maxHeight }) =>
       maxHeight &&
       css`
@@ -79,13 +80,14 @@ interface ModalProps {
   minHeight?: number | false | string
   maxWidth?: number | string
   maxHeight?: number | string
+  minWidth?: number | string
   initialFocusRef?: React.RefObject<any>
   children?: React.ReactNode
   closeByKeyboard?: boolean
   setIsOpen?(openOrNot: boolean): void
 }
 
-export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30, maxWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard }: ModalProps) {
+export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30, maxWidth, minWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard }: ModalProps) {
   /*   const [{ y }, set] = useSpring(() => ({ y: 0, config: { mass: 1, tension: 210, friction: 20 } }))
   const bind = useGesture({
     onDrag: (state) => {
@@ -140,6 +142,7 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
                 maxWidth={maxWidth}
                 minHeight={minHeight}
                 maxHeight={maxHeight}
+                minWidth={minWidth}
                 mobile={false}
               >
                 {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}

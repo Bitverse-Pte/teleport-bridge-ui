@@ -88,11 +88,11 @@ function colors(darkMode: boolean): Colors {
     secondary3: darkMode ? '#17000b26' : '#FDEAF1',
 
     // other
-    red1: darkMode ? '#FF4343' : '#DA2D2B',
+    red1: darkMode ? '#D25958' : '#DA2D2B',
     red2: darkMode ? '#F82D3A' : '#DF1F38',
     red3: '#D60000',
-    green1: darkMode ? '#27AE60' : '#007D35',
-    yellow1: '#E3A507',
+    green1: darkMode ? '#83F2C4' : '#007D35',
+    yellow1: '#F2BF6B',
     yellow2: '#FF8F00',
     yellow3: '#F3B71E',
     blue1: darkMode ? '#2172E5' : '#0068FC',

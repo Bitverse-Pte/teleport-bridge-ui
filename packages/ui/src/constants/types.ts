@@ -401,3 +401,9 @@ export interface Estimation {
   minReceived: number
   slippage: number
 }
+
+export enum CURRENCY_INPUT_ERROR {
+  INVALID = 'INVALID',
+  INSUFFICIENT = 'INSUFFICIENT',
+  OK = 'OK',
+}

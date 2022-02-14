@@ -5,7 +5,7 @@ import styled, { css } from 'styled-components'
 import { Flex } from 'rebass'
 import { debounce } from 'lodash'
 import BigNumber from 'bignumber.js'
-import { NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
+import { NetworkSelectModalMode, TRANSFER_STATUS, CURRENCY_INPUT_ERROR } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'
 import { SelectorButton, ButtonGray, PrimaryButton } from 'components/Button'
 import { RootState } from 'store/store'
@@ -151,13 +151,13 @@ const ShadowIcon = styled(Icon)`
  */
 export default function AppBody({ ...rest }) {
   const {
-    application: { setSelectedTokenName, stopUpdateEstimation, startUpdateEstimation, setTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, turnOverSrcAndDestChain },
+    application: { setSelectedTokenName, stopUpdateEstimation, startUpdateEstimation, changeTransferStatus, saveCurrentTokenBalance, setNetworkModalMode, setCurrencySelectModalOpen, judgeAllowance, turnOverSrcAndDestChain },
   } = useDispatch()
   const { connectStatus, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, availableChains, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen } = useSelector((state: RootState) => {
     const { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, networkModalMode, currencySelectModalOpen, connectStatus, srcChainId, destChainId, transferStatus, transferConfirmationModalOpen, transactionDetailModalOpen } = state.application // avoid to make a too long line
     return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen }
   })
-  const [inputError, setInputError] = useState(false)
+  const [inputError, setInputError] = useState<CURRENCY_INPUT_ERROR>(CURRENCY_INPUT_ERROR.OK)
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
   const fromValueInputRef = useRef<any>({})
   const toValueInputRef = useRef<any>({})
@@ -180,13 +180,13 @@ export default function AppBody({ ...rest }) {
     const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
     if (pair) {
       const { tokens } = pair
-      return tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName) || tokens[0]
+      return tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName) || tokens[0]
     }
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   useEffect(() => {
     if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && fromValueInputRef.current.value) {
-      setTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
+      changeTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
     }
   }, [ready, fromValueInputRef.current])
 
@@ -194,7 +194,7 @@ export default function AppBody({ ...rest }) {
     const pairKey = `${srcChainId}-${destChainId}`
     if (bridgePairs.has(pairKey)) {
       const selectedPair = bridgePairs.get(pairKey)
-      if (selectedPair && !selectedPair?.tokens.some((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)) {
+      if (selectedPair && !selectedPair?.tokens.some((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)) {
         setSelectedTokenName(selectedPair.tokens[0].srcToken.name!)
       }
     }
@@ -214,7 +214,7 @@ export default function AppBody({ ...rest }) {
     if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
       fromValueInputRef.current.value = undefined
     } else if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && !fromValueInputRef.current.value) {
-      setTransferStatus(TRANSFER_STATUS.NO_INPUT)
+      changeTransferStatus(TRANSFER_STATUS.NO_INPUT)
     }
   }, [ready, fromValueInputRef.current.value])
 
@@ -240,14 +240,17 @@ export default function AppBody({ ...rest }) {
     }
     if (fromValueInputRef.current.value) {
       const parsedCurrentTokenBalance = new BigNumber(currentTokenBalance!.toHexString()).div(`1e+${selectedTokenPair?.srcToken.decimals}`)
+      const currentTokenBaseBit = new BigNumber(1).div(`1e+${selectedTokenPair?.srcToken.decimals}`)
       const parsedValue = new BigNumber(fromValueInputRef.current.value)
-      if (parsedCurrentTokenBalance.isLessThan(parsedValue) || parsedValue.isNegative()) {
-        setInputError(true)
+      if (parsedCurrentTokenBalance.isLessThan(parsedValue)) {
+        setInputError(CURRENCY_INPUT_ERROR.INSUFFICIENT)
+      } else if (parsedValue.isNegative() || parsedValue.isLessThan(currentTokenBaseBit)) {
+        setInputError(CURRENCY_INPUT_ERROR.INVALID)
       } else {
-        setInputError(false)
+        setInputError(CURRENCY_INPUT_ERROR.OK)
       }
     } else {
-      setInputError(false)
+      setInputError(CURRENCY_INPUT_ERROR.OK)
     }
   }, [fromValueInputRef, selectedTokenPair, currentTokenBalance])
 
@@ -260,7 +263,7 @@ export default function AppBody({ ...rest }) {
       return
     }
     judgeBalance()
-    setTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
+    changeTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
     if (ready) {
       updateAllowance()
     }
@@ -326,7 +329,7 @@ export default function AppBody({ ...rest }) {
                     error={inputError}
                     disabled={!ready || !selectedTokenPair || !currentTokenBalance}
                     style={{ fontSize: '2rem', textAlign: 'center' }}
-                    step={selectedTokenPair && Math.pow(10, -(selectedTokenPair?.srcToken.decimals ?? 18))}
+                    min={selectedTokenPair && Math.pow(10, -(selectedTokenPair?.srcToken.decimals ?? 18))}
                     placeholder="0.0"
                     type="number"
                     ref={fromValueInputRef}

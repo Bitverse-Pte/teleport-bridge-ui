@@ -62,20 +62,15 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   }, [showSpinner])
   return (
     <Spinner closable={true} showSpinner={showSpinner} setShowSpinner={setShowSpinner}>
-      <TextPrimary1>TelePort Bridge has encounter some unexpected issue, we recommand you refresh the page, or you can close this mask after 10 seconds.</TextPrimary1>
+      <TextPrimary1>{`TelePort Bridge has encounter some unexpected issue
+         we recommand you refresh the page
+         or you can close this mask after 10 seconds.`}</TextPrimary1>
       <pre>{error.message}</pre>
     </Spinner>
   )
 }
 
 function App() {
-  // useConnectStatus()
-  // @ts-ignore
-  /* public web3Modal: Web3Modal
-  public state: IAppState
-
-  constructor(props: any) {
-    super(props) */
   const { account } = useActiveWeb3React()
   const {
     application: { initChains, initTransactions, setWaitWallet, resetApp },
@@ -84,10 +79,6 @@ function App() {
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
   const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
 
-  /*   useEffect(() => {
-    window.demo = demo
-  }, [])
- */
   useEffect(() => {
     Promise.all([initChains()])
       .then(() => {
@@ -100,7 +91,6 @@ function App() {
   }, [])
   useEffect(() => {
     connectStatus && account && initTransactions(account)
-    // saveConnectStatus(!!account)
   }, [account, connectStatus])
 
   const showBody = useCallback(() => {
@@ -111,7 +101,6 @@ function App() {
             FallbackComponent={ErrorFallback}
             onReset={() => {
               resetApp(undefined)
-              // reset the state of your app so the error doesn't happen again
             }}
           >
             <Body />
@@ -121,7 +110,7 @@ function App() {
         return (
           <ErrorBody>
             <Flex minHeight={'100%'} width={'100%'} justifyContent={'center'} alignItems={'center'}>
-              <TextPrimary1>Error</TextPrimary1>
+              <TextPrimary1>failed to load essential data</TextPrimary1>
             </Flex>
           </ErrorBody>
         )

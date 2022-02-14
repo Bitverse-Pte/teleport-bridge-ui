@@ -56,13 +56,13 @@ export const ButtonPrimary = styled(BaseButton)`
   //   box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.05, theme.primary1)};
   //   background-color: ${({ theme }) => darken(0.05, theme.primary1)};
   // }
-  &:hover {
-    background-color: ${({ theme }) => darken(0.05, theme.primary1)};
-  }
-  &:active {
-    box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.1, theme.primary1)};
-    background-color: ${({ theme }) => darken(0.1, theme.primary1)};
-  }
+  // &:hover {
+  //   background-color: ${({ theme }) => darken(0.05, theme.primary1)};
+  // }
+  // &:active {
+  //   box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.1, theme.primary1)};
+  //   background-color: ${({ theme }) => darken(0.1, theme.primary1)};
+  // }
   &:disabled {
     background-color: ${({ theme, altDisabledStyle, disabled }) => (altDisabledStyle ? (disabled ? theme.primary1 : theme.bg2) : theme.bg2)};
     color: ${({ altDisabledStyle, disabled, theme }) => (altDisabledStyle ? (disabled ? theme.white : theme.text2) : theme.text2)};

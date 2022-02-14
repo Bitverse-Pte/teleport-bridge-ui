@@ -48,7 +48,7 @@ export default function TransferConfirmationModal() {
   }, [destChainId, availableChains])
 
   const selectedTokenPairs = useMemo(() => {
-    return bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((e) => e.name === selectedTokenName)
+    return bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   const amount = useMemo(() => {
@@ -64,6 +64,8 @@ export default function TransferConfirmationModal() {
     <UniModal
       isOpen={transferConfirmationModalOpen}
       maxHeight={61.8}
+      minHeight={'fit-content'}
+      minWidth={'fit-content'}
       onDismiss={() => {
         console.log('dismiss')
       }}
@@ -77,40 +79,48 @@ export default function TransferConfirmationModal() {
           </StyledText>
           <CircledCloseIcon onClick={() => setTransferConfirmationModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex>
-        <UniModalContentWrapper>
-          <Flex flex={1} flexDirection={'column'} justifyContent="center">
-            <Flex justifyContent={'space-between'} color={'white'} width="100%">
-              <Flex>
+        <UniModalContentWrapper minWidth={'fit-content'}>
+          <Flex flex={1} minWidth={'fit-content'} flexDirection={'column'} justifyContent="center">
+            <Flex minWidth={'fit-content'} justifyContent={'space-between'} color={'white'} width="100%">
+              <Flex minWidth={'fit-content'} marginRight="1rem">
                 <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
                   {sourceChain?.icon && <StyledLogo size={'1.5rem'} srcs={[sourceChain.icon!]} />}
                 </Flex>
-                <Flex flexDirection={'column'} alignItems={'start'}>
-                  <Text1 fontWeight={600}>{sourceChain?.name}</Text1>
-                  <Text4 fontSize={'0.5rem'}>Source Chain</Text4>
+                <Flex flexDirection={'column'} minWidth={'fit-content'} alignItems={'start'}>
+                  <Text1 style={{ whiteSpace: 'nowrap' }} minWidth={'fit-content'} fontWeight={600}>
+                    {sourceChain?.name}
+                  </Text1>
+                  <Text4 minWidth={'fit-content'} style={{ whiteSpace: 'nowrap' }} fontSize={'0.5rem'}>
+                    Source Chain
+                  </Text4>
                 </Flex>
               </Flex>
-              <Flex flexDirection={'column'}>
-                <Text1 fontWeight={600} color="red">
+              <Flex flexDirection={'column'} minWidth={'fit-content'}>
+                <Text1 fontWeight={600} color="#D25958" minWidth={'fit-content'}>
                   -{amount}
                 </Text1>
                 <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
               </Flex>
             </Flex>
-            <Flex justifyContent={'space-between'} color={'white'} width="100%">
-              <Flex>
+            <Flex minWidth={'fit-content'} justifyContent={'space-between'} color={'white'} width="100%">
+              <Flex minWidth={'fit-content'} marginRight="1rem">
                 <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
                   {destChain?.icon && <StyledLogo size={'1.5rem'} srcs={[destChain.icon!]} />}
                 </Flex>
-                <Flex flexDirection={'column'} alignItems={'start'}>
-                  <Text1 fontWeight={600}>{destChain?.name}</Text1>
-                  <Text4 fontSize={'0.5rem'}>Destination Chain</Text4>
+                <Flex flexDirection={'column'} minWidth={'fit-content'} alignItems={'start'}>
+                  <Text1 style={{ whiteSpace: 'nowrap' }} minWidth={'fit-content'} fontWeight={600}>
+                    {destChain?.name}
+                  </Text1>
+                  <Text4 minWidth={'fit-content'} style={{ whiteSpace: 'nowrap' }} fontSize={'0.5rem'}>
+                    Source Chain
+                  </Text4>
                 </Flex>
               </Flex>
-              <Flex flexDirection={'column'}>
-                <Text1 fontWeight={600} color="green">
+              <Flex flexDirection={'column'} minWidth={'fit-content'}>
+                <Text1 fontWeight={600} color="#83F2C4">
                   +{amount}
                 </Text1>
-                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.destToken.symbol}</Text4>
+                <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
               </Flex>
             </Flex>
             <EstimationBlock width="100%" margin={'1rem 0'} />

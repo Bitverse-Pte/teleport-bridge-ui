@@ -4,7 +4,7 @@ import { RootState } from 'store/store'
 import { useTransition, config, animated, useSprings, useSpringRef, AnimatedProps } from '@react-spring/web'
 import { BaseSpinner, TransitionSpinner } from 'components/Spinner'
 import { PrimaryButton } from '.'
-import { NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
+import { CURRENCY_INPUT_ERROR, NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
 import { useActiveWeb3React, useDispatch } from 'hooks'
 import { Flex } from 'rebass'
 import { css } from 'styled-components/macro'
@@ -18,7 +18,7 @@ const TRANSFER_STATUS_BUTTONS_MAP = {
   [TRANSFER_STATUS.UNCONNECTED]: 0,
 }
 
-export const TransferButton = function ({ error }: { error?: boolean }) {
+export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERROR }) {
   const { account, active, chainId } = useActiveWeb3React()
   const { transferStatus, connectStatus, availableChains, srcChainId } = useSelector((state: RootState) => {
     const { transferStatus, connectStatus, availableChains, srcChainId } = state.application
@@ -33,13 +33,15 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
     }
     return false
   }, [availableChains, chainId, srcChainId])
-  const walletReady = useMemo(() => transferStatus !== TRANSFER_STATUS.UNCONNECTED, [transferStatus])
+  const walletReady = useMemo(() => {
+    return transferStatus !== TRANSFER_STATUS.UNCONNECTED
+  }, [transferStatus])
   const btnDisabled = useMemo(() => {
     if (!walletReady || !chainReady) {
       return false
     }
-    return transferStatus === TRANSFER_STATUS.NO_INPUT || error
-  }, [transferStatus, chainReady, walletReady])
+    return transferStatus === TRANSFER_STATUS.NO_INPUT || (error && error !== CURRENCY_INPUT_ERROR.OK)
+  }, [transferStatus, chainReady, walletReady, error])
 
   const [index, setIndex] = useState(0)
   const transRef = useSpringRef()
@@ -73,9 +75,11 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
   const clickHandler = useCallback(() => {
     if (!walletReady) {
       setWalletModalOpen(true)
+      return
     }
     if (!chainReady) {
-      return setNetworkModalMode(NetworkSelectModalMode.SRC)
+      setNetworkModalMode(NetworkSelectModalMode.SRC)
+      return
     }
     if (transferStatus === TRANSFER_STATUS.READY_TO_TRANSFER) {
       setTransferConfirmationModalOpen(true)
@@ -93,7 +97,14 @@ export const TransferButton = function ({ error }: { error?: boolean }) {
       return 'Choose Available Chain'
     }
     if (error) {
-      return 'Insufficient Balance'
+      switch (error) {
+        case CURRENCY_INPUT_ERROR.INSUFFICIENT:
+          return 'Insufficient Balance'
+        case CURRENCY_INPUT_ERROR.INVALID:
+          return 'Invalid Amount'
+        case CURRENCY_INPUT_ERROR.OK:
+          break
+      }
     }
     switch (transferStatus) {
       case TRANSFER_STATUS.NO_INPUT:

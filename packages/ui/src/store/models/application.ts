@@ -319,6 +319,26 @@ export const application = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
+    changeTransferStatus(transferStatus: TRANSFER_STATUS) {
+      switch (transferStatus) {
+        case TRANSFER_STATUS.UNCONNECTED:
+        case TRANSFER_STATUS.NO_INPUT:
+          dispatch.application.setTransferStatus(transferStatus)
+          break
+        case TRANSFER_STATUS.PENDING_ALLOWANCE:
+        case TRANSFER_STATUS.PENDING_APPROVE:
+        case TRANSFER_STATUS.READY_TO_APPROVE:
+        case TRANSFER_STATUS.READY_TO_TRANSFER:
+          // eslint-disable-next-line no-case-declarations
+          const fromInput = document.getElementById('fromValueInput')
+          if (!(fromInput as HTMLInputElement).value) {
+            dispatch.application.setTransferStatus(TRANSFER_STATUS.NO_INPUT)
+            break
+          }
+          dispatch.application.setTransferStatus(transferStatus)
+          break
+      }
+    },
     saveDestChainId(chainId: number) {
       dispatch.application.setDestChainId(chainId)
       dispatch.application.setNetworkModalMode(NetworkSelectModalMode.CLOSE)
@@ -334,6 +354,7 @@ export const application = createModel<RootModel>()({
     manuallyLogout() {
       Store2.set('connect-status', false)
       dispatch.application.setConnectStatus(false)
+      dispatch.application.changeTransferStatus(TRANSFER_STATUS.UNCONNECTED)
     },
     async initTransactions(account: string) {
       try {
@@ -352,7 +373,7 @@ export const application = createModel<RootModel>()({
       const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChain?.destChains.find((e) => e.chainId === destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
-      const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)!.srcToken
+      const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!.srcToken
       try {
         if (bridge && tokenInfo) {
           const targetAddress = bridge.srcChain.is_tele || bridge.destChain.is_tele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
@@ -361,23 +382,23 @@ export const application = createModel<RootModel>()({
           receipt
             .wait()
             .then(() => {
-              dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
+              dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
               successNoti(`succeeded to get approval ${amount} of ${selectedTokenName} from chain: ${bridge.srcChain.name}!`)
             })
             .catch((err: any) => {
               console.error(err)
               errorNoti(`failed to approve this amount: ${amount} for token: ${selectedTokenName} on chain: ${bridge.srcChain.name},
               the detail is ${err?.message}`)
-              dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
+              dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
             })
         }
         infoNoti(`sent request to get approval ${amount} of ${selectedTokenName} from chain: ${bridge!.srcChain.name}!`)
-        dispatch.application.setTransferStatus(TRANSFER_STATUS.PENDING_APPROVE)
+        dispatch.application.changeTransferStatus(TRANSFER_STATUS.PENDING_APPROVE)
       } catch (err) {
         console.error(err)
         errorNoti(`failed to approve this amount: ${amount} for token: ${selectedTokenName} on chain: ${bridge!.srcChain.name},
         the detail is ${(err as any)?.message}`)
-        dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
+        dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
       } finally {
         dispatch.application.setWaitWallet(false)
       }
@@ -389,7 +410,7 @@ export const application = createModel<RootModel>()({
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-      const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName)!
+      const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!
       const { srcToken, destToken } = selectedTokenPair
       const cachedTokenName = selectedTokenName
       let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
@@ -605,18 +626,18 @@ export const application = createModel<RootModel>()({
           const result: EtherBigNumber = await erc20Contract.allowance(account!, targetAddress)
           timeoutResolver && timeoutResolver(undefined)
           if (result.gte(parseEther(value))) {
-            dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
+            dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
           } else {
-            dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
+            dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
           }
         } catch (err) {
           console.error(err)
           warnNoti(`failed to get allowance for token: ${tokenInfo.name} on chain: ${bridgePairs.get(`${srcChainId}-${destChainId}`)?.srcChain.name},
           detail is ${(err as any)?.message}}`)
-          dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
+          dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
         }
       } else {
-        dispatch.application.setTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
+        dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
       }
     },
     async saveCurrentTokenBalance(rest = {}, state) {
@@ -624,7 +645,7 @@ export const application = createModel<RootModel>()({
       const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
       if (pair) {
         const { tokens } = pair
-        const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName || e.destToken.name === selectedTokenName) || tokens[0]
+        const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName) || tokens[0]
         if (selectedTokenPair) {
           try {
             const result = await getBalance(selectedTokenPair.srcToken, library!, account!)
@@ -648,7 +669,7 @@ export const application = createModel<RootModel>()({
       const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
       if (pair) {
         const { tokens } = pair
-        const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName) || tokens[0]
+        const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName) || tokens[0]
         if (selectedTokenPair) {
           dispatch.application.updateEstimation({ amount, srcChainName: pair.srcChain.name, destChainName: pair.destChain.name, selectedTokenName, selectedTokenPair })
           estimationClockId = window.setInterval(() => dispatch.application.updateEstimation({ amount, srcChainName: pair.srcChain.name, destChainName: pair.destChain.name, selectedTokenName, selectedTokenPair }), 30 * 1000)

@@ -9,9 +9,9 @@ export const colors: { [name: string]: string } = {
   lightBlue: '64, 153, 255',
   yellow: '250, 188, 45',
   orange: '246, 133, 27',
-  green: '84, 209, 146',
+  green: '131, 242, 196',
   pink: '255, 51, 102',
-  red: '214, 75, 71',
+  red: '210, 89, 88',
   purple: '110, 107, 233',
 }
 
