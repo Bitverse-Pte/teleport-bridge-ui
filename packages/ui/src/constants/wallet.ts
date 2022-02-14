@@ -38,6 +38,8 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
     href: null,
     color: '#E8831D',
   },
+  /*
+  only enable metamask in testnet for first release
   WALLET_CONNECT: {
     connector: walletconnect,
     name: 'WalletConnect',
@@ -81,5 +83,5 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
     href: null,
     color: '#4A6C9B',
     mobile: true,
-  },
+  }, */
 }
