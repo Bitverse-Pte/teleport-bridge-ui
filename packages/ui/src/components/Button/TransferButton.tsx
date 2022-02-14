@@ -121,7 +121,7 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
   }, [transferStatus, error, walletReady, chainReady])
 
   const pending = useMemo(() => {
-    if (error || !walletReady || !chainReady) {
+    if (error !== CURRENCY_INPUT_ERROR.OK || !walletReady || !chainReady) {
       return false
     }
     return transferStatus === TRANSFER_STATUS.PENDING_ALLOWANCE || transferStatus === TRANSFER_STATUS.PENDING_APPROVE
