@@ -21,7 +21,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>Tele Bridge</title>
+    <title>Teleport Bridge</title>
     <style>
       @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,500,600,700,800');
 
@@ -64,6 +64,14 @@ Explicitly load Inter var from public/ so it does not block LCP's critical path.
       }
       iframe {
         visibility: hidden !important;
+      }
+      ::-webkit-scrollbar {
+        width: 0.618rem;
+        background-color: rgba(0, 0, 0, 0);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 0.25rem;
       }
 
       body {
