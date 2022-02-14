@@ -354,7 +354,7 @@ export default function AppBody({ ...rest }) {
             </Container>
             <WormHoleWrapper paddingRight="1.5rem">
               <ArrowWrapper clickable={!!connectStatus} onClick={() => turnOverSrcAndDestChain(undefined)}>
-                <ShadowIcon size={48} src={SwitchSvg} />
+                <Icon size={48} src={SwitchSvg} />
               </ArrowWrapper>
             </WormHoleWrapper>
             <Container hideInput={false}>

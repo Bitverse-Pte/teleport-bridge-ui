@@ -18,7 +18,8 @@ const StyledDialogOverlay = styled(AnimatedDialogOverlay)`
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: ${({ theme }) => theme.modalBG};
+    // background-color: ${({ theme }) => theme.modalBG};
+    background: linear-gradient(to bottom left, rgba(46 48 48 / 40%), rgba(35 35 38 / 45%));
   }
   backdrop-filter: blur(10px);
 `
@@ -35,7 +36,7 @@ const StyledDialogContent = styled(({ maxWidth, minHeight, maxHeight, minWidth, 
     margin: 0;
     background-color: ${({ theme }) => theme.bg0};
     border: 1px solid ${({ theme }) => theme.bg1};
-    box-shadow: 0 5px 10px 0 ${({ theme }) => transparentize(0.2, theme.shadow1)};
+    box-shadow: 0 0 1px 1px ${({ theme }) => transparentize(0.2, theme.shadow1)};
     padding: 0px;
     width: 55vw;
     overflow-y: auto;

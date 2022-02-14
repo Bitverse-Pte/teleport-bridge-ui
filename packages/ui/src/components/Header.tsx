@@ -201,7 +201,7 @@ export default function Header() {
               onClick={() => {
                 setNetworkModalMode(NetworkSelectModalMode.SRC)
               }}
-              style={{ width: '30%', cursor: !connectedChain ? 'pointer' : 'default', justifyContent: 'center' }}
+              style={{ width: '30%', cursor: 'pointer', justifyContent: 'center' }}
             >
               {connectedChain && (
                 <>

@@ -70,7 +70,7 @@ export const WhiteText = styled(ThemedText.White)`
 `
 export const DarkGreenText = styled(Text)`
   white-space: nowrap;
-  color: #018d79;
+  color: #83f2c4;
   overflow: hidden;
   max-width: 5rem;
   // text-overflow: ellipsis;
