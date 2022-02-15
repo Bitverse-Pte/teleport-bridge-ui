@@ -19,6 +19,7 @@ import { CurrencyInput } from 'components/Input'
 import { Text1, Text2, DarkGreenText } from 'components/Text'
 import WormHole from 'assets/wormhole.svg'
 import SwitchSvg from 'assets/switch.svg'
+import DisabledSwitchSvg from 'assets/disabled-switch.svg'
 import { BodyWrapper } from 'components/BodyWrapper'
 import { TransferButton } from 'components/Button/TransferButton'
 import TransferConfirmationModal from 'components/CustomizedModal/TransferConfirmationModal'
@@ -162,12 +163,13 @@ export default function AppBody({ ...rest }) {
   const fromValueInputRef = useRef<any>({})
   const toValueInputRef = useRef<any>({})
   // const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
-  const connectedChain = useMemo(() => {
+  const chainReady = useMemo(() => {
     if (chainId && srcChainId == chainId) {
-      return availableChains.get(chainId)
+      return availableChains.has(chainId)
     }
+    return false
   }, [availableChains, chainId, srcChainId])
-  const ready = useMemo(() => Boolean(connectStatus && active && connectedChain && !!account), [connectedChain, connectStatus, active, account])
+  const walletReady = useMemo(() => Boolean(connectStatus && active && chainReady && !!account), [chainReady, connectStatus, active, account])
   const srcChain = useMemo(() => {
     return availableChains.get(srcChainId)
   }, [availableChains, srcChainId])
@@ -185,10 +187,10 @@ export default function AppBody({ ...rest }) {
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   useEffect(() => {
-    if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && fromValueInputRef.current.value) {
+    if (walletReady && fromValueInputRef.current && 'value' in fromValueInputRef.current && fromValueInputRef.current.value) {
       changeTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
     }
-  }, [ready, fromValueInputRef.current])
+  }, [walletReady, fromValueInputRef.current])
 
   useEffect(() => {
     const pairKey = `${srcChainId}-${destChainId}`
@@ -211,20 +213,20 @@ export default function AppBody({ ...rest }) {
   }, [srcChainId, destChainId, bridgePairs, selectedTokenName])
 
   useEffect(() => {
-    if (!ready && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
+    if (!walletReady && fromValueInputRef.current && 'value' in fromValueInputRef.current) {
       fromValueInputRef.current.value = undefined
-    } else if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && !fromValueInputRef.current.value) {
+    } else if (walletReady && fromValueInputRef.current && 'value' in fromValueInputRef.current && !fromValueInputRef.current.value) {
       changeTransferStatus(TRANSFER_STATUS.NO_INPUT)
     }
-  }, [ready, fromValueInputRef.current.value])
+  }, [walletReady, fromValueInputRef.current.value])
 
   const updateAllowance = useCallback(
     debounce(async () => {
-      if (ready && fromValueInputRef.current && 'value' in fromValueInputRef.current && selectedTokenPair) {
+      if (walletReady && fromValueInputRef.current && 'value' in fromValueInputRef.current && selectedTokenPair) {
         fromValueInputRef.current.value && (await judgeAllowance({ value: fromValueInputRef.current.value, tokenInfo: selectedTokenPair?.srcToken }))
       }
     }, 400),
-    [fromValueInputRef, selectedTokenPair, ready]
+    [fromValueInputRef, selectedTokenPair, walletReady]
   )
 
   const resetEstimationUpdatePolling = useCallback(() => {
@@ -268,7 +270,7 @@ export default function AppBody({ ...rest }) {
     const event = new Event('keyup')
     fromValueInputRef.current.dispatchEvent(event)
 
-    if (ready) {
+    if (walletReady) {
       updateAllowance()
     }
     if (toValueInputRef.current) {
@@ -303,9 +305,9 @@ export default function AppBody({ ...rest }) {
                   <Text1 fontWeight={600}>From</Text1>
                 </Flex>
                 <Flex justifyContent="space-between" padding={'0.5rem'}>
-                  <BalanceWrapper clickable={!!(ready && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
+                  <BalanceWrapper clickable={!!(walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
                     <DarkGreenText>{'Max ≈'}&nbsp;</DarkGreenText>
-                    {ready && selectedTokenName && selectedTokenPair && currentTokenBalance ? <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} /> : ready && connectStatus && account ? <Loader size={17} color="white" /> : <DarkGreenText>N/A</DarkGreenText>}
+                    {walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance ? <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} /> : walletReady && connectStatus && account ? <Loader size={17} color="white" /> : <DarkGreenText>N/A</DarkGreenText>}
                   </BalanceWrapper>
                 </Flex>
               </Flex>
@@ -321,14 +323,14 @@ export default function AppBody({ ...rest }) {
                     fontWeight={600}
                     fontSize="1rem"
                     lineHeight="1.3125rem"
-                    disabled={!ready}
+                    disabled={!walletReady}
                   />
                 </Flex>
                 <Flex flex={1} padding="0 1rem">
                   <CurrencyInput
                     id={'fromValueInput'}
                     error={inputError}
-                    disabled={!ready || !selectedTokenPair || !currentTokenBalance}
+                    disabled={!walletReady || !selectedTokenPair || !currentTokenBalance}
                     style={{ fontSize: '2rem', textAlign: 'center' }}
                     min={selectedTokenPair && Math.pow(10, -(selectedTokenPair?.srcToken.decimals ?? 18))}
                     placeholder="0.0"
@@ -342,7 +344,7 @@ export default function AppBody({ ...rest }) {
                   <DarkenedSelectorButton
                     labelContent={`${selectedTokenPair ? selectedTokenPair!.srcToken.symbol ?? '' : ''}`}
                     logoSrc={selectedTokenPair && selectedTokenPair!.srcToken.logoURI}
-                    disabled={!ready || !(connectStatus && account) || !selectedTokenPair}
+                    disabled={!walletReady || !(connectStatus && account) || !selectedTokenPair}
                     interactive={false}
                     width="10rem"
                     fontWeight={600}
@@ -354,8 +356,8 @@ export default function AppBody({ ...rest }) {
               </Flex>
             </Container>
             <WormHoleWrapper paddingRight="1.5rem">
-              <ArrowWrapper clickable={!!connectStatus} onClick={() => turnOverSrcAndDestChain(undefined)}>
-                <Icon size={48} src={SwitchSvg} />
+              <ArrowWrapper clickable={chainReady && walletReady} onClick={() => turnOverSrcAndDestChain(undefined)}>
+                <Icon size={48} src={chainReady && walletReady ? SwitchSvg : DisabledSwitchSvg} />
               </ArrowWrapper>
             </WormHoleWrapper>
             <Container hideInput={false}>
@@ -376,7 +378,7 @@ export default function AppBody({ ...rest }) {
                     width="10rem"
                     fontSize="1rem"
                     lineHeight="1.3125rem"
-                    disabled={!ready}
+                    disabled={!walletReady}
                     labelContent={`${destChain!.name.length > 10 ? destChain?.shortName : destChain?.name || 'Unavailable'}`}
                     logoSrc={destChain && destChain!.icon}
                     fontWeight={600}

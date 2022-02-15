@@ -361,7 +361,7 @@ export const application = createModel<RootModel>()({
         const {
           data: { data: transactions },
         } = await axios.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account })
-        dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(transactions, 10))
+        dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(transactions.reverse(), 10))
       } catch (err) {
         errorNoti(`failed to load historic transactions info from ${TRANSACTION_HISTORY_URL},
         the detail is ${(err as any)?.message}`)
@@ -444,25 +444,25 @@ export const application = createModel<RootModel>()({
             }
           } else {
             // dual jump
-            if (srcToken.address !== ZERO_ADDRESS || !srcToken.isNative) {
-              //non-native token
-              const ERC20TransferData = {
-                tokenAddress: srcToken.address,
-                receiver: bridge.agent_address, // agent address
-                amount: parsedAmount,
-              }
-              const rccTransfer = {
-                tokenAddress: selectedTokenPair.relayToken, // erc20 in teleport
-                receiver: account!,
-                amount: parsedAmount,
-                destChain: bridge.destChain.name, // double jump destChain
-                relayChain: '',
-              }
-              const proxyContract = getContract(bridge.srcChain.proxy!.address!, bridge.srcChain.proxy!.abi!, library!, account!)
-              transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer) // destChainName : teleport
-            } else {
-              // native token
+            // if (srcToken.address !== ZERO_ADDRESS || !srcToken.isNative) {
+            //non-native token
+            const ERC20TransferData = {
+              tokenAddress: srcToken.address === ZERO_ADDRESS || srcToken.isNative ? ZERO_ADDRESS : srcToken.address,
+              receiver: bridge.agent_address, // agent address
+              amount: parsedAmount,
             }
+            const rccTransfer = {
+              tokenAddress: selectedTokenPair.relayToken, // erc20 in teleport
+              receiver: account!,
+              amount: parsedAmount,
+              destChain: bridge.destChain.name, // double jump destChain
+              relayChain: '',
+            }
+            const proxyContract = getContract(bridge.srcChain.proxy!.address!, bridge.srcChain.proxy!.abi!, library!, account!)
+            transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer, { value: parsedAmount.toNumber() /* parsedAmount */ }) // destChainName : teleport
+            // } else {
+            //   // native token
+            // }
           }
 
           const transactionDetail = {
