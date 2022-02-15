@@ -459,7 +459,11 @@ export const application = createModel<RootModel>()({
               relayChain: '',
             }
             const proxyContract = getContract(bridge.srcChain.proxy!.address!, bridge.srcChain.proxy!.abi!, library!, account!)
-            transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer, { value: parsedAmount.toNumber() /* parsedAmount */ }) // destChainName : teleport
+            if (srcToken.address === ZERO_ADDRESS || srcToken.isNative) {
+              transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer, { value: parsedAmount /* parsedAmount */ }) // destChainName : teleport
+            } else {
+              transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer)
+            }
             // } else {
             //   // native token
             // }
