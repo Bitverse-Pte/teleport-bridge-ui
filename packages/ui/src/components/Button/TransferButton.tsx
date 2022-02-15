@@ -33,9 +33,9 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
     }
     return false
   }, [availableChains, chainId, srcChainId])
-  const walletReady = useMemo(() => {
-    return transferStatus !== TRANSFER_STATUS.UNCONNECTED
-  }, [transferStatus])
+  const walletReady = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account]) /* useMemo(() => {
+    return connectStatus && active
+  }, [connectStatus, active]) */
   const btnDisabled = useMemo(() => {
     if (!walletReady || !chainReady) {
       return false
