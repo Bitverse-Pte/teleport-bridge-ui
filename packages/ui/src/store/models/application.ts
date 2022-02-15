@@ -511,6 +511,7 @@ export const application = createModel<RootModel>()({
           const toInput = document.getElementById('toValueInput')
           if (fromInput) {
             ;(fromInput as HTMLInputElement).value = ''
+            fromInput.dispatchEvent(new Event('keyup'))
           }
           if (toInput) {
             ;(toInput as HTMLInputElement).value = ''

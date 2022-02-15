@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { Flex, FlexProps, Text } from 'rebass'
 import { RootState } from 'store'
 import styled, { css } from 'styled-components'
+import { debounce } from 'lodash'
 import { Text2, Text3 } from 'components/Text'
 import { HelpIcon } from 'components/Icon/HelpIcon'
 import { MouseoverTooltip, MouseoverTooltipContent } from 'components/Tooltip'
@@ -17,18 +18,12 @@ export function EstimationBlock({ ...rest }: FlexProps) {
     const { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating } = state.application
     return { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating }
   })
-  /* const srcChain = useMemo(() => {
-    return availableChains.get(srcChainId)
-  }, [srcChainId, availableChains])
-  const destChain = useMemo(() => {
-    return availableChains.get(destChainId)
-  }, [destChainId, availableChains]) */
   const [amount, setAmount] = useState<string | number>('')
   useEffect(() => {
     const input = document.getElementById('fromValueInput')
-    const onInput = function () {
+    const onInput = debounce(function () {
       setAmount(parseFloat((input as HTMLInputElement).value))
-    }
+    }, 400)
     if (input) {
       setAmount(parseFloat((input as HTMLInputElement).value))
       input.addEventListener('keyup', onInput)

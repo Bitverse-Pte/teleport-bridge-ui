@@ -264,6 +264,10 @@ export default function AppBody({ ...rest }) {
     }
     judgeBalance()
     changeTransferStatus(TRANSFER_STATUS.PENDING_ALLOWANCE)
+    // Dispatch the keyup event, so make the estimation update correctly.
+    const event = new Event('keyup')
+    fromValueInputRef.current.dispatchEvent(event)
+
     if (ready) {
       updateAllowance()
     }
@@ -285,9 +289,6 @@ export default function AppBody({ ...rest }) {
     if (connectStatus && fromValueInputRef.current && 'value' in fromValueInputRef.current && currentTokenBalance) {
       fromValueInputRef.current.value = new BigNumber(currentTokenBalance!.toString()).shiftedBy(-selectedTokenPair!.srcToken.decimals).toString()
       fromInputChange()
-      // Dispatch the keyup event, so make the estimation update correctly.
-      const event = new Event('keyup')
-      fromValueInputRef.current.dispatchEvent(event)
     }
   }, [fromValueInputRef, currentTokenBalance, connectStatus, selectedTokenPair, transferStatus, toValueInputRef])
 
