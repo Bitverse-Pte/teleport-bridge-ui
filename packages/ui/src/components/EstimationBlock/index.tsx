@@ -98,7 +98,7 @@ export function EstimationBlock({ ...rest }: FlexProps) {
       <EstimationRow>
         <Text2>
           Min Received&nbsp;
-          <MouseoverTooltip text={<Text>transfer is free for your in test period</Text>}>
+          <MouseoverTooltip text={<Text>Transfer is free on Testnet</Text>}>
             <HelpIcon size={12} />
           </MouseoverTooltip>
         </Text2>

@@ -156,10 +156,11 @@
     "@types/react-virtualized-auto-sizer": "^1.0.1",
     "@types/react-window": "^1.8.5",
     "@types/styled-components": "^5.1.18",
+    "cross-env": "^7.0.3",
     "eslint-plugin-prettier": "^4.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cross-env port=4000 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "lint": "eslint src/**/*.{ts,tsx} --fix",
