@@ -67,8 +67,7 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
 
   const approve = useCallback(() => {
     if (transferStatus === TRANSFER_STATUS.READY_TO_APPROVE) {
-      const input = document.getElementById('fromValueInput')
-      input && approveAmount({ amount: (input as HTMLInputElement)!.value })
+      approveAmount(undefined)
     }
   }, [transferStatus])
 

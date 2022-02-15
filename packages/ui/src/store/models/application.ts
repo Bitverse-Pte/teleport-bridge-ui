@@ -4,9 +4,8 @@ import { parseEther } from '@ethersproject/units'
 import { AbiItem } from 'web3-utils'
 import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
+import { MaxUint256 } from '@ethersproject/constants'
 import axios from 'axios'
-
-import { ZERO_ADDRESS } from 'constants/misc'
 
 import {
   AVAILABLE_CHAINS_URL,
@@ -25,6 +24,7 @@ import {
   TRANSACTION_HISTORY_URL,
   Estimation,
   ESTIMATION_URL,
+  ZERO_ADDRESS,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
 import { getContract } from 'helpers'
@@ -367,7 +367,7 @@ export const application = createModel<RootModel>()({
         the detail is ${(err as any)?.message}`)
       }
     },
-    async approveAmount({ amount }: { amount: string }, state) {
+    async approveAmount(rest = {}, state) {
       dispatch.application.setWaitWallet(true)
       const { availableChains: sourceChains, library, account, bridgePairs, selectedTokenName, srcChainId, destChainId } = state.application
       const sourceChain = sourceChains.get(srcChainId)
@@ -378,25 +378,25 @@ export const application = createModel<RootModel>()({
         if (bridge && tokenInfo) {
           const targetAddress = bridge.srcChain.is_tele || bridge.destChain.is_tele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
           const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
-          const receipt = await erc20Contract.approve(targetAddress, parseEther(amount))
+          const receipt = await erc20Contract.approve(targetAddress, MaxUint256)
           receipt
             .wait()
             .then(() => {
               dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
-              successNoti(`succeeded to get approval ${amount} of ${selectedTokenName} from chain: ${bridge.srcChain.name}!`)
+              successNoti(`succeeded to get approval of ${selectedTokenName} from chain: ${bridge.srcChain.name}!`)
             })
             .catch((err: any) => {
               console.error(err)
-              errorNoti(`failed to approve this amount: ${amount} for token: ${selectedTokenName} on chain: ${bridge.srcChain.name},
+              errorNoti(`failed to get approval for token: ${selectedTokenName} on chain: ${bridge.srcChain.name},
               the detail is ${err?.message}`)
               dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
             })
         }
-        infoNoti(`sent request to get approval ${amount} of ${selectedTokenName} from chain: ${bridge!.srcChain.name}!`)
+        infoNoti(`sent request to get approval of ${selectedTokenName} from chain: ${bridge!.srcChain.name}!`)
         dispatch.application.changeTransferStatus(TRANSFER_STATUS.PENDING_APPROVE)
       } catch (err) {
         console.error(err)
-        errorNoti(`failed to approve this amount: ${amount} for token: ${selectedTokenName} on chain: ${bridge!.srcChain.name},
+        errorNoti(`failed to get approval for token: ${selectedTokenName} on chain: ${bridge!.srcChain.name},
         the detail is ${(err as any)?.message}`)
         dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_APPROVE)
       } finally {
@@ -499,9 +499,9 @@ export const application = createModel<RootModel>()({
                 transaction.hash
               )
             })
-            .finally(() => {
+          /*  .finally(() => {
               dispatch.application.setTransactions(transactions)
-            })
+            }) */
           setTimeout(() => {
             dispatch.application.openTransactionDetailModal(transactionDetail.send_tx_hash)
             dispatch.application.setTransactionDetailModalOpen(true)
