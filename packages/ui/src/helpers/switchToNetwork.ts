@@ -17,7 +17,7 @@ interface SwitchNetworkArguments {
 
 // provider.request returns Promise<any>, but wallet_switchEthereumChain must return null or throw
 // see https://github.com/rekmarks/EIPs/blob/3326-create/EIPS/eip-3326.md for more info on wallet_switchEthereumChain
-export async function switchToNetwork({ library, chainId, connector }: Partial<Web3ReactContextInterface<Web3Provider>>, retry = true): Promise<void> {
+export async function switchToNetwork({ library, chainId, connector }: Partial<Web3ReactContextInterface<Web3Provider>> /* , retry = true */): Promise<void> {
   if (!library?.provider?.request) {
     return
   }
@@ -58,14 +58,18 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
       // metamask's behavior when switching to the current network is just to return null (a no-op)
       await addNetwork({ library, chainId, info: chain as Chain })
     }
-    if (retry) {
-      await window.ethereum?.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: formattedChainId }],
-      })
+    /*  if (retry) {
+      try {
+        await window.ethereum?.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: formattedChainId }],
+        })
+      } catch (retryErr) {
+        console.error(retryErr)
+      }
     } else {
       console.error(error)
-    }
+    } */
     // }
   }
 }

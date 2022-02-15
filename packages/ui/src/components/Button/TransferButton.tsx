@@ -29,7 +29,7 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
   } = useDispatch()
   const chainReady = useMemo(() => {
     if (chainId && srcChainId == chainId) {
-      return availableChains.has(+chainId)
+      return availableChains.has(+chainId) && active
     }
     return false
   }, [availableChains, chainId, srcChainId])
