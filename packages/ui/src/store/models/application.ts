@@ -480,7 +480,7 @@ export const application = createModel<RootModel>()({
             status: TRANSACTION_STATUS.PENDING,
           } as TransactionDetail
           transactions.push(transactionDetail)
-          dispatch.application.setTransactions(transactions)
+          dispatch.application.saveTransactions(transactions)
           transaction!
             .wait()
             .then(() => {
