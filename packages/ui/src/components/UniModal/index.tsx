@@ -116,7 +116,7 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
     leave: { opacity: 0 },
   })
 
-  const wrappedSetIsOpen = useCallback(() => {
+  const closeModal = useCallback(() => {
     if (!inClose) {
       setInClose(true)
       setWrappedIsOpen(false)
@@ -126,7 +126,7 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
   const escapeOnEscUp = useCallback(
     (event: KeyboardEvent) => {
       if (event.which == 27 && isOpen && setIsOpen) {
-        setIsOpen(false)
+        closeModal()
       }
     },
     [isOpen]
@@ -176,7 +176,7 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
                     <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
                       <a>{title}</a>
                     </StyledText>
-                    <CircledCloseIcon id={title.split(' ').join('-') + '-' + 'close-btn'} onClick={wrappedSetIsOpen} />
+                    <CircledCloseIcon id={title.split(' ').join('-') + '-' + 'close-btn'} onClick={closeModal} />
                   </Flex>
                   {children}
                 </Flex>

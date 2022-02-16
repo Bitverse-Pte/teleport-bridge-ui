@@ -20,12 +20,9 @@ export default function HistoryModal() {
     application: { setHistoryModalOpen },
   } = useDispatch()
 
-  const isOpen = useMemo(() => {
-    return historyModalOpen && !transactionDetailModalOpen
-  }, [historyModalOpen, transactionDetailModalOpen])
   return (
     <UniModal
-      isOpen={isOpen}
+      isOpen={historyModalOpen}
       maxWidth="61.8rem"
       maxHeight={61.8}
       onDismiss={() => {

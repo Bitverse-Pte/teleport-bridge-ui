@@ -7,7 +7,7 @@ import { Textfit } from 'react-textfit'
 import { Text, Box, Flex } from 'rebass'
 import BigNumber from 'bignumber.js'
 import { GreyCard, DarkGreyCard } from 'components/Card'
-import { IChainData, ICurrency, Overwrite, TransactionDetail, TRANSACTION_STATUS } from 'constants/index'
+import { BridgePair, IChainData, ICurrency, Overwrite, TokenPair, TransactionDetail, TRANSACTION_STATUS } from 'constants/index'
 import { StyledLogo } from 'components/Logo'
 import { ButtonLight } from 'components/Button'
 import { useActiveWeb3React } from 'hooks/web3'
@@ -164,19 +164,33 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
   }, [availableChains, transaction])
 
   const { srcToken, destToken } = useMemo(() => {
-    const key = `${transaction.src_chain_id}-${transaction.dest_chain_id}`
-    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-    const tokens = bridgePairs.get(key)?.tokens
-    if (!tokens) {
-      return {}
+    if (transaction.src_chain_id && transaction.dest_chain_id) {
+      const key = `${transaction.src_chain_id}-${transaction.dest_chain_id}`
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+      const tokens = bridgePairs.get(key)?.tokens
+      if (!tokens) {
+        return {}
+      }
+      const target = tokens!.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase() || e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())!
+      if (target) {
+        const { srcToken, destToken } = target
+        return { srcToken, destToken }
+      } else {
+        return {}
+      }
+    } else if (transaction.src_chain_id) {
+      let possibleTokenPair: TokenPair | undefined
+      for (const [key, value] of bridgePairs.entries()) {
+        if (key.startsWith(`${transaction.src_chain_id}-`)) {
+          possibleTokenPair = value.tokens.find((token) => token.srcToken.address === transaction.token_address)
+          break
+        }
+      }
+      if (possibleTokenPair) {
+        return { srcToken: possibleTokenPair.srcToken }
+      }
     }
-    const target = tokens!.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase() || e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())!
-    if (target) {
-      const { srcToken, destToken } = target
-      return { srcToken, destToken }
-    } else {
-      return {}
-    }
+    return {}
   }, [transaction.src_chain_id, transaction.dest_chain_id, transaction.token, bridgePairs])
 
   const jumpToSrcChainBrowserUrl = useMemo(() => {
@@ -194,7 +208,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
 
   return (
     <>
-      {srcToken && destToken && (
+      {srcToken && (
         <HistoryGreyCard>
           <Box style={{ display: 'flex', justifyContent: 'end', paddingRight: '0.5rem', alignItems: 'center' }}>
             <Text width="fit-content">From</Text>
@@ -270,7 +284,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           </Flex>
           <Box></Box>
           <Flex justifyContent="center" alignItems="center">
-            {transaction.status === TRANSACTION_STATUS.SUCCEEDED && (
+            {transaction.status === TRANSACTION_STATUS.SUCCEEDED && destToken && (
               <>
                 <TooltippedAmount amount={new BigNumber(transaction.amount).shiftedBy(-destToken.decimals).toFixed(4)} AmountText={AmountText} />
                 <UnitText>&nbsp;{destToken!.symbol}</UnitText>

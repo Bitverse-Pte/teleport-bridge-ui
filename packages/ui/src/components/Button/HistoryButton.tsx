@@ -71,7 +71,13 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
 
   return (
     <>
-      <ButtonDropdown style={{ backgroundColor: 'transparent', width: '30%', minWidth: 'fit-content', boxShadow: '0px 0px 4px 2px #323539' }} disabled={disabled} onClick={() => setHistoryModalOpen(true)}>
+      <ButtonDropdown
+        style={{ backgroundColor: 'transparent', width: '30%', minWidth: 'fit-content', boxShadow: '0px 0px 4px 2px #323539' }}
+        disabled={disabled}
+        onClick={() => {
+          setHistoryModalOpen(true)
+        }}
+      >
         <Wrapper className={'header-btn-img'}>
           {transitions((styles, item) => {
             return (

@@ -14,6 +14,7 @@ import { RootState } from 'store/store'
 import { Hash } from 'components/Hash'
 import { TooltippedAmount } from 'components/TooltippedAmount'
 import { StyledLogo } from 'components/Logo'
+import { TokenPair } from 'constants/index'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -88,10 +89,39 @@ export default function TransactionDetailModal() {
     })
   }, [selectedTransactionId, transactions])
 
-  const tokenInfo = useMemo(() => {
+  /*   const tokenInfo = useMemo(() => {
     if (selectedTx) {
       return bridgePairs.get(`${selectedTx.src_chain_id}-${selectedTx.dest_chain_id}`)?.tokens.find((e) => e.srcToken.address.toLowerCase() === selectedTx.token_address.toLowerCase())
     }
+  }, [selectedTx, bridgePairs]) */
+  const tokenInfo = useMemo(() => {
+    if (selectedTx && selectedTx.src_chain_id && selectedTx.dest_chain_id) {
+      const key = `${selectedTx.src_chain_id}-${selectedTx.dest_chain_id}`
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+      const tokens = bridgePairs.get(key)?.tokens
+      if (!tokens) {
+        return {}
+      }
+      const target = tokens!.find((e) => e.srcToken.address.toLowerCase() === selectedTx.token_address.toLowerCase() || e.destToken.address.toLowerCase() === selectedTx.token_address.toLowerCase())!
+      if (target) {
+        const { srcToken, destToken } = target
+        return { srcToken, destToken }
+      } else {
+        return {}
+      }
+    } else if (selectedTx && selectedTx.src_chain_id) {
+      let possibleTokenPair: TokenPair | undefined
+      for (const [key, value] of bridgePairs.entries()) {
+        if (key.startsWith(`${selectedTx.src_chain_id}-`)) {
+          possibleTokenPair = value.tokens.find((token) => token.srcToken.address === selectedTx.token_address)
+          break
+        }
+      }
+      if (possibleTokenPair) {
+        return { srcToken: possibleTokenPair.srcToken }
+      }
+    }
+    return {}
   }, [selectedTx, bridgePairs])
 
   return (
@@ -114,7 +144,7 @@ export default function TransactionDetailModal() {
           <CircledCloseIcon onClick={closeTransactionDetailModal} style={{ position: 'absolute' }} />
         </Flex> */}
       <UniModalContentWrapper justifyContent="space-evenly" flexDirection="column">
-        {selectedTx && tokenInfo && (
+        {selectedTx && tokenInfo.srcToken && (
           <>
             <Wrapper>
               <StyledStatusMark success={!!selectedTx.send_tx_hash}>
@@ -164,10 +194,12 @@ export default function TransactionDetailModal() {
                     {selectedTx?.dest_chain}
                   </Text1>
                 </Flex>
-                <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
-                  <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
-                  <Text1 color="#83F2C4">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
-                </Flex>
+                {tokenInfo!.destToken && (
+                  <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
+                    <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
+                    <Text1 color="#83F2C4">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
+                  </Flex>
+                )}
               </Flex>
               <Flex justifyContent={'space-between'}>
                 <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>

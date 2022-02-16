@@ -374,7 +374,7 @@ export const application = createModel<RootModel>()({
         } = await axios.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account })
         dispatch.application.saveTransactions(
           FixedSizeQueue.fromArray<TransactionDetail>(
-            transactions.reverse().filter((e) => e.dest_chain_id && e.src_chain_id && e.sender && e.send_tx_hash && e.amount && e.token_address && e.status),
+            transactions.reverse().filter((e) => e.sender && e.send_tx_hash && e.amount && e.token_address && e.status),
             10
           )
         )
