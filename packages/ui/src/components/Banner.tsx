@@ -8,6 +8,9 @@ const SBannerWrapper = styled.div`
   align-items: center;
   position: relative;
   width: 24vw;
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    width: 100%;
+  `}
   height: 100%;
   & span {
     color: rgb(${colors.lightBlue});

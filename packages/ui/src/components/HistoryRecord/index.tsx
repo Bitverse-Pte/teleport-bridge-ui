@@ -201,11 +201,11 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <HistoryChainButton maxWidth="15rem" height="2rem" padding="0.25rem" style={{ cursor: 'default', justifyContent: 'space-around' }}>
-              <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[srcChain!.icon]} />
-              <Textfit mode="single" min={2} max={20} style={{ width: '61.8%' }}>
+              <StyledLogo style={{ position: 'relative', maxWidth: '15%' /* , marginRight: '0.5rem' */ }} size={'1rem'} srcs={[srcChain!.icon]} />
+              <Textfit mode="single" min={2} max={20} style={{ width: 'calc(100% - 2rem)' }}>
                 {srcChain!.name}
               </Textfit>
-              <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToSrcChainBrowserUrl} />
+              <WrappedLink size={16} /* style={{ marginLeft: '0.5rem' }} */ to={jumpToSrcChainBrowserUrl} />
             </HistoryChainButton>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'end', paddingRight: '0.5rem', alignItems: 'center' }}>
@@ -213,11 +213,11 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <HistoryChainButton maxWidth="15rem" height="2rem" padding="0.25rem" style={{ cursor: 'default', justifyContent: 'space-around' }}>
-              <StyledLogo style={{ position: 'relative', maxWidth: '15%', marginRight: '0.5rem' }} size={'1rem'} srcs={[destChain!.icon]} />
-              <Textfit mode="single" min={2} max={20} style={{ width: '61.8%' }}>
+              <StyledLogo style={{ position: 'relative', maxWidth: '15%' /* , marginRight: '0.5rem' */ }} size={'1rem'} srcs={[destChain!.icon]} />
+              <Textfit mode="single" min={2} max={20} style={{ width: 'calc(100% - 2rem)' }}>
                 {destChain!.name}
               </Textfit>
-              <WrappedLink size={16} style={{ marginLeft: '0.5rem' }} to={jumpToDestChainBrowserUrl} />
+              <WrappedLink size={16} /* style={{ marginLeft: '0.5rem' }} */ to={jumpToDestChainBrowserUrl} />
             </HistoryChainButton>
           </Box>
           {(() => {

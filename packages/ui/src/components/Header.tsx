@@ -71,6 +71,10 @@ const NetworkStatus = styled(Web3StatusGeneric)<{ pending?: boolean; error?: boo
 
 const SHeader = styled(Flex)`
   padding: 0 5rem;
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    justify-content: flex-start;
+    padding: 0;
+  `}
   width: 100%;
   height: 80px;
   display: flex;
@@ -150,6 +154,16 @@ const HeaderFunctionalArea = styled(Flex)<{ ready: boolean }>`
     }
   }
 `
+const BannerArea = styled(Flex)`
+  width: 50%;
+  height: 100%;
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    justify-content: flex-start;
+    & > SBannerWrapper {
+      width: 100%;
+    }
+  `}
+`
 
 export default function Header() {
   const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
@@ -189,9 +203,9 @@ export default function Header() {
 
   return (
     <SHeader>
-      <Flex width="50%" height="100%">
+      <BannerArea>
         <Banner />
-      </Flex>
+      </BannerArea>
       <HeaderFunctionalArea ready={ready}>
         {ready && (
           <>
