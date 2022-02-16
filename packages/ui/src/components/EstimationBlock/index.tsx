@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux'
 import { Flex, FlexProps, Text } from 'rebass'
 import { RootState } from 'store'
 import styled, { css } from 'styled-components'
-import { debounce } from 'lodash'
 import { Text2, Text3 } from 'components/Text'
 import { HelpIcon } from 'components/Icon/HelpIcon'
 import { MouseoverTooltip, MouseoverTooltipContent } from 'components/Tooltip'
@@ -21,9 +20,9 @@ export function EstimationBlock({ ...rest }: FlexProps) {
   const [amount, setAmount] = useState<string | number>('')
   useEffect(() => {
     const input = document.getElementById('fromValueInput')
-    const onInput = debounce(function () {
+    const onInput = function () {
       setAmount(parseFloat((input as HTMLInputElement).value))
-    }, 400)
+    }
     if (input) {
       setAmount(parseFloat((input as HTMLInputElement).value))
       input.addEventListener('keyup', onInput)

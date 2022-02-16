@@ -159,9 +159,6 @@ const BannerArea = styled(Flex)`
   height: 100%;
   ${({ theme }) => theme.mediaWidth.upToSmall`
     justify-content: flex-start;
-    & > SBannerWrapper {
-      width: 100%;
-    }
   `}
 `
 
