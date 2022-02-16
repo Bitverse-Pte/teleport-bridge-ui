@@ -5,6 +5,7 @@ import { AbiItem } from 'web3-utils'
 import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
 import { MaxUint256 } from '@ethersproject/constants'
+import { mergeWith } from 'lodash'
 import axios from 'axios'
 
 import {
@@ -111,6 +112,7 @@ type IAppState = {
   bridgePairs: Map<string, BridgePair>
   library: Web3Provider | undefined
   account: string | null | undefined
+  transactionHistoryUpdatingTimer: number
   // wrongChain: boolean
   selectedTokenName: string
   transferStatus: TRANSFER_STATUS
@@ -146,6 +148,7 @@ const initialState: IAppState = {
   estimationUpdating: false,
   selectedTransactionId: '',
   transactionDetailModalOpen: false,
+  transactionHistoryUpdatingTimer: 0,
 }
 
 export const application = createModel<RootModel>()({
@@ -317,6 +320,12 @@ export const application = createModel<RootModel>()({
         transactionDetailModalOpen: false,
       }
     },
+    setTransactionHistoryUpdatingTimer(state, transactionHistoryUpdatingTimer: number) {
+      return {
+        ...state,
+        transactionHistoryUpdatingTimer,
+      }
+    },
   },
   effects: (dispatch) => ({
     changeTransferStatus(transferStatus: TRANSFER_STATUS) {
@@ -358,10 +367,17 @@ export const application = createModel<RootModel>()({
     },
     async initTransactions(account: string) {
       try {
+        dispatch.application.stopTransactionHistoryUpdating()
         const {
           data: { data: transactions },
         } = await axios.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account })
-        dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(transactions.reverse(), 10))
+        dispatch.application.saveTransactions(
+          FixedSizeQueue.fromArray<TransactionDetail>(
+            transactions.reverse().filter((e) => e.dest_chain_id && e.src_chain_id && e.sender && e.send_tx_hash && e.amount && e.token_address && e.status),
+            10
+          )
+        )
+        dispatch.application.startTransactionHistoryUpdating(undefined)
       } catch (err) {
         errorNoti(`failed to load historic transactions info from ${TRANSACTION_HISTORY_URL},
         the detail is ${(err as any)?.message}`)
@@ -646,7 +662,7 @@ export const application = createModel<RootModel>()({
         dispatch.application.changeTransferStatus(TRANSFER_STATUS.READY_TO_TRANSFER)
       }
     },
-    async saveCurrentTokenBalance(rest = {}, state) {
+    async saveCurrentTokenBalance(balance: EtherBigNumber | undefined, state) {
       const { library, account, bridgePairs, srcChainId, destChainId, selectedTokenName } = state.application
       const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
       if (pair) {
@@ -654,7 +670,7 @@ export const application = createModel<RootModel>()({
         const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName) || tokens[0]
         if (selectedTokenPair) {
           try {
-            const result = await getBalance(selectedTokenPair.srcToken, library!, account!)
+            const result = balance || (await getBalance(selectedTokenPair.srcToken, library!, account!))
             dispatch.application.setCurrentTokenBalance(result)
           } catch (err) {
             console.error(err)
@@ -715,36 +731,6 @@ export const application = createModel<RootModel>()({
       }
     },
     async saveTransactions(transactions: FixedSizeQueue<TransactionDetail>, state) {
-      for (const tx of transactions) {
-        if (tx.status === TRANSACTION_STATUS.PENDING && !transactionsHistoryUpdateList.some((item) => item.transactionHash === tx.send_tx_hash)) {
-          const record = {
-            transactionHash: tx.send_tx_hash,
-            timerId: window.setInterval(async () => {
-              const {
-                data: { data: newTxes },
-              } = await axios.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: tx.sender, send_tx_hash: tx.send_tx_hash })
-              const toUseNewTx = newTxes.find((e) => e.sender === tx.sender && e.send_tx_hash === tx.send_tx_hash)
-              const toUpdatedOne = store.getState().application.transactions.find((e) => e.sender === tx.sender && e.send_tx_hash === tx.send_tx_hash)
-              if (toUpdatedOne) {
-                Object.assign(toUpdatedOne, toUseNewTx)
-                dispatch.application.setTransactions(store.getState().application.transactions)
-                if (toUpdatedOne.status !== TRANSACTION_STATUS.PENDING) {
-                  clearInterval(record.timerId)
-                  const index = transactionsHistoryUpdateList.findIndex((e) => e.transactionHash === record.transactionHash && e.timerId === record.timerId)
-                  transactionsHistoryUpdateList.splice(index, 1)
-                }
-                if (toUpdatedOne.status === TRANSACTION_STATUS.SUCCEEDED) {
-                  successNoti(`succeeded to transfer ${toUpdatedOne.amount} of ${toUpdatedOne.token} from chain: ${toUpdatedOne.src_chain} to chain ${toUpdatedOne.dest_chain}!`, toUpdatedOne.send_tx_hash)
-                }
-                if (toUpdatedOne.status === TRANSACTION_STATUS.FAILED) {
-                  errorNoti(`failed to transfer this amount: ${toUpdatedOne.amount} for token: ${toUpdatedOne.token} from chain: ${toUpdatedOne.src_chain} to chain ${toUpdatedOne.dest_chain}`, toUpdatedOne.send_tx_hash)
-                }
-              }
-            }, 10 * 1000),
-          }
-          transactionsHistoryUpdateList.push(record)
-        }
-      }
       dispatch.application.setTransactions(transactions)
     },
     resetWhenAccountChange(rest = {}, state) {
@@ -768,7 +754,47 @@ export const application = createModel<RootModel>()({
       setCurrencySelectModalOpen(false)
       setTransactionDetailModalOpen(false)
     },
+    async startTransactionHistoryUpdating(rest = {}, state) {
+      const timer = window.setInterval(async () => {
+        const { account, transactions } = store.getState().application
+        if (!account) {
+          return
+        }
+        try {
+          const {
+            data: { data: newTxes },
+          } = await axios.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account /* , send_tx_hash: tx.send_tx_hash */ }) // backend does not support tx_hash in query
+
+          for (const toUpdateOne of transactions) {
+            if (toUpdateOne.status === TRANSACTION_STATUS.PENDING) {
+              const newOne = newTxes.find((e) => e.send_tx_hash === toUpdateOne.send_tx_hash)
+              if (newOne) {
+                // Object.assign(toUpdateOne, newOne)
+                mergeWith(toUpdateOne, newOne, function (objValue, srcValue) {
+                  return srcValue || objValue
+                })
+                if (newOne.status === TRANSACTION_STATUS.SUCCEEDED) {
+                  successNoti(`succeeded to transfer ${toUpdateOne.amount} of ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}!`, toUpdateOne.send_tx_hash)
+                }
+                if (newOne.status === TRANSACTION_STATUS.FAILED) {
+                  warnNoti(`failed to transfer this amount: ${toUpdateOne.amount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
+                }
+              }
+            }
+          }
+          dispatch.application.saveTransactions(transactions)
+        } catch (err) {
+          errorNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
+        }
+      }, 10 * 1000)
+      dispatch.application.setTransactionHistoryUpdatingTimer(timer)
+    },
+    stopTransactionHistoryUpdating() {
+      const { transactionHistoryUpdatingTimer } = store.getState().application
+      if (transactionHistoryUpdatingTimer) {
+        window.clearInterval(transactionHistoryUpdatingTimer)
+        dispatch.application.setTransactionHistoryUpdatingTimer(0)
+      }
+    },
   }),
 })
-
-const transactionsHistoryUpdateList: Array<{ transactionHash: string; timerId: number }> = []

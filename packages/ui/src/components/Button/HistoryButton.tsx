@@ -41,7 +41,7 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
 
   const hasPending = useMemo(() => {
     return transactions.some((e) => {
-      return e.status === TRANSACTION_STATUS.PENDING
+      return e.status === TRANSACTION_STATUS.PENDING && !!e.dest_chain_id && !!e.src_chain_id
     })
   }, [transactions])
 

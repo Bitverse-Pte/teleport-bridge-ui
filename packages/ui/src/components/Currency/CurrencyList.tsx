@@ -39,7 +39,7 @@ const MenuItem = styled(SpaceBetweenRow)`
 function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number; style: CSSProperties }) {
   const { account, library } = useActiveWeb3React()
   const {
-    application: { changeToken },
+    application: { changeToken, saveCurrentTokenBalance },
   } = useDispatch()
   const selectedTokenName = useSelector((state: RootState) => state.application.selectedTokenName)
   const tokenPair = data[index]
@@ -50,6 +50,11 @@ function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number;
   useEffect(() => {
     library && account && getBalance(token, library, account).then((res) => setBalance(res))
   }, [token.name])
+  useEffect(() => {
+    if (isSelected && balance) {
+      saveCurrentTokenBalance(balance)
+    }
+  }, [isSelected, balance])
   // only show add or remove buttons if not on selected list
   return (
     <MenuItem style={style} className={`token-item-${key}`} onClick={() => (isSelected ? null : changeToken(token.name))} disabled={isSelected} selected={isSelected}>

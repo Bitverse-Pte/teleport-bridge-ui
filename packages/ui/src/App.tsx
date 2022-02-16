@@ -73,7 +73,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 function App() {
   const { account } = useActiveWeb3React()
   const {
-    application: { initChains, initTransactions, setWaitWallet, resetApp },
+    application: { initChains, initTransactions, setWaitWallet, resetApp, stopTransactionHistoryUpdating },
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
@@ -91,6 +91,9 @@ function App() {
   }, [])
   useEffect(() => {
     connectStatus && account && initTransactions(account)
+    if (!connectStatus || !account) {
+      stopTransactionHistoryUpdating()
+    }
   }, [account, connectStatus])
 
   const showBody = useCallback(() => {
