@@ -200,7 +200,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
     }
   }, [srcChain, transaction])
   const jumpToDestChainBrowserUrl = useMemo(() => {
-    if (destChain?.explorers[0] && transaction.receive_tx_hash && destChain && window) {
+    if (destChain && destChain?.explorers[0] && transaction.receive_tx_hash && window) {
       const url = `${destChain!.explorers[0]!.url}/tx/${transaction!.receive_tx_hash}`
       return url
     }
@@ -227,11 +227,15 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <HistoryChainButton maxWidth="15rem" height="2rem" padding="0.25rem" style={{ cursor: 'default', justifyContent: 'space-around' }}>
-              <StyledLogo style={{ position: 'relative', maxWidth: '15%' /* , marginRight: '0.5rem' */ }} size={'1rem'} srcs={[destChain!.icon]} />
-              <Textfit mode="single" min={2} max={20} style={{ width: 'calc(100% - 2rem)' }}>
-                {destChain!.name}
-              </Textfit>
-              <WrappedLink size={16} /* style={{ marginLeft: '0.5rem' }} */ to={jumpToDestChainBrowserUrl} />
+              {destChain && (
+                <>
+                  <StyledLogo style={{ position: 'relative', maxWidth: '15%' /* , marginRight: '0.5rem' */ }} size={'1rem'} srcs={[destChain!.icon]} />
+                  <Textfit mode="single" min={2} max={20} style={{ width: 'calc(100% - 2rem)' }}>
+                    {destChain!.name}
+                  </Textfit>
+                  <WrappedLink size={16} /* style={{ marginLeft: '0.5rem' }} */ to={jumpToDestChainBrowserUrl} />
+                </>
+              )}
             </HistoryChainButton>
           </Box>
           {(() => {

@@ -6,6 +6,7 @@ import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
 import { MaxUint256 } from '@ethersproject/constants'
 import { mergeWith } from 'lodash'
+import Store2 from 'store2'
 import axios from 'axios'
 
 import {
@@ -24,21 +25,16 @@ import {
   TRANSACTION_STATUS,
   TRANSACTION_HISTORY_URL,
   Estimation,
-  ESTIMATION_URL,
   ZERO_ADDRESS,
   TRANSITION_DURATION,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
 import { getContract } from 'helpers'
-import Store2 from 'store2'
 import type { RootModel } from '.'
 import ERC20ABI from 'contracts/erc20.json'
 import { switchToNetwork } from 'helpers/switchToNetwork'
 import { errorNoti, infoNoti, successNoti, warnNoti } from 'helpers/notifaction'
-import { ContractTransaction } from '@ethersproject/contracts'
 import { FixedSizeQueue } from 'helpers/fixedQueue'
-import { setInterval } from 'timers'
-import { ReactText } from 'react'
 import { store } from 'store/store'
 // import { ProviderController } from 'controllers'import type { RootModel } from './index'
 
@@ -767,7 +763,8 @@ export const application = createModel<RootModel>()({
 
           for (const toUpdateOne of transactions) {
             if (toUpdateOne.status === TRANSACTION_STATUS.PENDING) {
-              const newOne = newTxes.find((e) => e.send_tx_hash === toUpdateOne.send_tx_hash)
+              const newOneIndex = newTxes.findIndex((e) => e.send_tx_hash === toUpdateOne.send_tx_hash)
+              const newOne = newTxes[newOneIndex]
               if (newOne) {
                 // Object.assign(toUpdateOne, newOne)
                 mergeWith(toUpdateOne, newOne, function (objValue, srcValue) {
@@ -780,8 +777,19 @@ export const application = createModel<RootModel>()({
                   warnNoti(`failed to transfer this amount: ${toUpdateOne.amount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
                 }
               }
+              newTxes.splice(newOneIndex, 1)
             }
           }
+          const newTransactions = [...transactions]
+          if (newTransactions.length < 10) {
+            newTransactions.concat(
+              newTxes
+                .reverse()
+                .filter((e) => e.sender && e.send_tx_hash && e.amount && e.token_address && e.status)
+                .splice(-(10 - newTransactions.length))
+            )
+          }
+          dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(newTransactions, 10))
           dispatch.application.saveTransactions(transactions)
         } catch (err) {
           errorNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)

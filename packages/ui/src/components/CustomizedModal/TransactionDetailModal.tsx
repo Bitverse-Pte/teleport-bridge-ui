@@ -188,11 +188,15 @@ export default function TransactionDetailModal() {
               </Flex>
               <Flex justifyContent={'space-between'} alignItems={'center'}>
                 <Flex justifyContent={'flex-start'} alignItems={'center'} width="50%">
-                  <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.dest_chain_id)!.icon!]} />
-                  &nbsp;
-                  <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
-                    {selectedTx?.dest_chain}
-                  </Text1>
+                  {tokenInfo!.destToken && (
+                    <>
+                      <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.dest_chain_id)!.icon!]} />
+                      &nbsp;
+                      <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
+                        {selectedTx?.dest_chain}
+                      </Text1>
+                    </>
+                  )}
                 </Flex>
                 {tokenInfo!.destToken && (
                   <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
