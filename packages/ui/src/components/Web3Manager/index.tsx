@@ -12,7 +12,6 @@ import { useActiveWeb3React, useEagerConnect, useInactiveListener } from '../../
 import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { pick } from 'lodash'
-import { switchToNetwork } from 'helpers/switchToNetwork'
 import { NetworkSelectModalMode } from 'constants/types'
 
 const MessageWrapper = styled.div`

@@ -367,8 +367,8 @@ export default function AppBody({ ...rest }) {
                 </Flex>
                 <Flex height={'fit-content'}>
                   <Text2 fontWeight={500}>Receive(Estimated)</Text2>
-                  &nbsp;
-                  <HelpIcon size={'1rem'} style={{ alignSelf: 'center' }} />
+                  {/* &nbsp;
+                  <HelpIcon size={'1rem'} style={{ alignSelf: 'center' }} /> */}
                 </Flex>
               </Flex>
               <br />

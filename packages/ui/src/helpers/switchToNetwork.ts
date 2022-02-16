@@ -9,6 +9,7 @@ import { Chain } from 'constants/index'
 import { store } from 'store/store'
 
 import { addNetwork } from './addNetwork'
+import { errorNoti } from './notifaction'
 /* 
 interface SwitchNetworkArguments {
   library: Web3Provider
@@ -17,7 +18,7 @@ interface SwitchNetworkArguments {
 
 // provider.request returns Promise<any>, but wallet_switchEthereumChain must return null or throw
 // see https://github.com/rekmarks/EIPs/blob/3326-create/EIPS/eip-3326.md for more info on wallet_switchEthereumChain
-export async function switchToNetwork({ library, chainId, connector }: Partial<Web3ReactContextInterface<Web3Provider>> /* , retry = true */): Promise<void> {
+export async function switchToNetwork({ library, chainId, connector }: Partial<Web3ReactContextInterface<Web3Provider>> /* , retry = true */): Promise<boolean | undefined> {
   if (!library?.provider?.request) {
     return
   }
@@ -45,12 +46,13 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
       },
       '0x31fF0B83003A89332BcCe9d733732A581C89ad83',
     ]) */
+    return true
   } catch (error) {
     // 4902 is the error code for attempting to switch to an unrecognized chainId
     if ((error as any).code === 4902 && chainId !== undefined) {
       const chain = store.getState().application.availableChains.get(chainId)
       if (!chain) {
-        console.error(`chain: ${chainId} is not supported!`)
+        errorNoti(`chain: ${chainId} is not supported!`)
         return
       }
       // metamask (only known implementer) automatically switches after a network is added
@@ -58,6 +60,7 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
       // metamask's behavior when switching to the current network is just to return null (a no-op)
       await addNetwork({ library, chainId, info: chain as Chain })
     }
+    errorNoti(`failed to change chain to ${chainId}, detail is ${(error as any).message}`)
     /*  if (retry) {
       try {
         await window.ethereum?.request({

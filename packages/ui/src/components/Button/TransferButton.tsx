@@ -86,7 +86,7 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
     if (transferStatus === TRANSFER_STATUS.READY_TO_APPROVE) {
       approve()
     }
-  }, [transferStatus, walletReady])
+  }, [transferStatus, walletReady, chainReady])
 
   const text = useMemo(() => {
     if (!walletReady) {

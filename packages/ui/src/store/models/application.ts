@@ -572,20 +572,21 @@ export const application = createModel<RootModel>()({
     async turnOverSrcAndDestChain(rest = {}, state) {
       dispatch.application.setWaitWallet(true)
       const network = await state.application.library?.getNetwork()
-      network && (await switchToNetwork({ library: state.application.library, chainId: state.application.destChainId }))
-      await dispatch.application.updateBridgeInfo({ destChainId: state.application.srcChainId, srcChainId: state.application.destChainId })
-      dispatch.application.exchangeSrcAndDestChain()
-      dispatch.application.setWaitWallet(false)
+      if (network) {
+        const result = await switchToNetwork({ library: state.application.library, chainId: state.application.destChainId })
+        dispatch.application.setWaitWallet(false)
+        if (result) {
+          await dispatch.application.updateBridgeInfo({ destChainId: state.application.srcChainId, srcChainId: state.application.destChainId })
+          dispatch.application.exchangeSrcAndDestChain()
+        }
+      }
     },
     async changeNetwork({ chainId }, state) {
       dispatch.application.setWaitWallet(true)
-      try {
-        await switchToNetwork({ library: state.application.library, chainId })
+      const result = await switchToNetwork({ library: state.application.library, chainId })
+      dispatch.application.setWaitWallet(false)
+      if (result) {
         dispatch.application.setSrcChainId(chainId)
-      } catch (err) {
-        console.error(err)
-      } finally {
-        dispatch.application.setWaitWallet(false)
         dispatch.application.setNetworkModalMode(NetworkSelectModalMode.CLOSE)
       }
     },

@@ -11,7 +11,6 @@ import { gnosisSafe, injected } from 'connectors'
 import { RootState } from 'store/store'
 import { IS_IN_IFRAME, NetworkContextName } from 'constants/misc'
 import { isMobile } from 'helpers/userAgent'
-import { switchToNetwork } from 'helpers/switchToNetwork'
 import { store } from 'store/store'
 
 export function useActiveWeb3React() {
