@@ -33,40 +33,41 @@ export default function HistoryModal() {
       }}
       closeByKeyboard={true}
       setIsOpen={setHistoryModalOpen}
+      title="History"
     >
-      <Flex flexDirection="column" width="100%" overflow="hidden">
+      {/*  <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
             <a>History</a>
           </StyledText>
           <CircledCloseIcon onClick={() => setHistoryModalOpen(false)} style={{ position: 'absolute' }} />
+        </Flex> */}
+      <UniModalContentWrapper flex={1}>
+        <Flex width="100%" height="100%" flexDirection={'column'} maxHeight={'61.8vh'} overflowX={'hidden'} overflowY={'auto'} justifyContent={transactions.isEmpty() ? 'center' : 'flex-start'} alignItems={'center'}>
+          {transactions.isEmpty() && (
+            <>
+              <Icon src={Empty} size={100}></Icon>
+              <Text
+                css={css`
+                  font-style: normal;
+                  font-size: 1.25rem;
+                  line-height: 1.625rem;
+                  text-transform: capitalize;
+                  color: gray;
+                  font-weight: 700;
+                `}
+              >
+                No Data
+              </Text>
+            </>
+          )}
+          {!transactions.isEmpty() &&
+            [...transactions].reverse().map((transaction) => {
+              return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
+            })}
         </Flex>
-        <UniModalContentWrapper flex={1}>
-          <Flex width="100%" height="100%" flexDirection={'column'} maxHeight={'61.8vh'} overflowX={'hidden'} overflowY={'auto'} justifyContent={transactions.isEmpty() ? 'center' : 'flex-start'} alignItems={'center'}>
-            {transactions.isEmpty() && (
-              <>
-                <Icon src={Empty} size={100}></Icon>
-                <Text
-                  css={css`
-                    font-style: normal;
-                    font-size: 1.25rem;
-                    line-height: 1.625rem;
-                    text-transform: capitalize;
-                    color: gray;
-                    font-weight: 700;
-                  `}
-                >
-                  No Data
-                </Text>
-              </>
-            )}
-            {!transactions.isEmpty() &&
-              [...transactions].reverse().map((transaction) => {
-                return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
-              })}
-          </Flex>
-        </UniModalContentWrapper>
-      </Flex>
+      </UniModalContentWrapper>
+      {/* </Flex> */}
     </UniModal>
   )
 }

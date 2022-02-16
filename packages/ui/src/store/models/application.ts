@@ -26,6 +26,7 @@ import {
   Estimation,
   ESTIMATION_URL,
   ZERO_ADDRESS,
+  TRANSITION_DURATION,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
 import { getContract } from 'helpers'
@@ -101,7 +102,7 @@ type IAppState = {
   connectStatus: boolean
   walletModalOpen: boolean
   transferConfirmationModalOpen: boolean
-  networkModalMode: NetworkSelectModalMode
+  networkModalMode: NetworkSelectModalMode | false
   historyModalOpen: boolean
   currencySelectModalOpen: boolean
   destinationChains: Map<number, Chain>
@@ -126,7 +127,7 @@ type IAppState = {
 
 const initialState: IAppState = {
   connectStatus: Store2.get('connect-status'),
-  networkModalMode: NetworkSelectModalMode.CLOSE,
+  networkModalMode: false, //NetworkSelectModalMode.CLOSE,
   walletModalOpen: false,
   historyModalOpen: false,
   transferConfirmationModalOpen: false,
@@ -160,7 +161,7 @@ export const application = createModel<RootModel>()({
         connectStatus,
       }
     },
-    setNetworkModalMode(state, networkModalMode: NetworkSelectModalMode) {
+    setNetworkModalMode(state, networkModalMode: NetworkSelectModalMode | false) {
       return {
         ...state,
         networkModalMode,
@@ -350,12 +351,12 @@ export const application = createModel<RootModel>()({
     },
     saveDestChainId(chainId: number) {
       dispatch.application.setDestChainId(chainId)
-      dispatch.application.setNetworkModalMode(NetworkSelectModalMode.CLOSE)
+      dispatch.application.setNetworkModalMode(false)
     },
-    changeToken(selectedTokenName: string) {
+    /*  changeToken(selectedTokenName: string) {
       dispatch.application.setSelectedTokenName(selectedTokenName)
       dispatch.application.setCurrencySelectModalOpen(false)
-    },
+    }, */
     loggedIn() {
       Store2.set('connect-status', true)
       dispatch.application.setConnectStatus(true)
@@ -524,8 +525,7 @@ export const application = createModel<RootModel>()({
             }) */
           setTimeout(() => {
             dispatch.application.openTransactionDetailModal(transactionDetail.send_tx_hash)
-            dispatch.application.setTransactionDetailModalOpen(true)
-          }, 0)
+          }, TRANSITION_DURATION)
           infoNoti(`sent request to transfer ${amount} of ${selectedTokenName} from chain: ${bridge.srcChain.name} to chain ${bridge.destChain.name}!`, transaction!.hash) as number
           const fromInput = document.getElementById('fromValueInput')
           const toInput = document.getElementById('toValueInput')
@@ -603,7 +603,7 @@ export const application = createModel<RootModel>()({
       dispatch.application.setWaitWallet(false)
       if (result) {
         dispatch.application.setSrcChainId(chainId)
-        dispatch.application.setNetworkModalMode(NetworkSelectModalMode.CLOSE)
+        dispatch.application.setNetworkModalMode(false)
       }
     },
     async updateBridgeInfo({ srcChainId, destChainId, extendedUpdate = true }: { srcChainId: number; destChainId: number; extendedUpdate?: boolean }) {
@@ -749,7 +749,7 @@ export const application = createModel<RootModel>()({
       const { setWalletModalOpen, setTransferConfirmationModalOpen, setNetworkModalMode, setHistoryModalOpen, setCurrencySelectModalOpen, setTransactionDetailModalOpen } = dispatch.application
       setWalletModalOpen(false)
       setTransferConfirmationModalOpen(false)
-      setNetworkModalMode(NetworkSelectModalMode.CLOSE)
+      setNetworkModalMode(false)
       setHistoryModalOpen(false)
       setCurrencySelectModalOpen(false)
       setTransactionDetailModalOpen(false)

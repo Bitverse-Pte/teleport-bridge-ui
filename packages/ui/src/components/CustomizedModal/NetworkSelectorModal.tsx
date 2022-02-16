@@ -83,20 +83,15 @@ export default function NetworkSelectModal() {
     <UniModal
       maxWidth="40rem"
       maxHeight={61.8}
-      isOpen={networkModalMode !== NetworkSelectModalMode.CLOSE}
+      isOpen={!!networkModalMode}
       onDismiss={() => {
         console.log('dismiss')
       }}
       closeByKeyboard={true}
-      setIsOpen={() => setNetworkModalMode(NetworkSelectModalMode.CLOSE)}
+      setIsOpen={setNetworkModalMode}
+      title="Select A Chain"
     >
       <Flex flexDirection="column" width="100%" overflow="hidden">
-        <Flex height="40px" width="100%" justifyContent="flex-end">
-          <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
-            <a>Select a Chain</a>
-          </StyledText>
-          <CircledCloseIcon onClick={() => setNetworkModalMode(NetworkSelectModalMode.CLOSE)} />
-        </Flex>
         <UniModalContentWrapper>
           <OptionGrid>{getNetworkOptions()}</OptionGrid>
         </UniModalContentWrapper>

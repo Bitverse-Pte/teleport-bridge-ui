@@ -59,7 +59,7 @@ export const SelectorLogo = styled(SimpleLogo)<{ left?: string; interactive?: bo
   } */
 `
 
-export const StyledLogo = styled(Logo)<{ size: string }>`
+export const StyledLogo = styled(Logo)<{ size: string; isSelected?: boolean }>`
   width: ${({ size }) => size};
   height: ${({ size }) => size};
   background: radial-gradient(white 50%, #ffffff00 calc(75% + 1px), #ffffff00 100%);
@@ -68,4 +68,11 @@ export const StyledLogo = styled(Logo)<{ size: string }>`
   -webkit-box-shadow: 0 0 1px black;
   box-shadow: 0 0 1px black;
   border: 0px solid rgba(255, 255, 255, 0);
+  ${({ isSelected, theme, size }) =>
+    isSelected &&
+    `
+    -mox-box-shadow: 0 0 ${size} ${theme.green1};
+    -webkit-box-shadow: 0 0 ${size} ${theme.green1};
+    box-shadow: 0 0 ${size} ${theme.green1};
+  `}
 `

@@ -49,8 +49,8 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
     return true
   } catch (error) {
     // 4902 is the error code for attempting to switch to an unrecognized chainId
+    const chain = store.getState().application.availableChains.get(chainId!)
     if ((error as any).code === 4902 && chainId !== undefined) {
-      const chain = store.getState().application.availableChains.get(chainId)
       if (!chain) {
         errorNoti(`chain: ${chainId} is not supported!`)
         return
@@ -60,7 +60,7 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
       // metamask's behavior when switching to the current network is just to return null (a no-op)
       await addNetwork({ library, chainId, info: chain as Chain })
     }
-    errorNoti(`failed to change chain to ${chainId}, detail is ${(error as any).message}`)
+    errorNoti(`failed to change chain to ${chain?.name}, detail is ${(error as any).message}`)
     /*  if (retry) {
       try {
         await window.ethereum?.request({

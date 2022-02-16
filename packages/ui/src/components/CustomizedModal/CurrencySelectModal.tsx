@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { CircledCloseIcon } from 'components/Icon'
-import { StyledText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import Option from 'components/Option'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
@@ -50,24 +49,25 @@ export default function CurrencySelectModal() {
       closeByKeyboard={true}
       setIsOpen={setCurrencySelectModalOpen}
       maxWidth={'40rem'}
+      title="Select A Token"
     >
-      <Flex flexDirection="column" width="100%" overflow="hidden">
-        <Flex height="40px" width="100%" justifyContent="flex-end">
+      {/* <Flex flexDirection="column" width="100%" overflow="hidden"> */}
+      {/*  <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
             <a>Select a Token</a>
           </StyledText>
           <CircledCloseIcon onClick={() => setCurrencySelectModalOpen(false)} style={{ position: 'absolute' }} />
+        </Flex> */}
+      <UniModalContentWrapper style={{ flex: 1 }}>
+        <Flex flex={1}>
+          <AutoSizer style={{ width: '100%', height: '100%' }}>
+            {({ height }) => {
+              return <CurrencyList height={height} tokenPairs={selectedTokenPairs} />
+            }}
+          </AutoSizer>
         </Flex>
-        <UniModalContentWrapper style={{ flex: 1 }}>
-          <Flex flex={1}>
-            <AutoSizer style={{ width: '100%', height: '100%' }}>
-              {({ height }) => {
-                return <CurrencyList height={height} tokenPairs={selectedTokenPairs} />
-              }}
-            </AutoSizer>
-          </Flex>
-        </UniModalContentWrapper>
-      </Flex>
+      </UniModalContentWrapper>
+      {/* </Flex> */}
     </UniModal>
   )
 }

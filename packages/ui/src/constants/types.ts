@@ -362,7 +362,7 @@ export interface TokenPair {
 export enum NetworkSelectModalMode {
   SRC = 'SRC',
   DEST = 'DEST',
-  CLOSE = 'CLOSE',
+  // CLOSE = 'CLOSE',
 }
 
 export enum TRANSFER_STATUS {

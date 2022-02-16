@@ -143,8 +143,10 @@ export default function CustomziedThemeProvider({ children }: { children: React.
   return <ThemeProvider theme={themeObject}>{children}</ThemeProvider>
 }
 
-const TextWrapper = styled(Text)<{ color: keyof Colors }>`
-  color: ${({ theme, color }) => (theme as any)[color]};
+export const TextWrapper = styled(Text)<{ color: keyof Colors }>`
+  color: ${({ theme, color }) => {
+    return (theme as any)[color]
+  }};
 `
 
 /* function TextWrapper() {

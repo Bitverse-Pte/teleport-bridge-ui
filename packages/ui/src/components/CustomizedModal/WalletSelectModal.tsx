@@ -180,18 +180,19 @@ export default function WalletSelectModal() {
       }}
       closeByKeyboard={true}
       setIsOpen={setWalletModalOpen}
+      title="Select A Wallet"
     >
-      <Flex flexDirection="column" width="100%" overflow="hidden">
+      {/* <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
             <PrimaryText>Select a Wallet</PrimaryText>
           </StyledText>
           <CircledCloseIcon onClick={() => setWalletModalOpen(false)} style={{ position: 'absolute' }} />
-        </Flex>
-        <UniModalContentWrapper>
-          <OptionGrid>{getOptions()}</OptionGrid>
-        </UniModalContentWrapper>
-      </Flex>
+        </Flex> */}
+      <UniModalContentWrapper>
+        <OptionGrid>{getOptions()}</OptionGrid>
+      </UniModalContentWrapper>
+      {/*  </Flex> */}
     </UniModal>
   )
 }

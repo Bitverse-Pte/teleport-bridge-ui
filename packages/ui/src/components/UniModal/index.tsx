@@ -1,10 +1,15 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { DialogContent, DialogOverlay } from '@reach/dialog'
 import { transparentize } from 'polished'
 import { animated, useSpring, useTransition } from '@react-spring/web'
 import { useGesture } from 'react-use-gesture'
 import styled, { css } from 'styled-components/macro'
 import { Flex } from 'rebass'
+import { delay } from 'lodash'
+
+import { StyledText } from 'components/Text'
+import { CircledCloseIcon } from 'components/Icon'
+import { TRANSITION_DURATION } from 'constants/index'
 
 // import { isMobile } from '../../utils/userAgent'
 
@@ -85,10 +90,11 @@ interface ModalProps {
   initialFocusRef?: React.RefObject<any>
   children?: React.ReactNode
   closeByKeyboard?: boolean
-  setIsOpen?(openOrNot: boolean): void
+  setIsOpen?(openOrNot: false): any
+  title: string
 }
 
-export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30, maxWidth, minWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard }: ModalProps) {
+export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30, maxWidth, minWidth, maxHeight = 90, initialFocusRef, children, closeByKeyboard, title }: ModalProps) {
   /*   const [{ y }, set] = useSpring(() => ({ y: 0, config: { mass: 1, tension: 210, friction: 20 } }))
   const bind = useGesture({
     onDrag: (state) => {
@@ -100,23 +106,23 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
       }
     },
   }) */
+  const [inClose, setInClose] = useState(false)
+  const [wrappedIsOpen, setWrappedIsOpen] = useState(isOpen)
 
-  const fadeTransition = useTransition(isOpen, {
-    config: { duration: 200 },
+  const fadeTransition = useTransition(wrappedIsOpen, {
+    config: { duration: TRANSITION_DURATION },
     from: { opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
   })
-  useEffect(() => {
-    if (closeByKeyboard) {
-      document.addEventListener('keyup', escapeOnEscUp)
+
+  const wrappedSetIsOpen = useCallback(() => {
+    if (!inClose) {
+      setInClose(true)
+      setWrappedIsOpen(false)
+      setTimeout(() => setIsOpen && setIsOpen(false), TRANSITION_DURATION)
     }
-    return () => {
-      if (closeByKeyboard) {
-        document.removeEventListener('keyup', escapeOnEscUp)
-      }
-    }
-  }, [isOpen])
+  }, [inClose, wrappedIsOpen])
   const escapeOnEscUp = useCallback(
     (event: KeyboardEvent) => {
       if (event.which == 27 && isOpen && setIsOpen) {
@@ -125,6 +131,23 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
     },
     [isOpen]
   )
+  useEffect(() => {
+    if (closeByKeyboard) {
+      document.addEventListener('keyup', escapeOnEscUp)
+    }
+    if (!isOpen) {
+      if (!inClose) {
+        setInClose(true)
+      }
+      setWrappedIsOpen(false)
+    }
+
+    return () => {
+      if (closeByKeyboard) {
+        document.removeEventListener('keyup', escapeOnEscUp)
+      }
+    }
+  }, [isOpen, title, inClose, wrappedIsOpen])
 
   return (
     <>
@@ -148,7 +171,15 @@ export default function UniModal({ isOpen, setIsOpen, onDismiss, minHeight = 30,
               >
                 {/* prevents the automatic focusing of inputs on mobile by the reach dialog */}
                 {/* {!initialFocusRef && false ? <div tabIndex={1} /> : null} */}
-                {children}
+                <Flex flexDirection="column" width="100%" overflow="hidden">
+                  <Flex height="40px" width="100%" justifyContent="flex-end">
+                    <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
+                      <a>{title}</a>
+                    </StyledText>
+                    <CircledCloseIcon id={title.split(' ').join('-') + '-' + 'close-btn'} onClick={wrappedSetIsOpen} />
+                  </Flex>
+                  {children}
+                </Flex>
               </StyledDialogContent>
             </StyledDialogOverlay>
           )

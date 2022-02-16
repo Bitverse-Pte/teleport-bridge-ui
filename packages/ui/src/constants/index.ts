@@ -8,3 +8,4 @@ export * from './urls'
 export * from './types'
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+export const TRANSITION_DURATION = 200

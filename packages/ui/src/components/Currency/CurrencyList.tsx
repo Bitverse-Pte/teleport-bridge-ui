@@ -39,7 +39,7 @@ const MenuItem = styled(SpaceBetweenRow)`
 function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number; style: CSSProperties }) {
   const { account, library } = useActiveWeb3React()
   const {
-    application: { changeToken, saveCurrentTokenBalance },
+    application: { /* changeToken, */ setSelectedTokenName, setCurrencySelectModalOpen, saveCurrentTokenBalance },
   } = useDispatch()
   const selectedTokenName = useSelector((state: RootState) => state.application.selectedTokenName)
   const tokenPair = data[index]
@@ -56,16 +56,24 @@ function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number;
     }
   }, [isSelected, balance])
   // only show add or remove buttons if not on selected list
+  const selectToken = useCallback(() => {
+    if (isSelected) {
+      return
+    }
+    setSelectedTokenName(token.name)
+    const btn = document.getElementById('Select-A-Token-close-btn')
+    btn?.dispatchEvent(new MouseEvent('click', { view: window, bubbles: true }))
+  }, [isSelected, token])
   return (
-    <MenuItem style={style} className={`token-item-${key}`} onClick={() => (isSelected ? null : changeToken(token.name))} disabled={isSelected} selected={isSelected}>
-      <StyledLogo size={'1.5rem'} srcs={[token.logoURI!]} alt={`${token?.symbol ?? 'token'} logo`} />
+    <MenuItem style={style} className={`token-item-${key}`} onClick={selectToken} /* disabled={isSelected} selected={isSelected} */>
+      <StyledLogo isSelected={isSelected} size={'1.5rem'} srcs={[token.logoURI!]} alt={`${token?.symbol ?? 'token'} logo`} />
       <Column>
-        <ThemedText.Main>{token.symbol}</ThemedText.Main>
+        <ThemedText.Main color={isSelected ? 'green1' : 'text2'}>{token.symbol}</ThemedText.Main>
         <ThemedText.DarkGray ml="0px" fontSize={'12px'} fontWeight={300}>
           {token.name}
         </ThemedText.DarkGray>
       </Column>
-      {<RowFixed style={{ justifySelf: 'flex-end' }}>{balance ? <Balance balance={balance} currency={token} /> : account ? <Loader /> : null}</RowFixed>}
+      {<RowFixed style={{ justifySelf: 'flex-end' }}>{balance ? <Balance matchCurrentToken={true} balance={balance} currency={token} /> : account ? <Loader /> : null}</RowFixed>}
     </MenuItem>
   )
 }
