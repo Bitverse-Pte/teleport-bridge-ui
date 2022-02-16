@@ -44,7 +44,7 @@ export default function NetworkSelectModal() {
             <Option
               id={`connect-${chain.name}`}
               onClick={() => {
-                changeNetwork({ chainId: chain.chainId })
+                srcChainId !== chain.chainId && changeNetwork({ chainId: chain.chainId })
               }}
               key={chain.chainId}
               active={!!(connectStatus && account && chainId == chain.chainId)}
@@ -62,7 +62,7 @@ export default function NetworkSelectModal() {
             <Option
               id={`connect-${chain.name}`}
               onClick={() => {
-                saveDestChainId(chain.chainId)
+                destChainId !== chain.chainId && saveDestChainId(chain.chainId)
               }}
               key={chain.chainId}
               active={destChainId == chain.chainId}
