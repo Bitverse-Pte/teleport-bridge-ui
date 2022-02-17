@@ -3,8 +3,7 @@ import { Copy, CheckCircle } from 'react-feather'
 import { Textfit } from 'react-textfit'
 import styled from 'styled-components/macro'
 import { useTransition, config, animated, useSpringRef } from '@react-spring/web'
-import { Text, Flex } from 'rebass'
-import { infoNoti } from 'helpers/notifaction'
+import { Text, Flex, FlexProps } from 'rebass'
 
 const ColorfulText = styled(Text)<{ color?: string }>`
   font-style: normal;
@@ -14,7 +13,7 @@ const ColorfulText = styled(Text)<{ color?: string }>`
   color: ${({ color }) => color ?? '#ffffff'};
 `
 
-export function Hash({ hash, copyable = false, color, ellipsis = false, showCounts = 8, ...rest }: { showCounts?: number; hash: string; color?: string; ellipsis?: boolean; copyable?: boolean }) {
+export function Hash({ hash, copyable = false, color, ellipsis = false, showCounts = 8, ...rest }: { showCounts?: number; hash: string; color?: string; ellipsis?: boolean; copyable?: boolean } & FlexProps) {
   const [isCopied, setIsCopied] = useState(false)
   const coptToClipBoard = useCallback(() => {
     if (hash) {
@@ -56,9 +55,9 @@ export function Hash({ hash, copyable = false, color, ellipsis = false, showCoun
     return undefined
   }, [isCopied])
   return (
-    <Flex style={{ position: 'relative' }}>
-      <ColorfulText color={color} paddingRight="2rem">
-        <Textfit max={20} min={2} mode="single">
+    <Flex style={{ position: 'relative' }} {...rest}>
+      <ColorfulText color={color} paddingRight="2rem" width={'100%'}>
+        <Textfit max={20} min={2} mode="single" style={{ width: '100%' }}>
           {ellipsis ? `${hash.substring(0, showCounts)}...${hash.substring(hash.length - showCounts, hash.length)}` : hash}
         </Textfit>
       </ColorfulText>

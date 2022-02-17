@@ -172,11 +172,11 @@ export default function TransactionDetailModal() {
               </Flex>
               <Flex justifyContent={'space-between'}>
                 <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
-                <Hash ellipsis={true} hash={selectedTx.send_tx_hash} copyable={true} />
+                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.send_tx_hash} copyable={true} />
               </Flex>
               <Flex justifyContent={'space-between'}>
                 <Text2 style={{ whiteSpace: 'nowrap' }}>Sender Address</Text2>
-                <Hash ellipsis={true} hash={selectedTx.sender} copyable={true} />
+                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.sender} copyable={true} />
               </Flex>
             </Wrapper>
             <Wrapper>
@@ -207,11 +207,11 @@ export default function TransactionDetailModal() {
               </Flex>
               <Flex justifyContent={'space-between'}>
                 <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
-                <Hash ellipsis={true} hash={selectedTx.receive_tx_hash} copyable={true} />
+                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receive_tx_hash} copyable={true} />
               </Flex>
               <Flex justifyContent={'space-between'}>
                 <Text2 style={{ whiteSpace: 'nowrap' }}>Receiver Address</Text2>
-                <Hash ellipsis={true} hash={selectedTx.receiver} copyable={true} />
+                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receiver} copyable={true} />
               </Flex>
             </Wrapper>
           </>
