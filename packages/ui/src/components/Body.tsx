@@ -326,7 +326,13 @@ export default function AppBody({ ...rest }) {
                 <Flex justifyContent="space-between" padding={'0.5rem'}>
                   <BalanceWrapper clickable={!!(walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
                     <DarkGreenText>{'Max ≈'}&nbsp;</DarkGreenText>
-                    {walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance ? <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} /> : walletReady && connectStatus && account ? <Loader size={17} color="white" /> : <DarkGreenText>N/A</DarkGreenText>}
+                    {walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance ? (
+                      <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} />
+                    ) : walletReady && connectStatus && account ? (
+                      <Loader size={17} color="primary1" />
+                    ) : (
+                      <DarkGreenText>N/A</DarkGreenText>
+                    )}
                   </BalanceWrapper>
                 </Flex>
               </Flex>

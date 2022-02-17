@@ -168,7 +168,7 @@ function App() {
           <Header />
           {showBody()}
           <Spinner closable={true} showSpinner={waitWallet} setShowSpinner={setWaitWallet}>
-            <TextPrimary1>This DApp is awaiting response from your wallet.</TextPrimary1>
+            <TextPrimary1>This DApp is waiting response from your wallet.</TextPrimary1>
           </Spinner>
           <ToastContainer pauseOnFocusLoss={true} limit={8} draggable={true} autoClose={10000} theme="dark" />
         </Flex>

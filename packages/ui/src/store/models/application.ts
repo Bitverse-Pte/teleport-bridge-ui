@@ -1,4 +1,5 @@
 import { BigNumber as EtherBigNumber } from '@ethersproject/bignumber'
+import BigNumber from 'bignumber.js'
 import { isAddress } from '@ethersproject/address'
 import { parseEther } from '@ethersproject/units'
 import { AbiItem } from 'web3-utils'
@@ -771,10 +772,20 @@ export const application = createModel<RootModel>()({
                   return srcValue || objValue
                 })
                 if (newOne.status === TRANSACTION_STATUS.SUCCEEDED) {
-                  successNoti(`succeeded to transfer ${toUpdateOne.amount} of ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}!`, toUpdateOne.send_tx_hash)
+                  const tokenInfo = store
+                    .getState()
+                    .application.bridgePairs.get(`${toUpdateOne.src_chain_id}-${toUpdateOne.dest_chain_id}`)
+                    ?.tokens.find((token) => token.srcToken.address === toUpdateOne.token_address)?.srcToken
+                  successNoti(`succeeded to transfer ${new BigNumber(toUpdateOne.amount).shiftedBy(-tokenInfo!.decimals).toString()} of ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}!`, toUpdateOne.send_tx_hash)
                 }
                 if (newOne.status === TRANSACTION_STATUS.FAILED) {
-                  warnNoti(`failed to transfer this amount: ${toUpdateOne.amount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
+                  let parsedTransactionAmount = `${toUpdateOne.amount}(not converted by decimals)`
+                  const bridgePair = store.getState().application.bridgePairs.get(`${toUpdateOne.src_chain_id}-${toUpdateOne.dest_chain_id}`)
+                  if (bridgePair) {
+                    const tokenInfo = bridgePair?.tokens.find((token) => token.srcToken.address === toUpdateOne.token_address)?.srcToken
+                    parsedTransactionAmount = new BigNumber(toUpdateOne.amount).shiftedBy(-tokenInfo!.decimals).toString()
+                  }
+                  warnNoti(`failed to transfer this amount: ${parsedTransactionAmount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
                 }
               }
               newTxes.splice(newOneIndex, 1)
@@ -792,7 +803,7 @@ export const application = createModel<RootModel>()({
           dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(newTransactions, 10))
           dispatch.application.saveTransactions(transactions)
         } catch (err) {
-          errorNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
+          warnNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
         }
       }, 10 * 1000)
       dispatch.application.setTransactionHistoryUpdatingTimer(timer)

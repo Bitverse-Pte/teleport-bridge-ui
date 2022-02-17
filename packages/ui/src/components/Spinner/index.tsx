@@ -17,14 +17,13 @@ to {
 }
 `
 
-export const BaseSpinner = styled.div<{ warning: boolean; size: string }>`
+export const BaseSpinner = styled.div<{ color?: string; warning?: boolean; size: string }>`
   animation: ${rotate360} 1.618s cubic-bezier(0.83, 0, 0.17, 1) infinite;
   transform: translateZ(0);
-
   border-top: 0.1618rem solid transparent;
   border-right: 0.1618rem solid transparent;
   border-bottom: 0.1618rem solid transparent;
-  border-left: 0.1618rem solid ${({ theme, warning }) => (warning ? theme.yellow3 : theme.white)};
+  border-left: 0.1618rem solid ${({ theme, color, warning }) => (warning ? theme.yellow3 : color ? color : theme.white)};
   background: transparent;
   width: ${({ size }) => size};
   height: ${({ size }) => size};

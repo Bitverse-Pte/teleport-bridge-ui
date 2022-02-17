@@ -29,7 +29,7 @@ const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
   width: 100%;
   align-items: center;
-  padding: 0.5rem;
+  padding: 1rem;
   margin-left: 1.5rem;
   border-radius: 1.5rem;
   cursor: pointer;
