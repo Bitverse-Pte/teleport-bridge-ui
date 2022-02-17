@@ -1,8 +1,9 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css, useTheme } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
 import { useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
+import { RefreshCw } from 'react-feather'
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 
 import 'react-toastify/dist/ReactToastify.css'
@@ -39,6 +40,17 @@ const SLayout = styled(Flex)`
   }
 `
 
+const Refresh = styled(RefreshCw)<{ disabled: boolean }>`
+  :hover {
+    opacity: 0.6;
+  }
+  ${({ disabled }) => {
+    return `
+    cursor:${disabled ? 'not-allowed' : 'pointer'};
+    `
+  }}
+`
+
 const ErrorBody = function ({ children }: { children: ReactNode | ReactNode[] }) {
   return (
     <Flex flex={1} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -72,14 +84,21 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 
 function App() {
   const { account } = useActiveWeb3React()
+  const theme = useTheme()
   const {
     application: { initChains, initTransactions, setWaitWallet, resetApp, stopTransactionHistoryUpdating },
   } = useDispatch()
   const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
+  const [inFetching, setInFetching] = useState(false)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
   const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
 
-  useEffect(() => {
+  const initEssentialData = useCallback(() => {
+    if (inFetching) {
+      return
+    }
+    setInFetching(true)
+    setInitStatus(INIT_STATUS.starting)
     Promise.all([initChains()])
       .then(() => {
         setInitStatus(INIT_STATUS.initialized)
@@ -88,6 +107,13 @@ function App() {
         errorNoti(`failed to load essential data`)
         setInitStatus(INIT_STATUS.error)
       })
+      .finally(() => {
+        setInFetching(false)
+      })
+  }, [inFetching])
+
+  useEffect(() => {
+    initEssentialData()
   }, [])
   useEffect(() => {
     connectStatus && account && initTransactions(account)
@@ -112,15 +138,18 @@ function App() {
       case INIT_STATUS.error:
         return (
           <ErrorBody>
-            <Flex minHeight={'100%'} width={'100%'} justifyContent={'center'} alignItems={'center'}>
-              <TextPrimary1>failed to load essential data</TextPrimary1>
+            <Flex minHeight={'100%'} width={'100%'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
+              <TextPrimary1>Failed to load essential data!</TextPrimary1>
+              <TextPrimary1>Please click refresh button to retry.</TextPrimary1>
+              <br />
+              <Refresh size={32} color={theme.primary1} onClick={initEssentialData} disabled={inFetching} />
             </Flex>
           </ErrorBody>
         )
       default:
         return <Spinner closable={false} showSpinner={true} />
     }
-  }, [initStatus])
+  }, [initStatus, inFetching])
 
   return (
     <Flex
