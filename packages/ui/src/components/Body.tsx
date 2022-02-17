@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { darken } from 'polished'
 import styled, { css } from 'styled-components'
@@ -162,6 +162,25 @@ export default function AppBody({ ...rest }) {
   const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
   const fromValueInputRef = useRef<any>({})
   const toValueInputRef = useRef<any>({})
+
+  const containerRef = useRef<any>()
+  const [containerJustifyMode, setContainerJustifyMode] = useState('center')
+  const windowResizeHandler = useCallback(() => {
+    if (containerRef.current) {
+      if ((containerRef.current as HTMLDivElement).offsetHeight > 600) {
+        setContainerJustifyMode('center')
+      } else {
+        setContainerJustifyMode('flex-start')
+      }
+    }
+  }, [containerRef])
+  useLayoutEffect(() => {
+    windowResizeHandler()
+    window.addEventListener('resize', windowResizeHandler)
+    return () => {
+      window.removeEventListener('resize', windowResizeHandler)
+    }
+  }, [containerRef])
   // const [toValue, setToValue] = useState<BigNumber>(new BigNumber(0))
   const chainReady = useMemo(() => {
     if (chainId && srcChainId == chainId) {
@@ -296,7 +315,7 @@ export default function AppBody({ ...rest }) {
 
   return (
     <>
-      <Flex flex={1} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
+      <Flex ref={containerRef} minHeight="fit-content" height="100%" overflowY="auto" maxHeight="calc(100vh - 80px)" flexDirection={'column'} justifyContent={containerJustifyMode} alignItems={'center'}>
         <BodyWrapper {...rest}>
           <Flex width="100%" flexDirection="column" justifyContent="space-between">
             <Container hideInput={false}>

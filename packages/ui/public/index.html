@@ -76,7 +76,6 @@ Explicitly load Inter var from public/ so it does not block LCP's critical path.
 
       body {
         position: fixed;
-        overflow: hidden;
         height: 100% !important;
         width: 100% !important;
         margin: 0 !important;
@@ -88,6 +87,7 @@ Explicitly load Inter var from public/ so it does not block LCP's critical path.
         font-size: 16px;
         background-color: rgb(255, 255, 255);
         color: rgb(12, 12, 13);
+        overflow-x: hidden;
         overflow-y: auto;
         text-rendering: optimizeLegibility;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);

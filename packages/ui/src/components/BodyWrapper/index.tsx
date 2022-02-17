@@ -33,7 +33,7 @@ export const BodyWrapper = styled.main<{ margin?: string; maxWidth?: string }>`
   // border-style: solid;
   box-shadow: -1px -1px 1px 1px rgb(255 255 255 / 10%);
   padding: 1.5rem;
-  min-height: 20rem;
+  min-height: 495px;
   max-height: calc(100% - 100px);
   // box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 24px 32px rgba(0, 0, 0, 0.01);
   z-index: ${Z_INDEX.deprecated_zero};

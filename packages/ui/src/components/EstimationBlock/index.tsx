@@ -49,7 +49,7 @@ export function EstimationBlock({ ...rest }: FlexProps) {
         color: white;
         padding: 1.6rem 1.6rem;
         width: 80%;
-        height: 'fit-content';
+        height: fit-content;
         background: rgba(0, 0, 0, 0.3);
         border: solid rgba(255, 255, 255, 0.2);
         box-sizing: border-box;
