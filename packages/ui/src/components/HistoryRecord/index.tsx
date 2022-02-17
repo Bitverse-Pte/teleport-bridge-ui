@@ -288,7 +288,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           </Flex>
           <Box></Box>
           <Flex justifyContent="center" alignItems="center">
-            {transaction.status === TRANSACTION_STATUS.SUCCEEDED && destToken && (
+            {destToken && (
               <>
                 <TooltippedAmount amount={new BigNumber(transaction.amount).shiftedBy(-destToken.decimals).toFixed(4)} AmountText={AmountText} />
                 <UnitText>&nbsp;{destToken!.symbol}</UnitText>
