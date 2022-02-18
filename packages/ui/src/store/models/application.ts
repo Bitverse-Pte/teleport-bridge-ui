@@ -249,11 +249,11 @@ export const application = createModel<RootModel>()({
         selectedTokenName: tokenName,
       }
     },
-    exchangeSrcAndDestChain(state) {
+    exchangeSrcAndDestChain(state, newSrcChainId?, newDestChainId?) {
       return {
         ...state,
-        destChainId: state.srcChainId,
-        srcChainId: state.destChainId,
+        destChainId: newDestChainId || state.srcChainId,
+        srcChainId: newSrcChainId || state.destChainId,
       }
     },
     setTransferStatus(state, transferStatus: TRANSFER_STATUS) {
@@ -582,15 +582,16 @@ export const application = createModel<RootModel>()({
               the detail is ${(err as any)?.message}`)
       }
     },
-    async turnOverSrcAndDestChain(rest = {}, state) {
+    async turnOverSrcAndDestChain(rest = {}) {
       dispatch.application.setWaitWallet(true)
-      const network = await state.application.library?.getNetwork()
+      const network = await store.getState().application.library?.getNetwork()
+      const { srcChainId: cachedSrcChainId, destChainId: cachedDestChainId } = store.getState().application
       if (network) {
-        const result = await switchToNetwork({ library: state.application.library, chainId: state.application.destChainId })
+        const result = await switchToNetwork({ library: store.getState().application.library, chainId: cachedDestChainId })
         dispatch.application.setWaitWallet(false)
         if (result) {
-          await dispatch.application.updateBridgeInfo({ destChainId: state.application.srcChainId, srcChainId: state.application.destChainId })
-          dispatch.application.exchangeSrcAndDestChain()
+          // await dispatch.application.updateBridgeInfo({ destChainId: cachedSrcChainId, srcChainId: cachedDestChainId })
+          dispatch.application.exchangeSrcAndDestChain(cachedDestChainId, cachedSrcChainId)
         }
       }
     },
@@ -603,8 +604,8 @@ export const application = createModel<RootModel>()({
         dispatch.application.setNetworkModalMode(false)
       }
     },
-    async updateBridgeInfo({ srcChainId, destChainId, extendedUpdate = true }: { srcChainId: number; destChainId: number; extendedUpdate?: boolean }) {
-      const state = store.getState()
+    async updateBridgeInfo({ srcChainId, destChainId, extendedUpdate = true }: { srcChainId: number; destChainId: number; extendedUpdate?: boolean }, state) {
+      // const state = store.getState()
       const key = `${srcChainId}-${destChainId}`
       if (!state.application.bridgePairs.has(key)) {
         const {

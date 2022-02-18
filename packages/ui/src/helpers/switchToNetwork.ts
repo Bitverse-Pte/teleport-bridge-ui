@@ -38,6 +38,7 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
       // metamask's behavior when switching to the current network is just to return null (a no-op)
       try {
         await addNetwork({ library, chainId, info: chain as Chain })
+        return true
       } catch (err) {
         errorNoti(`chain: ${chainId} is not supported!`)
       }
