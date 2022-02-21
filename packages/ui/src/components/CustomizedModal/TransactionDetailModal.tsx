@@ -102,7 +102,7 @@ export default function TransactionDetailModal() {
       if (!tokens) {
         return {}
       }
-      const target = tokens!.find((e) => e.srcToken.address.toLowerCase() === selectedTx.token_address.toLowerCase() || e.destToken.address.toLowerCase() === selectedTx.token_address.toLowerCase())!
+      const target = tokens!.find((e) => e.srcToken.address.toLowerCase() === transaction.token_address.toLowerCase()) || tokens!.find((e) => e.destToken.address.toLowerCase() === transaction.token_address.toLowerCase())
       if (target) {
         const { srcToken, destToken } = target
         return { srcToken, destToken }
