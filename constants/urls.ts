@@ -1,0 +1,5 @@
+export const AVAILABLE_CHAINS_URL = '/bridge/chains'
+export const COUNTERPARTY_CHAINS_URL = '/bridge/counterpartyChains'
+export const BRIDGE_TOKENS_URL = '/bridge/bridges'
+export const TRANSACTION_HISTORY_URL = '/bridge/packet/history'
+export const ESTIMATION_URL = '/bridge/estimation'
