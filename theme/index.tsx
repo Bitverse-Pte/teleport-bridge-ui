@@ -5,8 +5,6 @@ import styled, { css, DefaultTheme, ThemeProvider } from 'styled-components'
 
 import { Colors } from './styled'
 
-export * from './components'
-
 type TextProps = Omit<TextPropsOriginal, 'css'>
 
 export const DefaultButtonRadius = '1.5rem'

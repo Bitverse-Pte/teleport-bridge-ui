@@ -1,6 +1,6 @@
-import EthereumLogo from 'assets/images/ethereum-logo.png'
-import DefaultIcon from 'assets/defaultIcon.svg'
-import USDTLogo from 'assets/usdt.svg'
+import EthereumLogo from 'public/images/ethereum-logo.png'
+import DefaultIcon from 'public/defaultIcon.svg'
+import USDTLogo from 'public/usdt.svg'
 import ERC20ABI from 'contracts/erc20.json'
 import { TokenInfo } from 'constants/types'
 

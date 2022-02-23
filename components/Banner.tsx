@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import logo from 'assets/logo.svg'
+import logo from 'public/logo.svg'
 import { fonts, colors } from 'theme/styles'
 
 const SBannerWrapper = styled.div`

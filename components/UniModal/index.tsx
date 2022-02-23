@@ -3,7 +3,7 @@ import { DialogContent, DialogOverlay } from '@reach/dialog'
 import { transparentize } from 'polished'
 import { animated, useSpring, useTransition } from '@react-spring/web'
 import { useGesture } from 'react-use-gesture'
-import styled, { css } from 'styled-components/macro'
+import styled, { css } from 'styled-components'
 import { Flex } from 'rebass'
 import { delay } from 'lodash'
 

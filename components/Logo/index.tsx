@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Slash } from 'react-feather'
 import CssValueParser from 'parse-unit'
+import Image from 'next/image'
 import { ImageProps } from 'rebass'
 import styled from 'styled-components'
 
@@ -11,12 +12,13 @@ const BAD_SRCS: { [tokenAddress: string]: true } = {}
 
 interface LogoProps extends Pick<ImageProps, 'style' | 'alt' | 'className'> {
   srcs: string[]
+  size: string
 }
 
 /**
  * Renders an image by sequentially trying a list of URIs, and then eventually a fallback triangle alert
  */
-export default function Logo({ srcs, alt, style, ...rest }: LogoProps) {
+export default function Logo({ srcs, alt, size = '1rem', style, ...rest }: LogoProps) {
   const [, refresh] = useState<number>(0)
 
   const theme = useTheme()
@@ -25,11 +27,12 @@ export default function Logo({ srcs, alt, style, ...rest }: LogoProps) {
 
   if (src) {
     return (
-      <img
+      <Image
         {...rest}
+        height={size}
+        width={size}
         alt={alt}
         src={src}
-        style={style}
         onError={() => {
           if (src) BAD_SRCS[src] = true
           refresh((i) => i + 1)

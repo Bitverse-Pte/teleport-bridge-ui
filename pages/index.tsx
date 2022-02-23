@@ -1,6 +1,5 @@
-import React from 'react'
-import { Provider, connect } from 'react-redux'
-import { createWeb3ReactRoot, Web3ReactProvider } from '@web3-react/core'
+import React, { useEffect } from 'react'
+import { Provider, connect, useDispatch } from 'react-redux'
 import ReactDOM from 'react-dom'
 import '@reach/dialog/styles.css'
 // import 'inter-ui'
@@ -9,10 +8,14 @@ import BridgeUI from 'components/BridgeUI'
 import ThemeProvider from 'theme'
 // import { globalStyle } from './styles'
 // import { store } from 'store/store'
-import { RootState, Dispatch } from 'store/store'
+import { RootState, Dispatch, store, initializeStore } from 'store/store'
 import getLibrary from 'helpers/getLibrary'
 import Web3Manager from 'components/Web3Manager'
-import { NetworkContextName } from 'constants/misc'
+import { NetworkContextName, ZERO_ADDRESS } from 'constants/misc'
+import axios from 'axios'
+import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS } from 'constants/index'
+import { fillRpc } from 'helpers'
+import { isAddress } from 'web3-utils'
 // const GlobalStyle = createGlobalStyle`
 //   ${globalStyle}
 // `
@@ -68,7 +71,7 @@ import { NetworkContextName } from 'constants/misc'
 //   )
 // }
 
-const mapState = ({ application }: RootState) => ({
+/* const mapState = ({ application }: RootState) => ({
   application,
 })
 
@@ -76,23 +79,127 @@ const mapDispatch = ({ application }: Dispatch) => ({
   application,
 })
 
-const StatefulBridgeUI = connect(mapState, mapDispatch)(BridgeUI)
-const Web3ProviderNetwork = createWeb3ReactRoot(NetworkContextName)
+const StatefulBridgeUI = connect(mapState, mapDispatch)(BridgeUI) */
 
-ReactDOM.render(
-  <>
-    {/* <GlobalStyle /> */}
-    {/* <Provider store={store}> */}
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <Web3ProviderNetwork getLibrary={getLibrary}>
-        <Web3Manager>
-          <ThemeProvider>
-            <StatefulBridgeUI />
-          </ThemeProvider>
-        </Web3Manager>
-      </Web3ProviderNetwork>
-    </Web3ReactProvider>
-    {/* </Provider> */}
-  </>,
-  document.getElementById('root'),
-)
+// ReactDOM.render(
+export default function Home({
+  toSetBridgePairs,
+  toSetSrcChainId,
+  toSetAvailableChains,
+  toSetDestChainId,
+  toSetSelectedTokenName,
+}: {
+  toSetBridgePairs: Array<[string, BridgePair]>
+  toSetSrcChainId: number
+  toSetAvailableChains: Array<[number, ExtChain]>
+  toSetDestChainId: number
+  toSetSelectedTokenName: string
+}) {
+  const {
+    application: { setBridgesPairs, setSelectedTokenName, setSrcChainId, setDestChainId, setAvailableChains, setInitStatus },
+  } = useDispatch()
+  useEffect(() => {
+    if (toSetAvailableChains && toSetBridgePairs && toSetSelectedTokenName && toSetSrcChainId && toSetDestChainId) {
+      setAvailableChains(new Map(toSetAvailableChains))
+      setBridgesPairs(new Map(toSetBridgePairs))
+      setSelectedTokenName(toSetSelectedTokenName)
+      setSrcChainId(toSetSrcChainId)
+      setDestChainId(toSetDestChainId)
+      setInitStatus(INIT_STATUS.initialized)
+    }
+  }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName])
+  return (
+    <>
+      {/* <GlobalStyle /> */}
+      {/* <Provider store={store}> */}
+      <Web3Manager>
+        <ThemeProvider>
+          {/* <StatefulBridgeUI />*/}
+          <BridgeUI />
+        </ThemeProvider>
+      </Web3Manager>
+      {/* </Provider> */}
+    </>
+  )
+}
+/* 
+export async function getStaticProps() {
+  const store = initializeStore(undefined)
+  await store.dispatch.application.initChains()
+
+  return {
+    props: {
+      // usersList,
+    },
+  }
+} */
+
+// document.getElementById('root'),
+// )
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const { data: chains } = await axios.get<Chain[]>(AVAILABLE_CHAINS_URL)
+  const map = new Map<number, ExtChain>()
+  const bridgePairs = new Map<string, BridgePair>()
+
+  // dispatch.application.setSrcChainId(chains[0].chainId)
+  try {
+    const subTasks: Promise<void>[] = []
+    await Promise.all(
+      chains.map(async (chain) => {
+        fillRpc(chain)
+        return axios
+          .get<Chain[]>(COUNTERPARTY_CHAINS_URL + '/' + chain.chainId)
+          .then(({ data: destChains }) => {
+            for (const destChain of destChains) {
+              fillRpc(destChain)
+              const key = `${chain.chainId}-${destChain.chainId}`
+              subTasks.push(
+                axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${chain.chainId}/${destChain.chainId}`).then(({ data }) => {
+                  data.tokens.forEach((token) => {
+                    if (!isAddress(token.srcToken.address) || ZERO_ADDRESS == token.srcToken.address) {
+                      token.srcToken.isNative = true
+                    }
+                  })
+                  bridgePairs.set(key, data)
+                })
+              )
+            }
+            map.set(chain.chainId, chain as ExtChain)
+            ;(chain as ExtChain).destChains = destChains
+          })
+          .catch((err: any) => {
+            console.error(err)
+            return {
+              props: {
+                error: `failed to get couter party chains for chainId ${chain.name}`,
+              },
+            }
+          })
+      })
+    )
+    await Promise.all(subTasks)
+    axios.defaults.timeout = 10000
+    // dispatch.application.setAvailableChains(map)
+    // dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
+    // dispatch.application.setSelectedTokenName(store.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
+  } catch (err) {
+    return {
+      props: {
+        error: `failed to load source info from ${AVAILABLE_CHAINS_URL},
+        the detail is ${(err as any)?.message}`,
+      },
+    }
+  }
+
+  // Pass data to the page via props
+  return {
+    props: {
+      toSetBridgePairs: [...bridgePairs.entries()],
+      toSetSrcChainId: chains[0].chainId,
+      toSetAvailableChains: [...map.entries()],
+      toSetDestChainId: map.get(chains[0].chainId)!.destChains[0].chainId,
+      toSetSelectedTokenName: bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name,
+    },
+  }
+}

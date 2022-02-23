@@ -1,9 +1,8 @@
-// import { Trans } from '@lingui/macro'
+// import { Trans } from '@lingui'
 import React, { CSSProperties, MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react'
 import { FixedSizeList } from 'react-window'
 import { BigNumber } from '@ethersproject/bignumber'
-import styled from 'styled-components/macro'
-import { isEqualWith } from 'lodash'
+import styled from 'styled-components'
 
 import { TokenPair, TokenInfo } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'

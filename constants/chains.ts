@@ -1,12 +1,12 @@
 import { ETH_ON_MAINNET, ETH_ON_RINKEBY, ETH_ON_TELEPORT_TEST, TELE_ON_RINKEBY, TELE_ON_TELEPORT_TEST, USDT_ON_MAINNET, USDT_ON_RINKEBY, USDT_ON_TELEPORT_TEST } from './tokens'
 import { ChainDataList, IChainData } from 'constants/index'
 
-import EthereumLogo from 'assets/images/ethereum-logo.png'
-import BSCLogo from 'assets/BSC.png'
-import ethereumLogoUrl from 'assets/images/ethereum-logo.png'
-import arbitrumLogoUrl from 'assets/svg/arbitrum_logo.svg'
-import defaultIcon from 'assets/defaultIcon.svg'
-import optimismLogoUrl from 'assets/svg/optimistic_ethereum.svg'
+import EthereumLogo from 'public/images/ethereum-logo.png'
+import BSCLogo from 'public/BSC.png'
+import ethereumLogoUrl from 'public/images/ethereum-logo.png'
+import arbitrumLogoUrl from 'public/svg/arbitrum_logo.svg'
+import defaultIcon from 'public/defaultIcon.svg'
+import optimismLogoUrl from 'public/svg/optimistic_ethereum.svg'
 import ms from 'ms.macro'
 
 import { ARBITRUM_LIST, BSC_LIST, OPTIMISM_LIST } from './lists'
@@ -334,7 +334,8 @@ export interface L2ChainInfo extends L1ChainInfo {
 
 export type ChainInfo = { readonly [chainId: number]: L1ChainInfo | L2ChainInfo } & {
   readonly [chainId in SupportedL2ChainId]: L2ChainInfo
-} & { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
+} &
+  { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
 /* 
 id(pin):56
 name(pin):"BSC"
@@ -461,7 +462,7 @@ export const CHAIN_INFO: ChainInfo = {
 export const ARBITRUM_HELP_CENTER_LINK = 'https://help.uniswap.org/en/collections/3137787-uniswap-on-arbitrum'
 export const OPTIMISM_HELP_CENTER_LINK = 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ'
 
-export const IS_TEST_NETWORK = process.env.REACT_APP_NETWORK_MODE === 'TEST'
+export const IS_TEST_NETWORK = process.env.NEXT_PUBLIC_NETWORK_MODE === 'TEST'
 
 export const DEFAULT_DESTINATION_CHAIN: IChainData = {
   name: 'TELEPORT TEST',
@@ -481,244 +482,3 @@ export const DEFAULT_DESTINATION_CHAIN: IChainData = {
   },
   supportTokens: [USDT_ON_TELEPORT_TEST, ETH_ON_TELEPORT_TEST, TELE_ON_TELEPORT_TEST],
 }
-
-export const SupportedChains: Map<number, IChainData> = new Map(
-  IS_TEST_NETWORK
-    ? [
-        [
-          4,
-          {
-            name: 'Ethereum Rinkeby',
-            short_name: 'rin',
-            chain: 'ETH',
-            network: 'rinkeby',
-            chain_id: 4,
-            network_id: 4,
-            rpc_url: 'https://rinkeby.infura.io/v3/%API_KEY%',
-            logo: EthereumLogo,
-            native_currency: {
-              name: 'Rinkeby ETH',
-              symbol: 'rinkETH',
-              decimals: '18',
-              contractAddress: '',
-              balance: '',
-            },
-            supportTokens: [USDT_ON_RINKEBY, ETH_ON_RINKEBY, TELE_ON_RINKEBY],
-          },
-        ],
-        [7001, DEFAULT_DESTINATION_CHAIN],
-      ]
-    : [
-        [
-          1,
-          {
-            name: 'Ethereum Mainnet',
-            short_name: 'eth',
-            chain: 'ETH',
-            network: 'mainnet',
-            chain_id: 1,
-            network_id: 1,
-            rpc_url: 'https://mainnet.infura.io/v3/%API_KEY%',
-            logo: EthereumLogo,
-            native_currency: {
-              symbol: 'ETH',
-              name: 'Ethereum',
-              decimals: '18',
-              contractAddress: '',
-              balance: '',
-            },
-            supportTokens: [ETH_ON_MAINNET, USDT_ON_MAINNET],
-          },
-        ],
-        /* {
-  name: 'Ethereum Ropsten',
-  short_name: 'rop',
-  logo: RopstenLogo,
-  chain: 'ETH',
-  network: 'ropsten',
-  chain_id: 3,
-  network_id: 3,
-  rpc_url: 'https://ropsten.infura.io/v3/%API_KEY%',
-  native_currency: {
-    symbol: 'ETH',
-    name: 'Ethereum',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-}, */
-        /*
-{
-  name: 'Ethereum Görli',
-  short_name: 'gor',
-  chain: 'ETH',
-  network: 'goerli',
-  logo: '',
-  chain_id: 5,
-  network_id: 5,
-  rpc_url: 'https://goerli.infura.io/v3/%API_KEY%',
-  native_currency: {
-    symbol: 'ETH',
-    name: 'Ethereum',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-},
-{
-  name: 'RSK Mainnet',
-  short_name: 'rsk',
-  chain: 'RSK',
-  logo: '',
-  network: 'mainnet',
-  chain_id: 30,
-  network_id: 30,
-  rpc_url: 'https://public-node.rsk.co',
-  native_currency: {
-    symbol: 'RSK',
-    name: 'RSK',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-},
-{
-  name: 'Ethereum Kovan',
-  short_name: 'kov',
-  chain: 'ETH',
-  network: 'kovan',
-  chain_id: 42,
-  logo: '',
-  network_id: 42,
-  rpc_url: 'https://kovan.infura.io/v3/%API_KEY%',
-  native_currency: {
-    symbol: 'ETH',
-    name: 'Ethereum',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-},
-{
-  name: 'Ethereum Classic Mainnet',
-  short_name: 'etc',
-  chain: 'ETC',
-  network: 'mainnet',
-  logo: '',
-  chain_id: 61,
-  network_id: 1,
-  rpc_url: 'https://ethereumclassic.network',
-  native_currency: {
-    symbol: 'ETH',
-    name: 'Ethereum',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-},
-{
-  name: 'POA Network Sokol',
-  short_name: 'poa',
-  chain: 'POA',
-  network: 'sokol',
-  chain_id: 77,
-  logo: '',
-  network_id: 77,
-  rpc_url: 'https://sokol.poa.network',
-  native_currency: {
-    symbol: 'POA',
-    name: 'POA',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-},
-{
-  name: 'POA Network Core',
-  short_name: 'skl',
-  chain: 'POA',
-  network: 'core',
-  chain_id: 99,
-  network_id: 99,
-  logo: '',
-  rpc_url: 'https://core.poa.network',
-  native_currency: {
-    symbol: 'POA',
-    name: 'POA',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-},
-{
-  name: 'xDAI Chain',
-  short_name: 'xdai',
-  chain: 'POA',
-  network: 'dai',
-  chain_id: 100,
-  logo: '',
-  network_id: 100,
-  rpc_url: 'https://dai.poa.network',
-  native_currency: {
-    symbol: 'xDAI',
-    name: 'xDAI',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-},
-{
-  name: 'Callisto Mainnet',
-  short_name: 'clo',
-  chain: 'callisto',
-  network: 'mainnet',
-  chain_id: 820,
-  logo: '',
-  network_id: 1,
-  rpc_url: 'https://clo-geth.0xinfra.com/',
-  native_currency: {
-    symbol: 'CLO',
-    name: 'CLO',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-}, */
-        /*    {
-      name: 'Binance Smart Chain',
-      short_name: 'bsc',
-      chain: 'smartchain',
-      network: 'mainnet',
-      chain_id: 56,
-      logo: BSCLogo,
-      network_id: 56,
-      rpc_url: 'https://bsc-dataseed.binance.org/',
-      native_currency: {
-        symbol: 'BNB',
-        name: 'BNB',
-        decimals: '18',
-        contractAddress: '',
-        balance: '',
-      },
-      supportTokens: [
-        {
-          chainId: 56,
-          symbol: 'ETH',
-          name: 'Ethereum Token',
-          decimals: 18,
-          address: '',
-          logoURI: EthereumLogo,
-          // balance: '',
-        },
-        {
-          chainId: 1,
-          name: 'Tether USD',
-          address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-          logoURI: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png',
-          decimals: 6,
-          symbol: 'USDT',
-        },
-      ],
-    }, */
-      ]
-)

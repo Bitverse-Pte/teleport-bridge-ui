@@ -407,3 +407,9 @@ export enum CURRENCY_INPUT_ERROR {
   INSUFFICIENT = 'INSUFFICIENT',
   OK = 'OK',
 }
+
+export enum INIT_STATUS {
+  starting = 'starting',
+  initialized = 'initialized',
+  error = 'error',
+}

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { Link, IconProps } from 'react-feather'
-import styled from 'styled-components/macro'
+import styled from 'styled-components'
 
 const StyledLink = styled(Link)<{ disabled: boolean }>`
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};

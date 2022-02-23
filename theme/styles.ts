@@ -94,9 +94,9 @@ export const globalStyle = `
     font-style: normal;
     font-display: block;
     font-named-instance: 'Regular';
-    src: url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format("woff2 supports variations(gvar)"),
-        url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format("woff2-variations"),
-        url(%PUBLIC_URL%/fonts/Inter-roman.var.woff2) format("woff2");
+    src: url(/fonts/Inter-roman.var.woff2) format("woff2 supports variations(gvar)"),
+        url(/fonts/Inter-roman.var.woff2) format("woff2-variations"),
+        url(/fonts/Inter-roman.var.woff2) format("woff2");
   }
 
   @supports (font-variation-settings: normal) {

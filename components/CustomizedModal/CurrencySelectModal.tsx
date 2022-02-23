@@ -15,7 +15,6 @@ import { useDispatch } from 'hooks'
 import { RootState } from 'store'
 import { useActiveWeb3React } from 'hooks/web3'
 import CurrencyList from '../Currency/CurrencyList'
-import { getChainData } from 'helpers/chains'
 
 const OptionGrid = styled.div`
   display: grid;

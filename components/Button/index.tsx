@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { css } from 'styled-components/macro'
+import styled, { css } from 'styled-components'
 import { Flex, Box, Button as RebassButton, ButtonProps as ButtonPropsOriginal, Text } from 'rebass/styled-components'
 import { darken } from 'polished'
 

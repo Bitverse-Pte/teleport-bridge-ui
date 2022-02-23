@@ -6,7 +6,7 @@ import { UnsupportedChainIdError } from '@web3-react/core'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 
-import MetamaskIcon from 'assets/images/metamask.png'
+import MetamaskIcon from 'public/images/metamask.png'
 import { CircledCloseIcon } from 'components/Icon'
 import { StyledText, PrimaryText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'

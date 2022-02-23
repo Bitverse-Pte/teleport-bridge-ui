@@ -1,6 +1,6 @@
 import React from 'react'
 import { HelpCircle } from 'react-feather'
-import styled from 'styled-components/macro'
+import styled from 'styled-components'
 
 export const HelpIcon = styled(HelpCircle)`
   color: rgba(255, 255, 255, 0.45);

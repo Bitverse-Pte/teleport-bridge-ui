@@ -2,7 +2,6 @@ import { BigNumber as EtherBigNumber } from '@ethersproject/bignumber'
 import BigNumber from 'bignumber.js'
 import { isAddress } from '@ethersproject/address'
 import { parseEther } from '@ethersproject/units'
-import { AbiItem } from 'web3-utils'
 import { createModel } from '@rematch/core'
 import { Web3Provider } from '@ethersproject/providers'
 import { MaxUint256 } from '@ethersproject/constants'
@@ -12,7 +11,6 @@ import axios from 'axios'
 
 import {
   AVAILABLE_CHAINS_URL,
-  DEFAULT_DESTINATION_CHAIN,
   COUNTERPARTY_CHAINS_URL,
   BRIDGE_TOKENS_URL,
   Chain,
@@ -28,9 +26,10 @@ import {
   Estimation,
   ZERO_ADDRESS,
   TRANSITION_DURATION,
+  INIT_STATUS,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
-import { getContract } from 'helpers'
+import { fillRpc, getContract } from 'helpers'
 import type { RootModel } from '.'
 import ERC20ABI from 'contracts/erc20.json'
 import { switchToNetwork } from 'helpers/switchToNetwork'
@@ -39,63 +38,22 @@ import { FixedSizeQueue } from 'helpers/fixedQueue'
 import { store } from 'store/store'
 // import { ProviderController } from 'controllers'import type { RootModel } from './index'
 
-const API_KEY = process.env.REACT_APP_INFURA_ID
-
-function fillRpc(chain: Chain) {
-  for (let index = 0; index < chain.rpc.length; index++) {
-    if (chain.rpc[index].includes('infura.io') && chain.rpc[index].includes('%API_KEY%') && API_KEY) {
-      const rpcUrl = chain.rpc[index].replace('%API_KEY%', API_KEY)
-      chain.rpc[index] = rpcUrl
-    }
-  }
-}
+const isServer = typeof window === 'undefined'
+axios.interceptors.request.use(
+  async (config) => {
+    config.baseURL = isServer ? process.env.NEXT_PUBLIC_BACKEND_URL : ''
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
 if (!Store2.has('connect-status')) {
   Store2.set('connect-status', false)
 }
 
-const sendFunctionFragment: AbiItem = {
-  name: 'send',
-  type: 'function',
-  inputs: [
-    {
-      components: [
-        {
-          internalType: 'address',
-          name: 'tokenAddress',
-          type: 'address',
-        },
-        {
-          internalType: 'string',
-          name: 'receiver',
-          type: 'string',
-        },
-        {
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
-        {
-          internalType: 'string',
-          name: 'destChain',
-          type: 'string',
-        },
-        {
-          internalType: 'string',
-          name: 'relayChain',
-          type: 'string',
-        },
-      ],
-      internalType: 'struct TransferDataTypes.ERC20TransferData',
-      name: 'transferData',
-      type: 'tuple',
-    },
-  ],
-}
-
 let estimationClockId: number
 // eslint-disable-next-line @typescript-eslint/ban-types
-type IAppState = {
+export type IAppState = {
   connectStatus: boolean
   walletModalOpen: boolean
   transferConfirmationModalOpen: boolean
@@ -104,6 +62,8 @@ type IAppState = {
   currencySelectModalOpen: boolean
   destinationChains: Map<number, Chain>
   waitWallet: boolean
+  initStatus: INIT_STATUS
+  inFetching: boolean
   availableChains: Map<number, ExtChain>
   srcChainId: number
   destChainId: number
@@ -122,10 +82,12 @@ type IAppState = {
   transactionDetailModalOpen: boolean
 }
 
-const initialState: IAppState = {
+export const initialState: IAppState = {
   connectStatus: Store2.get('connect-status'),
   networkModalMode: false, //NetworkSelectModalMode.CLOSE,
   walletModalOpen: false,
+  initStatus: INIT_STATUS.starting,
+  inFetching: false,
   historyModalOpen: false,
   transferConfirmationModalOpen: false,
   currencySelectModalOpen: false,
@@ -324,6 +286,18 @@ export const application = createModel<RootModel>()({
         transactionHistoryUpdatingTimer,
       }
     },
+    setInitStatus(state, initStatus: INIT_STATUS) {
+      return {
+        ...state,
+        initStatus,
+      }
+    },
+    setInFetching(state, inFetching: boolean) {
+      return {
+        ...state,
+        inFetching,
+      }
+    },
   },
   effects: (dispatch) => ({
     changeTransferStatus(transferStatus: TRANSFER_STATUS) {
@@ -427,7 +401,10 @@ export const application = createModel<RootModel>()({
       const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!
       const { srcToken, destToken } = selectedTokenPair
       const cachedTokenName = selectedTokenName
-      let transaction: { hash: string | number | undefined; wait: () => Promise<any> }
+      let transaction: {
+        hash: string | number | undefined
+        wait: () => Promise<any>
+      }
       try {
         if (bridge && srcToken) {
           const parsedAmount = parseEther(amount)
@@ -561,7 +538,13 @@ export const application = createModel<RootModel>()({
               .then(({ data: destChains }) => {
                 for (const destChain of destChains) {
                   fillRpc(destChain)
-                  subTasks.push(dispatch.application.updateBridgeInfo({ srcChainId: chain.chainId, destChainId: destChain.chainId, extendedUpdate: false }))
+                  subTasks.push(
+                    dispatch.application.updateBridgeInfo({
+                      srcChainId: chain.chainId,
+                      destChainId: destChain.chainId,
+                      extendedUpdate: false,
+                    })
+                  )
                 }
                 map.set(chain.chainId, chain as ExtChain)
                 ;(chain as ExtChain).destChains = destChains
@@ -576,7 +559,7 @@ export const application = createModel<RootModel>()({
         axios.defaults.timeout = 10000
         dispatch.application.setAvailableChains(map)
         dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
-        dispatch.application.setSelectedTokenName(store.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
+        dispatch.application.setSelectedTokenName(store!.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
       } catch (err) {
         errorNoti(`failed to load source info from ${AVAILABLE_CHAINS_URL},
               the detail is ${(err as any)?.message}`)
@@ -584,10 +567,13 @@ export const application = createModel<RootModel>()({
     },
     async turnOverSrcAndDestChain(rest = {}) {
       dispatch.application.setWaitWallet(true)
-      const network = await store.getState().application.library?.getNetwork()
-      const { srcChainId: cachedSrcChainId, destChainId: cachedDestChainId } = store.getState().application
+      const network = await store!.getState().application.library?.getNetwork()
+      const { srcChainId: cachedSrcChainId, destChainId: cachedDestChainId } = store!.getState().application
       if (network) {
-        const result = await switchToNetwork({ library: store.getState().application.library, chainId: cachedDestChainId })
+        const result = await switchToNetwork({
+          library: store!.getState().application.library,
+          chainId: cachedDestChainId,
+        })
         dispatch.application.setWaitWallet(false)
         if (result) {
           // await dispatch.application.updateBridgeInfo({ destChainId: cachedSrcChainId, srcChainId: cachedDestChainId })
@@ -597,7 +583,10 @@ export const application = createModel<RootModel>()({
     },
     async changeNetwork({ chainId }, state) {
       dispatch.application.setWaitWallet(true)
-      const result = await switchToNetwork({ library: state.application.library, chainId })
+      const result = await switchToNetwork({
+        library: state.application.library,
+        chainId,
+      })
       dispatch.application.setWaitWallet(false)
       if (result) {
         dispatch.application.setSrcChainId(chainId)
@@ -605,7 +594,7 @@ export const application = createModel<RootModel>()({
       }
     },
     async updateBridgeInfo({ srcChainId, destChainId, extendedUpdate = true }: { srcChainId: number; destChainId: number; extendedUpdate?: boolean }, state) {
-      // const state = store.getState()
+      // const state = store!.getState()
       const key = `${srcChainId}-${destChainId}`
       if (!state.application.bridgePairs.has(key)) {
         const {
@@ -616,7 +605,12 @@ export const application = createModel<RootModel>()({
             tokens[index].srcToken.isNative = true
           }
         })
-        state.application.bridgePairs.set(key, { tokens, srcChain, destChain, agent_address } as BridgePair)
+        state.application.bridgePairs.set(key, {
+          tokens,
+          srcChain,
+          destChain,
+          agent_address,
+        } as BridgePair)
         if (extendedUpdate) {
           dispatch.application.setBridgesPairs(new Map(state.application.bridgePairs))
           dispatch.application.setSelectedTokenName(tokens[0].name)
@@ -624,7 +618,7 @@ export const application = createModel<RootModel>()({
       }
     },
     async judgeAllowance({ value, tokenInfo }: { value: string; tokenInfo: TokenInfo }, state) {
-      const { library, account, bridgePairs, srcChainId, destChainId } = store.getState().application
+      const { library, account, bridgePairs, srcChainId, destChainId } = store!.getState().application
       const bridge = bridgePairs.get(`${srcChainId}-${destChainId}`)
 
       if (!tokenInfo.isNative && bridge) {
@@ -691,8 +685,24 @@ export const application = createModel<RootModel>()({
         const { tokens } = pair
         const selectedTokenPair = tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName) || tokens[0]
         if (selectedTokenPair) {
-          dispatch.application.updateEstimation({ amount, srcChainName: pair.srcChain.name, destChainName: pair.destChain.name, selectedTokenName, selectedTokenPair })
-          estimationClockId = window.setInterval(() => dispatch.application.updateEstimation({ amount, srcChainName: pair.srcChain.name, destChainName: pair.destChain.name, selectedTokenName, selectedTokenPair }), 30 * 1000)
+          dispatch.application.updateEstimation({
+            amount,
+            srcChainName: pair.srcChain.name,
+            destChainName: pair.destChain.name,
+            selectedTokenName,
+            selectedTokenPair,
+          })
+          estimationClockId = window.setInterval(
+            () =>
+              dispatch.application.updateEstimation({
+                amount,
+                srcChainName: pair.srcChain.name,
+                destChainName: pair.destChain.name,
+                selectedTokenName,
+                selectedTokenPair,
+              }),
+            30 * 1000
+          )
         }
       }
     },
@@ -754,7 +764,7 @@ export const application = createModel<RootModel>()({
     },
     async startTransactionHistoryUpdating(rest = {}, state) {
       const timer = window.setInterval(async () => {
-        const { account, transactions } = store.getState().application
+        const { account, transactions } = store!.getState().application
         if (!account) {
           return
         }
@@ -773,7 +783,7 @@ export const application = createModel<RootModel>()({
                   return srcValue || objValue
                 })
                 if (newOne.status === TRANSACTION_STATUS.SUCCEEDED) {
-                  const tokenInfo = store
+                  const tokenInfo = store!
                     .getState()
                     .application.bridgePairs.get(`${toUpdateOne.src_chain_id}-${toUpdateOne.dest_chain_id}`)
                     ?.tokens.find((token) => token.srcToken.address === toUpdateOne.token_address)?.srcToken
@@ -781,7 +791,7 @@ export const application = createModel<RootModel>()({
                 }
                 if (newOne.status === TRANSACTION_STATUS.FAILED) {
                   let parsedTransactionAmount = `${toUpdateOne.amount}(not converted by decimals)`
-                  const bridgePair = store.getState().application.bridgePairs.get(`${toUpdateOne.src_chain_id}-${toUpdateOne.dest_chain_id}`)
+                  const bridgePair = store!.getState().application.bridgePairs.get(`${toUpdateOne.src_chain_id}-${toUpdateOne.dest_chain_id}`)
                   if (bridgePair) {
                     const tokenInfo = bridgePair?.tokens.find((token) => token.srcToken.address === toUpdateOne.token_address)?.srcToken
                     parsedTransactionAmount = new BigNumber(toUpdateOne.amount).shiftedBy(-tokenInfo!.decimals).toString()
@@ -810,7 +820,7 @@ export const application = createModel<RootModel>()({
       dispatch.application.setTransactionHistoryUpdatingTimer(timer)
     },
     stopTransactionHistoryUpdating() {
-      const { transactionHistoryUpdatingTimer } = store.getState().application
+      const { transactionHistoryUpdatingTimer } = store!.getState().application
       if (transactionHistoryUpdatingTimer) {
         window.clearInterval(transactionHistoryUpdatingTimer)
         dispatch.application.setTransactionHistoryUpdatingTimer(0)

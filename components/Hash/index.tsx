@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { Copy, CheckCircle } from 'react-feather'
 import { Textfit } from 'react-textfit'
-import styled from 'styled-components/macro'
+import styled from 'styled-components'
 import { useTransition, config, animated, useSpringRef } from '@react-spring/web'
 import { Text, Flex, FlexProps } from 'rebass'
 

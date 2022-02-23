@@ -8,7 +8,7 @@ import { TRANSFER_STATUS } from 'constants/types'
 import { useDispatch } from 'hooks'
 import BigNumber from 'bignumber.js'
 import { Flex } from 'rebass'
-import styled, { css } from 'styled-components/macro'
+import styled, { css } from 'styled-components'
 import { darken } from 'polished'
 import { getBalance } from 'helpers/web3'
 

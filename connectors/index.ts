@@ -1,27 +1,26 @@
-import { Web3Provider } from '@ethersproject/providers'
-import { SafeAppConnector } from '@gnosis.pm/safe-apps-web3-react'
+// import { SafeAppConnector } from '@gnosis.pm/safe-apps-web3-react'
 import { InjectedConnector } from '@web3-react/injected-connector'
 import { PortisConnector } from '@web3-react/portis-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 import { WalletLinkConnector } from '@web3-react/walletlink-connector'
 
-import UNISWAP_LOGO_URL from '../assets/svg/logo.svg'
-import { ALL_SUPPORTED_CHAIN_IDS, SupportedChainId } from '../constants/chains'
-import getLibrary from 'helpers/getLibrary'
+import UNISWAP_LOGO_URL from 'public/svg/logo.svg'
+import { SupportedChainId } from 'constants/chains'
 import { FortmaticConnector } from './Fortmatic'
 import { NetworkConnector } from './NetworkConnector'
 
-const INFURA_KEY = process.env.REACT_APP_INFURA_KEY
-const FORMATIC_KEY = process.env.REACT_APP_FORTMATIC_KEY
-const PORTIS_ID = process.env.REACT_APP_PORTIS_ID
+const INFURA_KEY = process.env.NEXT_PUBLIC_INFURA_KEY
+const FORMATIC_KEY = process.env.NEXT_PUBLIC_FORTMATIC_KEY
+const PORTIS_ID = process.env.NEXT_PUBLIC_PORTIS_ID
 
 if (typeof INFURA_KEY === 'undefined') {
-  throw new Error('REACT_APP_INFURA_KEY must be a defined environment variable')
+  throw new Error('NEXT_PUBLIC_INFURA_KEY must be a defined environment variable')
 }
 
 const NETWORK_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.BSC]: 'https://bsc-dataseed.binance.org/',
-  [SupportedChainId.BSC_TESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  [SupportedChainId.BSC_TESTNET]:
+    'https://data-seed-prebsc-1-s1.binance.org:8545/',
   [SupportedChainId.TELEPORT]: 'http://10.41.20.10:8545',
   [SupportedChainId.MAINNET]: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.RINKEBY]: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
@@ -53,7 +52,17 @@ export const injected = new InjectedConnector({
   // supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
 })
 
-export const gnosisSafe = new SafeAppConnector()
+/* const gnosisSafe = dynamic(
+  async () => {
+    const { SafeAppConnector } = await import('@gnosis.pm/safe-apps-web3-react')
+    return new SafeAppConnector()
+  },
+  {
+    ssr: false,
+  },
+) */
+
+// export const gnosisSafe = new SafeAppConnector()
 
 export const walletconnect = new WalletConnectConnector({
   // supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Flex, Text } from 'rebass'
-import { css } from 'styled-components/macro'
+import { css } from 'styled-components'
 
 import { CircledCloseIcon, Icon } from 'components/Icon'
 import { StyledText } from 'components/Text'
@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from 'store'
 import { useDispatch } from 'hooks'
 import HistoryRecord from 'components/HistoryRecord'
-import Empty from 'assets/empty.svg'
+import Empty from 'public/empty.svg'
 
 export default function HistoryModal() {
   const { historyModalOpen, transactionDetailModalOpen, transactions } = useSelector((state: RootState) => {

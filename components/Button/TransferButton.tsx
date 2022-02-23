@@ -7,7 +7,7 @@ import { PrimaryButton } from '.'
 import { CURRENCY_INPUT_ERROR, NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
 import { useActiveWeb3React, useDispatch } from 'hooks'
 import { Flex } from 'rebass'
-import { css } from 'styled-components/macro'
+import { css } from 'styled-components'
 
 const TRANSFER_STATUS_BUTTONS_MAP = {
   [TRANSFER_STATUS.PENDING_APPROVE]: 3,

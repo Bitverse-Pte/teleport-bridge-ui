@@ -1,6 +1,6 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 import styled, { css, useTheme } from 'styled-components'
-import { Flex } from 'rebass/styled-components'
+import { Flex } from 'rebass'
 import { useSelector } from 'react-redux'
 import { ToastContainer } from 'react-toastify'
 import { RefreshCw } from 'react-feather'
@@ -8,17 +8,18 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
 
 import 'react-toastify/dist/ReactToastify.css'
 
-import bg1 from 'assets/bg-1.svg'
-import bg2 from 'assets/bg-2.svg'
+import bg1 from 'public/bg-1.svg'
+import bg2 from 'public/bg-2.svg'
 import Header from 'components/Header'
 // import { hashPersonalMessage, recoverPublicKey, recoverPersonalSignature, formatTestTransaction, getChainData } from './helpers/utils'
 import Body from 'components/Body'
-import { RootState } from 'store'
+import { RootState, store } from 'store'
 import Spinner from 'components/Spinner'
 import { TextPrimary1 } from 'components/Text'
 import { useActiveWeb3React, useDispatch } from 'hooks'
 import { BodyWrapper } from 'components/BodyWrapper'
 import { errorNoti } from 'helpers/notifaction'
+import { INIT_STATUS } from 'constants/types'
 // import { demo } from 'helpers/demo'
 
 const SLayout = styled(Flex)`
@@ -59,12 +60,6 @@ const ErrorBody = function ({ children }: { children: ReactNode | ReactNode[] })
   )
 }
 
-enum INIT_STATUS {
-  starting = 'starting',
-  initialized = 'initialized',
-  error = 'error',
-}
-
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   const [showSpinner, setShowSpinner] = useState(true)
   useEffect(() => {
@@ -86,12 +81,14 @@ export default function BridgeUI() {
   const { account } = useActiveWeb3React()
   const theme = useTheme()
   const {
-    application: { initChains, initTransactions, setWaitWallet, resetApp, stopTransactionHistoryUpdating },
+    application: { initChains, initTransactions, setWaitWallet, resetApp, stopTransactionHistoryUpdating, setInitStatus, setInFetching },
   } = useDispatch()
-  const [initStatus, setInitStatus] = useState(INIT_STATUS.starting)
-  const [inFetching, setInFetching] = useState(false)
+  /*  const [initStatus, setInitStatus] = useState(INIT_STATUS.initialized)
+  const [inFetching, setInFetching] = useState(true) */
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
   const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
+  const initStatus = useSelector((state: RootState) => state.application.initStatus)
+  const inFetching = useSelector((state: RootState) => state.application.inFetching)
 
   const initEssentialData = useCallback(() => {
     if (inFetching) {
@@ -112,9 +109,9 @@ export default function BridgeUI() {
       })
   }, [inFetching])
 
-  useEffect(() => {
-    initEssentialData()
-  }, [])
+  // useEffect(() => {
+  //   initEssentialData()
+  // }, [])
   useEffect(() => {
     connectStatus && account && initTransactions(account)
     if (!connectStatus || !account) {

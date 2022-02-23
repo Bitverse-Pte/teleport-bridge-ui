@@ -7,12 +7,12 @@ import {
   useSpringRef,
 } from '@react-spring/web'
 import { Textfit } from 'react-textfit'
-import styled from 'styled-components/macro'
+import styled from 'styled-components'
 import { Icon } from 'components/Icon'
 import { Text1 } from 'components/Text'
 import { BaseButtonProps, ButtonDropdown } from '.'
 import { RootState } from 'store/store'
-import HistorySvg from 'assets/history.svg'
+import HistorySvg from 'public/history.svg'
 import { TRANSACTION_STATUS } from 'constants/index'
 import { TransitionSpinner } from 'components/Spinner'
 

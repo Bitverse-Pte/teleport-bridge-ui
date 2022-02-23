@@ -1,9 +1,9 @@
-// import { Trans } from '@lingui/macro'
+// import { Trans } from '@lingui'
 import React, { useCallback, useLayoutEffect } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { Text } from 'rebass'
 import { useEffect } from 'react'
-import styled from 'styled-components/macro'
+import styled from 'styled-components'
 
 import { network } from '../../connectors'
 import { useDispatch } from 'hooks/index'
