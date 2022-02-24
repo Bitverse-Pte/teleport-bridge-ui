@@ -59,6 +59,9 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
   })
   useEffect(() => {
     transRef.start()
+    return () => {
+      transRef.stop()
+    }
   }, [index])
 
   useEffect(() => {

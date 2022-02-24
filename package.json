@@ -56,16 +56,16 @@
   "devDependencies": {
     "@types/lodash": "^4.14.178",
     "@types/ms.macro": "^2.0.0",
-    "@types/node": "15.0.0",
+    "@types/node": "^15.0.0",
     "@types/parse-unit": "^1.0.1",
-    "@types/react": "17.0.4",
-    "@types/react-dom": "17.0.3",
+    "@types/react": "^17.0.4",
+    "@types/react-dom": "^17.0.3",
     "@types/react-textfit": "^1.1.0",
     "@types/react-virtualized-auto-sizer": "^1.0.1",
     "@types/react-window": "^1.8.5",
     "@types/rebass": "^4.0.10",
-    "@types/styled-components": "5.1.9",
+    "@types/styled-components": "^5.1.9",
     "babel-plugin-styled-components": "^1.12.0",
-    "typescript": "4.2.4"
+    "typescript": "^4.3.2"
   }
 }
