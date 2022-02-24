@@ -1,4 +1,3 @@
-import { ETH_ON_MAINNET, ETH_ON_RINKEBY, ETH_ON_TELEPORT_TEST, TELE_ON_RINKEBY, TELE_ON_TELEPORT_TEST, USDT_ON_MAINNET, USDT_ON_RINKEBY, USDT_ON_TELEPORT_TEST } from './tokens'
 import { ChainDataList, IChainData } from 'constants/index'
 
 import EthereumLogo from 'public/images/ethereum-logo.png'
@@ -317,7 +316,7 @@ export interface L1ChainInfo {
   readonly explorer: string
   readonly infoLink: string
   readonly label: string
-  readonly logoUrl?: string
+  readonly logoUrl?: string | StaticImageData
   readonly rpcUrls?: string[]
   readonly nativeCurrency: {
     name: string // 'Goerli ETH',
@@ -327,7 +326,7 @@ export interface L1ChainInfo {
 }
 export interface L2ChainInfo extends L1ChainInfo {
   readonly bridge: string
-  readonly logoUrl: string
+  readonly logoUrl: string | StaticImageData
   readonly statusPage?: string
   readonly defaultListUrl: string
 }
@@ -463,22 +462,3 @@ export const ARBITRUM_HELP_CENTER_LINK = 'https://help.uniswap.org/en/collection
 export const OPTIMISM_HELP_CENTER_LINK = 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ'
 
 export const IS_TEST_NETWORK = process.env.NEXT_PUBLIC_NETWORK_MODE === 'TEST'
-
-export const DEFAULT_DESTINATION_CHAIN: IChainData = {
-  name: 'TELEPORT TEST',
-  short_name: 'tpt',
-  chain: 'TELE',
-  network: 'rinkeby',
-  chain_id: 7001,
-  network_id: 7001,
-  rpc_url: 'http://10.41.20.10:8545',
-  logo: defaultIcon,
-  native_currency: {
-    name: 'TELE',
-    symbol: 'TELE',
-    decimals: '18',
-    contractAddress: '',
-    balance: '',
-  },
-  supportTokens: [USDT_ON_TELEPORT_TEST, ETH_ON_TELEPORT_TEST, TELE_ON_TELEPORT_TEST],
-}

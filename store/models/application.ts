@@ -52,7 +52,6 @@ if (!Store2.has('connect-status')) {
 }
 
 let estimationClockId: number
-// eslint-disable-next-line @typescript-eslint/ban-types
 export type IAppState = {
   connectStatus: boolean
   walletModalOpen: boolean
@@ -310,7 +309,6 @@ export const application = createModel<RootModel>()({
         case TRANSFER_STATUS.PENDING_APPROVE:
         case TRANSFER_STATUS.READY_TO_APPROVE:
         case TRANSFER_STATUS.READY_TO_TRANSFER:
-          // eslint-disable-next-line no-case-declarations
           const fromInput = document.getElementById('fromValueInput')
           if (!(fromInput as HTMLInputElement).value) {
             dispatch.application.setTransferStatus(TRANSFER_STATUS.NO_INPUT)
@@ -397,7 +395,6 @@ export const application = createModel<RootModel>()({
       const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!
       const { srcToken, destToken } = selectedTokenPair
       const cachedTokenName = selectedTokenName

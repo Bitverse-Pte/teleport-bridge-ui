@@ -6,7 +6,6 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { CircledCloseIcon } from 'components/Icon'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
-import Option from 'components/Option'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected, portis } from 'connectors'
 import { isMobile } from 'helpers/userAgent'

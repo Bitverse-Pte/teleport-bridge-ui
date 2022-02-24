@@ -97,7 +97,6 @@ export default function TransactionDetailModal() {
   const tokenInfo = useMemo(() => {
     if (selectedTx && selectedTx.src_chain_id && selectedTx.dest_chain_id) {
       const key = `${selectedTx.src_chain_id}-${selectedTx.dest_chain_id}`
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const tokens = bridgePairs.get(key)?.tokens
       if (!tokens) {
         return {}

@@ -89,7 +89,6 @@ export default function WalletSelectModal() {
             } */
           })
           .finally(() => setWaitWallet(false))
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
     },
     [connector]
   )

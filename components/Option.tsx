@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import ExternalLink from './ExternalLink'
 import { StyledLogo } from 'components/Logo'
+import { Icon } from 'components/Icon'
 
 const InfoCard = styled.button<{ active?: boolean }>`
   background-color: ${({ theme, active }) => (active ? theme.bg3 : theme.bg2)};
@@ -122,12 +123,12 @@ export default function Option({
 }: {
   link?: string | null
   clickable?: boolean
-  size?: number | null
+  size?: number
   onClick?: null | (() => void)
   color: string
   header: React.ReactNode
   subheader: React.ReactNode | null
-  icon: string
+  icon: string | StaticImageData
   active?: boolean
   id: string
   type: OPTION_TYPE
@@ -152,9 +153,10 @@ export default function Option({
         {subheader && <SubHeader>{subheader}</SubHeader>}
       </OptionCardLeft>
       {type === OPTION_TYPE.WALLET && (
-        <IconWrapper size={size}>
+        <Icon size={size} src={icon} alt={'Icon'} />
+        /*    <IconWrapper size={size}>
           <img src={icon} alt={'Icon'} />
-        </IconWrapper>
+        </IconWrapper> */
       )}
       {type === OPTION_TYPE.NETWORK && <StyledLogo size={'1.5rem'} srcs={[icon]}></StyledLogo>}
     </OptionCardClickable>

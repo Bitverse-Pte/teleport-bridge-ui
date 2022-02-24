@@ -11,7 +11,7 @@ import { injected } from '../connectors'
 interface WalletInfo {
   connector?: AbstractConnector
   name: string
-  iconURL: string
+  iconURL: string | StaticImageData
   description: string
   href: string | null
   color: string

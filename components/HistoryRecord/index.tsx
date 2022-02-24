@@ -166,7 +166,6 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
   const { srcToken, destToken } = useMemo(() => {
     if (transaction.src_chain_id && transaction.dest_chain_id) {
       const key = `${transaction.src_chain_id}-${transaction.dest_chain_id}`
-      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const tokens = bridgePairs.get(key)?.tokens
       if (!tokens) {
         return {}
