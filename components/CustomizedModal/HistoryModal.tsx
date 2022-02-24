@@ -43,7 +43,7 @@ export default function HistoryModal() {
         <Flex width="100%" height="100%" flexDirection={'column'} maxHeight={'61.8vh'} overflowX={'hidden'} overflowY={'auto'} justifyContent={transactions.isEmpty() ? 'center' : 'flex-start'} alignItems={'center'}>
           {transactions.isEmpty() && (
             <>
-              <Icon src={Empty} size={100}></Icon>
+              <Icon src={Empty} size={100} />
               <Text
                 css={css`
                   font-style: normal;

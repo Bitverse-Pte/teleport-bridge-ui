@@ -52,6 +52,10 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, []) */
+  useEffect(() => {
+    setLibrary(library)
+    setAccount(account)
+  }, [library, account])
 
   useEffect(() => {
     if (active && chainId && availableChains.size) {
@@ -60,7 +64,7 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
           return
         }
         if (availableChains.has(chainId)) {
-          changeNetwork({ chainId: chainId })
+          library && changeNetwork({ chainId: chainId })
           return
         }
         account && connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
@@ -72,12 +76,7 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
         connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
       } */
     }
-  }, [active, chainId, availableChains, connectStatus, account])
-
-  useEffect(() => {
-    setLibrary(library)
-    setAccount(account)
-  }, [library, account])
+  }, [active, chainId, availableChains, connectStatus, account, library])
 
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
   useEffect(() => {

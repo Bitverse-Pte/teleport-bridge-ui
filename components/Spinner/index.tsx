@@ -1,12 +1,9 @@
-import { PrimaryButton } from 'components/Button'
-import React, { HTMLProps, ReactPropTypes, useEffect, useState } from 'react'
-import { useTransition, config, animated } from '@react-spring/web'
+import React, { HTMLProps, useCallback, useEffect, useState } from 'react'
+import { useTransition, config, animated, useSpringRef } from '@react-spring/web'
 import { Flex } from 'rebass'
 import styled, { keyframes, css } from 'styled-components'
-import { useDispatch } from 'hooks'
+
 import { CloseIcon } from 'components/Icon'
-import { useSelector } from 'react-redux'
-import { RootState } from 'store/store'
 
 const rotate360 = keyframes`
 from {
@@ -108,7 +105,10 @@ export const TransitionSpinnerMask = function ({ show, children, ...rest }: { sh
 export default function Spinner({ showSpinner, setShowSpinner, closable = false, warning = false, size = '2rem', children }: { showSpinner: boolean; setShowSpinner?: (showSpinner: boolean) => void; closable?: boolean; warning?: boolean; size?: string | number } & { children?: React.ReactNode }) {
   const [show, setShow] = useState(false)
   const [timerId, setTimerId] = useState<number>()
+  const transRef = useSpringRef()
+  const closeTransRef = useSpringRef()
   const transitions = useTransition(showSpinner, {
+    ref: transRef,
     from: { opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
@@ -117,6 +117,7 @@ export default function Spinner({ showSpinner, setShowSpinner, closable = false,
     // onRest: () => setPending(!pending),
   })
   const closeTransitions = useTransition(show, {
+    ref: closeTransRef,
     from: { opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
@@ -124,6 +125,11 @@ export default function Spinner({ showSpinner, setShowSpinner, closable = false,
     config: config.gentle,
     // onRest: () => setPending(!pending),
   })
+
+  const timerHandler = useCallback(() => {
+    !!(timerId === 0 || timerId) && setShow(true)
+    !!(timerId === 0 || timerId) && setTimerId(0)
+  }, [timerId])
   useEffect(() => {
     if (!showSpinner) {
       window.clearTimeout(timerId)
@@ -131,16 +137,26 @@ export default function Spinner({ showSpinner, setShowSpinner, closable = false,
       setTimerId(0)
     }
     if (showSpinner && !timerId) {
-      const timer = window.setTimeout(() => {
-        setShow(true)
-        setTimerId(0)
-      }, 10 * 1000)
+      const timer = window.setTimeout(timerHandler, 10 * 1000)
       setTimerId(timer)
     }
     return () => {
       window.clearTimeout(timerId)
     }
-  }, [showSpinner, timerId])
+  }, [showSpinner, timerId, timerHandler])
+
+  useEffect(() => {
+    transRef.start()
+    return () => {
+      transRef.stop()
+    }
+  }, [showSpinner])
+  useEffect(() => {
+    closeTransRef.start()
+    return () => {
+      closeTransRef.stop()
+    }
+  }, [show])
 
   return (
     <>

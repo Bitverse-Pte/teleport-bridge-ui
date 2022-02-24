@@ -20,6 +20,7 @@ import { useActiveWeb3React, useDispatch } from 'hooks'
 import { BodyWrapper } from 'components/BodyWrapper'
 import { errorNoti } from 'helpers/notifaction'
 import { INIT_STATUS } from 'constants/types'
+import Image from 'next/image'
 // import { demo } from 'helpers/demo'
 
 const SLayout = styled(Flex)`
@@ -27,18 +28,18 @@ const SLayout = styled(Flex)`
   position: relative;
   min-height: 100vh;
   text-align: center;
-  background: url(${bg1}) no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  > .bg2 {
-    background: url(${bg2}) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-  }
+  // background: url(${bg1}) no-repeat center center fixed;
+  // -webkit-background-size: cover;
+  // -moz-background-size: cover;
+  // -o-background-size: cover;
+  // background-size: cover;
+  // > .bg2 {
+  //   background: url(${bg2}) no-repeat center center fixed;
+  //   -webkit-background-size: cover;
+  //   -moz-background-size: cover;
+  //   -o-background-size: cover;
+  //   background-size: cover;
+  // }
 `
 
 const Refresh = styled(RefreshCw)<{ disabled: boolean }>`
@@ -161,6 +162,8 @@ export default function BridgeUI() {
       justifyContent={'center'}
     >
       <SLayout flexDirection={'column'} justifyContent={'center'}>
+        <Image src={bg1} layout="fill" objectFit="cover" quality={100}></Image>
+        <Image src={bg2} layout="fill" objectFit="cover" quality={100}></Image>
         <Flex className={'bg2'} flex={1} flexDirection={'column'} justifyContent={'space-between'}>
           <Header />
           {showBody()}

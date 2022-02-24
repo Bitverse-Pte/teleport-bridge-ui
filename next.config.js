@@ -1,11 +1,16 @@
 module.exports = {
+  api: {
+    externalResolver: true,
+  },
   async rewrites() {
-    return [
-      {
-        source: '/bridge',
-        destination: process.env.NEXT_PUBLIC_BACKEND_URL,
-      },
-    ]
+    return {
+      fallback: [
+        {
+          source: '/bridge/:path*',
+          destination: process.env.NEXT_PUBLIC_BACKEND_URL + '/bridge/:path*',
+        },
+      ],
+    }
   },
   images: {
     domains: ['static-files.teleport.network'],

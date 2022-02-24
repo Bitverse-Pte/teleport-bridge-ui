@@ -2,9 +2,8 @@
 import { InjectedConnector } from '@web3-react/injected-connector'
 import { PortisConnector } from '@web3-react/portis-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
-import { WalletLinkConnector } from '@web3-react/walletlink-connector'
+// import { WalletLinkConnector } from '@web3-react/walletlink-connector'
 
-import UNISWAP_LOGO_URL from 'public/svg/logo.svg'
 import { SupportedChainId } from 'constants/chains'
 import { FortmaticConnector } from './Fortmatic'
 import { NetworkConnector } from './NetworkConnector'
@@ -19,8 +18,7 @@ if (typeof INFURA_KEY === 'undefined') {
 
 const NETWORK_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.BSC]: 'https://bsc-dataseed.binance.org/',
-  [SupportedChainId.BSC_TESTNET]:
-    'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  [SupportedChainId.BSC_TESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   [SupportedChainId.TELEPORT]: 'http://10.41.20.10:8545',
   [SupportedChainId.MAINNET]: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.RINKEBY]: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
@@ -83,8 +81,9 @@ export const portis = new PortisConnector({
 })
 
 // mainnet only
-export const walletlink = new WalletLinkConnector({
+/* export const walletlink = new WalletLinkConnector({
   url: NETWORK_URLS[SupportedChainId.MAINNET],
   appName: 'Uniswap',
   appLogoUrl: UNISWAP_LOGO_URL,
 })
+ */

@@ -5,7 +5,7 @@ import BigNumberJS from 'bignumber.js'
 import { Check } from 'react-feather'
 import { css } from 'styled-components'
 
-import { CircledCloseIcon, Icon } from 'components/Icon'
+import { CircledCloseIcon } from 'components/Icon'
 import { StyledText, Text1, Text2, Text4 } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import styled, { StyledComponent } from 'styled-components'

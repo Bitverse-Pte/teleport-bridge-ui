@@ -8,7 +8,6 @@ import BridgeUI from 'components/BridgeUI'
 import ThemeProvider from 'theme'
 // import { globalStyle } from './styles'
 // import { store } from 'store/store'
-import { RootState, Dispatch, store, initializeStore } from 'store/store'
 import getLibrary from 'helpers/getLibrary'
 import Web3Manager from 'components/Web3Manager'
 import { NetworkContextName, ZERO_ADDRESS } from 'constants/misc'
@@ -88,17 +87,23 @@ export default function Home({
   toSetAvailableChains,
   toSetDestChainId,
   toSetSelectedTokenName,
+  error,
 }: {
   toSetBridgePairs: Array<[string, BridgePair]>
   toSetSrcChainId: number
   toSetAvailableChains: Array<[number, ExtChain]>
   toSetDestChainId: number
   toSetSelectedTokenName: string
+  error: string
 }) {
   const {
     application: { setBridgesPairs, setSelectedTokenName, setSrcChainId, setDestChainId, setAvailableChains, setInitStatus },
   } = useDispatch()
   useEffect(() => {
+    if (error) {
+      setInitStatus(INIT_STATUS.error)
+      return
+    }
     if (toSetAvailableChains && toSetBridgePairs && toSetSelectedTokenName && toSetSrcChainId && toSetDestChainId) {
       setAvailableChains(new Map(toSetAvailableChains))
       setBridgesPairs(new Map(toSetBridgePairs))
@@ -107,7 +112,7 @@ export default function Home({
       setDestChainId(toSetDestChainId)
       setInitStatus(INIT_STATUS.initialized)
     }
-  }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName])
+  }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName, error])
   return (
     <>
       {/* <GlobalStyle /> */}

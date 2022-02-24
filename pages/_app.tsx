@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic'
 import getLibrary from 'helpers/getLibrary'
 import { Web3ReactProvider } from '@web3-react/core'
 
-import { useStore } from 'store/store'
+// import { useStore } from 'store/store'
+import { store } from 'store/store'
 
 import 'theme/rootStyle.css'
 
@@ -14,7 +15,7 @@ const Web3ReactProviderDefault = dynamic(() => import('../components/DefaultProv
 
 // import { RootState, Dispatch } from 'store/store'
 export default function App({ Component, pageProps }: AppProps): ReactElement {
-  const store = useStore(pageProps.initialReduxState)
+  // const store = useStore(pageProps.initialReduxState)
   return (
     <>
       <Head>

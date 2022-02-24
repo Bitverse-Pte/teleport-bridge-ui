@@ -1,11 +1,6 @@
 import React, { useDebugValue, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  animated,
-  useTransition,
-  config,
-  useSpringRef,
-} from '@react-spring/web'
+import { animated, useTransition, config, useSpringRef } from '@react-spring/web'
 import { Textfit } from 'react-textfit'
 import styled from 'styled-components'
 import { Icon } from 'components/Icon'
@@ -102,7 +97,7 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
                   </animated.div>
                 ) : (
                   <animated.div style={{ ...styles }}>
-                    <Icon src={HistorySvg} />
+                    <Icon size={20} src={HistorySvg} />
                   </animated.div>
                 )}
               </>

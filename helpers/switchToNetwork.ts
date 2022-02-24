@@ -27,7 +27,7 @@ export async function switchToNetwork({ library, chainId, connector }: Partial<W
     return true
   } catch (error) {
     // 4902 is the error code for attempting to switch to an unrecognized chainId
-    const chain = store.getState().application.availableChains.get(chainId!)
+    const chain = store!.getState().application.availableChains.get(chainId!)
     if ((error as any).code === 4902 && chainId !== undefined) {
       if (!chain) {
         errorNoti(`chain: ${chainId} is not supported!`)

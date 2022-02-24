@@ -6,7 +6,7 @@ import FORTMATIC_ICON_URL from 'public/images/fortmaticIcon.png'
 import METAMASK_ICON_URL from 'public/images/metamask.png'
 import PORTIS_ICON_URL from 'public/images/portisIcon.png'
 import WALLETCONNECT_ICON_URL from 'public/images/walletConnectIcon.svg'
-import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
+import { injected } from '../connectors'
 
 interface WalletInfo {
   connector?: AbstractConnector

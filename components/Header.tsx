@@ -17,7 +17,6 @@ import { ButtonPrimary, ButtonSecondary, ButtonDropdown } from 'components/Butto
 import HistorySvg from 'public/history.svg'
 import WalletSelectModal from 'components/CustomizedModal/WalletSelectModal'
 import HistoryModal from 'components/CustomizedModal/HistoryModal'
-import { Icon } from 'components/Icon'
 import { MouseoverTooltip } from 'components/Tooltip'
 import { HistoryButton } from './Button/HistoryButton'
 import { Hash } from './Hash'

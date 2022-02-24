@@ -1,10 +1,7 @@
 import React, { useCallback, useMemo } from 'react'
 import { Flex, Text } from 'rebass'
-import { pick } from 'lodash'
 import { useSelector } from 'react-redux'
-import AutoSizer from 'react-virtualized-auto-sizer'
 
-import { CircledCloseIcon, Icon } from 'components/Icon'
 import { StyledText, Text1, Text4 } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import Option from 'components/Option'

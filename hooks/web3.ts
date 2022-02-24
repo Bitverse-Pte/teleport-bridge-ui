@@ -1,12 +1,9 @@
 import { useDispatch } from 'hooks'
 import { useSelector } from 'react-redux'
 import type { SafeAppConnector } from '@gnosis.pm/safe-apps-web3-react'
-import { AbstractConnector } from '@web3-react/abstract-connector'
 import { Web3Provider } from '@ethersproject/providers'
 import { useWeb3React } from '@web3-react/core'
-import { wrap } from 'lodash'
 import { useCallback, useEffect, useState } from 'react'
-import Store2 from 'store2'
 
 import { injected } from 'connectors'
 import { RootState } from 'store/store'
@@ -66,9 +63,7 @@ export function useEagerConnect() {
 
   useEffect(() => {
     ;(async () => {
-      const { SafeAppConnector } = await import(
-        '@gnosis.pm/safe-apps-web3-react'
-      )
+      const { SafeAppConnector } = await import('@gnosis.pm/safe-apps-web3-react')
       setGnosisSafe(new SafeAppConnector())
     })()
   }, [])
@@ -124,23 +119,14 @@ export function useEagerConnect() {
  * and out after checking what network theyre on
  */
 export function useInactiveListener(suppress = false) {
-  const {
-    active,
-    error,
-    activate,
-    account,
-    library,
-    connector,
-  } = useWeb3React()
+  const { active, error, activate, account, library, connector } = useWeb3React()
   const {
     application: { setDestChainId, setSrcChainId, resetWhenAccountChange },
   } = useDispatch()
-  const { srcChainId, destChainId, availableChains } = useSelector(
-    (state: RootState) => {
-      const { srcChainId, destChainId, availableChains } = state.application
-      return { srcChainId, destChainId, availableChains }
-    },
-  )
+  const { srcChainId, destChainId, availableChains } = useSelector((state: RootState) => {
+    const { srcChainId, destChainId, availableChains } = state.application
+    return { srcChainId, destChainId, availableChains }
+  })
   const [cachedAccount, setCachedAccount] = useState('')
   const handleConnect = useCallback(() => {
     console.log("Handling 'connect' event")
@@ -155,17 +141,13 @@ export function useInactiveListener(suppress = false) {
       } */
 
       if (chainId != srcChainId) {
-        if (
-          store
-            .getState()
-            .application.availableChains.has(parseInt(`${chainId}`))
-        ) {
+        if (store.getState().application.availableChains.has(parseInt(`${chainId}`))) {
           setSrcChainId(parseInt(`${chainId}`))
         }
       }
       activate(injected)
     },
-    [srcChainId, availableChains],
+    [srcChainId, availableChains]
   )
   const handleAccountsChanged = useCallback((accounts: string[]) => {
     console.log("Handling 'accountsChanged' event with payload", accounts)

@@ -5,6 +5,8 @@ import styled, { css } from 'styled-components'
 import { Flex } from 'rebass'
 import { debounce } from 'lodash'
 import BigNumber from 'bignumber.js'
+import Image from 'next/image'
+
 import { NetworkSelectModalMode, TRANSFER_STATUS, CURRENCY_INPUT_ERROR } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'
 import { SelectorButton, ButtonGray, PrimaryButton } from 'components/Button'
@@ -41,10 +43,10 @@ const Container = styled(Flex)<{ hideInput: boolean }>`
 `
 
 const ArrowWrapper = styled.div<{ clickable: boolean }>`
-  height: 32px;
-  width: 32px;
+  height: 48px;
+  width: 48px;
   position: absolute;
-  left: calc(50% - 16px);
+  left: calc(50% - 24px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,11 +103,15 @@ const StyledTokenName = styled.span<{ active?: boolean }>`
 `
 
 const WormHoleWrapper = styled(Flex)`
-  background: url(${WormHole}) no-repeat center;
+  // background: url(${WormHole}) no-repeat center;
   height: 88px;
   width: 100%;
   align-items: center;
+  position: relative;
   flex-direction: row-reverse;
+  & > span:first-of-type {
+    right: calc(50% - 98px);
+   }
 `
 
 const DarkenedSelectorButton = styled(SelectorButton)`
@@ -140,11 +146,6 @@ const BalanceWrapper = styled(Flex)<{ clickable?: boolean }>`
       : css`
           cursor: not-allowed;
         `}
-`
-
-const ShadowIcon = styled(Icon)`
-  box-shadow: 0 0 1px 1px rgb(0 198 169 / 50%);
-  border-radius: ${({ size }) => size / 4 + 'px'};
 `
 
 /**
@@ -380,7 +381,8 @@ export default function AppBody({ ...rest }) {
                 </Flex>
               </Flex>
             </Container>
-            <WormHoleWrapper paddingRight="1.5rem">
+            <WormHoleWrapper>
+              <Image width={'196px'} src={WormHole} objectFit="cover" objectPosition="center" quality={100} />
               <ArrowWrapper clickable={chainReady && walletReady} onClick={() => turnOverSrcAndDestChain(undefined)}>
                 <Icon size={48} src={chainReady && walletReady ? SwitchSvg : DisabledSwitchSvg} />
               </ArrowWrapper>
