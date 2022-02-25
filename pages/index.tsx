@@ -142,8 +142,37 @@ export async function getStaticProps() {
 
 // document.getElementById('root'),
 // )
-export async function getServerSideProps({ res }: { res: NextApiResponse }) {
-  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=59')
+const isServer = typeof window === 'undefined'
+let dataCache:
+  | {
+      props?: {
+        toSetBridgePairs: Array<[string, BridgePair]>
+        toSetSrcChainId: number
+        toSetAvailableChains: Array<[number, ExtChain]>
+        toSetDestChainId: number
+        toSetSelectedTokenName: string
+      }
+      error?: string
+    }
+  | undefined = undefined
+
+let fetchRequest: Promise<void> | undefined = undefined
+if (isServer) {
+  if (dataCache === undefined) {
+    fetchRequest = fetchChainsDataOnServer()
+  }
+  setInterval(() => {
+    fetchRequest = fetchChainsDataOnServer()
+  }, 60 * 60 * 1000)
+}
+
+async function fetchChainsDataOnServer() {
+  if (!isServer) {
+    return
+  }
+  if (fetchRequest) {
+    return fetchRequest
+  }
   try {
     // Fetch data from external API
     const { data: chains } = await requestor.get<Chain[]>(AVAILABLE_CHAINS_URL)
@@ -184,7 +213,8 @@ export async function getServerSideProps({ res }: { res: NextApiResponse }) {
     // dispatch.application.setAvailableChains(map)
     // dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
     // dispatch.application.setSelectedTokenName(store.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
-    return {
+
+    dataCache = {
       props: {
         toSetBridgePairs: [...bridgePairs.entries()],
         toSetSrcChainId: chains[0].chainId,
@@ -194,11 +224,30 @@ export async function getServerSideProps({ res }: { res: NextApiResponse }) {
       },
     }
   } catch (err) {
-    return {
-      props: {
-        error: `failed to load source info from ${AVAILABLE_CHAINS_URL},
+    dataCache = {
+      error: `failed to load source info from ${AVAILABLE_CHAINS_URL},
         the detail is ${(err as any)?.message}`,
-      },
+    }
+  } finally {
+    if (fetchRequest) {
+      fetchRequest = undefined
+    }
+  }
+}
+
+export async function getServerSideProps({ res }: { res: NextApiResponse }) {
+  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=59')
+  if (dataCache && dataCache.props) {
+    return { props: dataCache.props }
+  } else {
+    fetchRequest = fetchChainsDataOnServer()
+    await fetchRequest
+    if (dataCache && dataCache.props) {
+      return { props: dataCache.props }
+    } else if (dataCache && dataCache.error) {
+      return { props: { error: dataCache.error } }
+    } else {
+      return { props: { error: `unexpected exception occurs, please contact developers` } }
     }
   }
 
