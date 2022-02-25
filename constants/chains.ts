@@ -460,5 +460,3 @@ export const CHAIN_INFO: ChainInfo = {
 
 export const ARBITRUM_HELP_CENTER_LINK = 'https://help.uniswap.org/en/collections/3137787-uniswap-on-arbitrum'
 export const OPTIMISM_HELP_CENTER_LINK = 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ'
-
-export const IS_TEST_NETWORK = process.env.NEXT_PUBLIC_NETWORK_MODE === 'TEST'

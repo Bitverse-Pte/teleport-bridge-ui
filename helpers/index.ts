@@ -49,18 +49,3 @@ function getSigner(library: Web3Provider, account: string): JsonRpcSigner {
 export function isObject(obj: any): boolean {
   return typeof obj === 'object' && !!Object.keys(obj).length
 }
-
-const API_KEY = process.env.NEXT_PUBLIC_INFURA_ID
-
-export function fillRpc(chain: Chain) {
-  for (let index = 0; index < chain.rpc.length; index++) {
-    if (
-      chain.rpc[index].includes('infura.io') &&
-      chain.rpc[index].includes('%API_KEY%') &&
-      API_KEY
-    ) {
-      const rpcUrl = chain.rpc[index].replace('%API_KEY%', API_KEY)
-      chain.rpc[index] = rpcUrl
-    }
-  }
-}

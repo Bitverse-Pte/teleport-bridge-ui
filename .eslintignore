@@ -1,5 +1,6 @@
 build/*
 dist/*
+.next/*
 *.config.js
 _raw/*
 webpack.config.js

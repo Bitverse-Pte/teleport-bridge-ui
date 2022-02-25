@@ -1,22 +1,18 @@
 import React, { useCallback } from 'react'
+import styled from 'styled-components'
 import { Flex, Text } from 'rebass'
-import { pick } from 'lodash'
 import { useSelector } from 'react-redux'
-import { UnsupportedChainIdError } from '@web3-react/core'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 
 import MetamaskIcon from 'public/images/metamask.png'
-import { CircledCloseIcon } from 'components/Icon'
-import { StyledText, PrimaryText } from 'components/Text'
 import UniModal, { UniModalContentWrapper } from 'components/UniModal'
 import Option, { OPTION_TYPE } from 'components/Option'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
-import { injected, portis } from 'connectors'
+import { injected /* ,portis */ } from 'connectors'
 import { isMobile } from 'helpers/userAgent'
-import styled from 'styled-components'
 import { useDispatch } from 'hooks'
-import { RootState } from 'store'
+import { RootState } from 'store/store'
 import { useActiveWeb3React } from 'hooks/web3'
 import { errorNoti } from 'helpers/notifaction'
 
@@ -100,9 +96,9 @@ export default function WalletSelectModal() {
       // check for mobile options
       if (isMobile) {
         //disable portis on mobile for now
-        if (option.connector === portis) {
-          return null
-        }
+        // if (option.connector === portis) {
+        //   return null
+        // }
 
         if (!window.web3 && !window.ethereum && option.mobile) {
           return (

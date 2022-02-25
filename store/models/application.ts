@@ -7,7 +7,7 @@ import { Web3Provider } from '@ethersproject/providers'
 import { MaxUint256 } from '@ethersproject/constants'
 import { mergeWith } from 'lodash'
 import Store2 from 'store2'
-import axios from 'axios'
+import requestor from 'helpers/requestor'
 
 import {
   AVAILABLE_CHAINS_URL,
@@ -29,7 +29,7 @@ import {
   INIT_STATUS,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
-import { fillRpc, getContract } from 'helpers'
+import { getContract } from 'helpers'
 import type { RootModel } from '.'
 import ERC20ABI from 'contracts/erc20.json'
 import { switchToNetwork } from 'helpers/switchToNetwork'
@@ -37,15 +37,6 @@ import { errorNoti, infoNoti, successNoti, warnNoti } from 'helpers/notifaction'
 import { FixedSizeQueue } from 'helpers/fixedQueue'
 import { store } from 'store/store'
 // import { ProviderController } from 'controllers'import type { RootModel } from './index'
-
-const isServer = typeof window === 'undefined'
-axios.interceptors.request.use(
-  async (config) => {
-    config.baseURL = isServer ? process.env.NEXT_PUBLIC_BACKEND_URL : ''
-    return config
-  },
-  (error) => Promise.reject(error)
-)
 
 if (!Store2.has('connect-status')) {
   Store2.set('connect-status', false)
@@ -340,7 +331,7 @@ export const application = createModel<RootModel>()({
         dispatch.application.stopTransactionHistoryUpdating()
         const {
           data: { data: transactions },
-        } = await axios.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account })
+        } = await requestor.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account })
         dispatch.application.saveTransactions(
           FixedSizeQueue.fromArray<TransactionDetail>(
             transactions.reverse().filter((e) => e.sender && e.send_tx_hash && e.amount && e.token_address && e.status),
@@ -522,19 +513,17 @@ export const application = createModel<RootModel>()({
       }
     },
     async initChains() {
-      const { data: chains } = await axios.get<Chain[]>(AVAILABLE_CHAINS_URL)
+      const { data: chains } = await requestor.get<Chain[]>(AVAILABLE_CHAINS_URL)
       const map = new Map<number, ExtChain>()
       dispatch.application.setSrcChainId(chains[0].chainId)
       try {
         const subTasks: Promise<void>[] = []
         await Promise.all(
           chains.map(async (chain) => {
-            fillRpc(chain)
-            return axios
+            return requestor
               .get<Chain[]>(COUNTERPARTY_CHAINS_URL + '/' + chain.chainId)
               .then(({ data: destChains }) => {
                 for (const destChain of destChains) {
-                  fillRpc(destChain)
                   subTasks.push(
                     dispatch.application.updateBridgeInfo({
                       srcChainId: chain.chainId,
@@ -553,7 +542,6 @@ export const application = createModel<RootModel>()({
           })
         )
         await Promise.all(subTasks)
-        axios.defaults.timeout = 10000
         dispatch.application.setAvailableChains(map)
         dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
         dispatch.application.setSelectedTokenName(store!.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
@@ -596,7 +584,7 @@ export const application = createModel<RootModel>()({
       if (!state.application.bridgePairs.has(key)) {
         const {
           data: { tokens, srcChain, destChain, agent_address },
-        } = await axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${srcChainId}/${destChainId}`)
+        } = await requestor.get<BridgePair>(BRIDGE_TOKENS_URL + `/${srcChainId}/${destChainId}`)
         tokens.forEach((token, index) => {
           if (!isAddress(tokens[index].srcToken.address) || ZERO_ADDRESS == tokens[index].srcToken.address) {
             tokens[index].srcToken.isNative = true
@@ -768,7 +756,7 @@ export const application = createModel<RootModel>()({
         try {
           const {
             data: { data: newTxes },
-          } = await axios.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account /* , send_tx_hash: tx.send_tx_hash */ }) // backend does not support tx_hash in query
+          } = await requestor.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account /* , send_tx_hash: tx.send_tx_hash */ }) // backend does not support tx_hash in query
 
           for (const toUpdateOne of transactions) {
             if (toUpdateOne.status === TRANSACTION_STATUS.PENDING) {

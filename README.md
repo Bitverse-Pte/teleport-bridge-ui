@@ -1,34 +1,36 @@
-# TypeScript & Styled Components Next.js example
+# Teleport Network Bridge UI
 
-This is a really simple project that show the usage of Next.js with TypeScript and Styled Components.
+connect chains all together
 
 ## Preview
 
-Preview the example live on [StackBlitz](http://stackblitz.com/):
+View [QA](https://bridge.qa.davionlabs.com/)
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-typescript-styled-components)
+## Scripts Illustration
 
-## Deploy your own
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-typescript-styled-components&project-name=with-typescript-styled-components&repository-name=with-typescript-styled-components)
-
-## How to use it?
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
-
+for development:
 ```bash
-npx create-next-app --example with-typescript-styled-components with-typescript-styled-components-app
-# or
-yarn create next-app --example with-typescript-styled-components with-typescript-styled-components-app
+yarn dev
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+for CI:
+```bash
+yarn # install dependencies
+yarn build # build server/client code
+```
 
-## Notes
+for CD:
+```bash
+yarn start
+```
 
-This is an amalgamation of the 2 existing examples:
+## Required Environments Variables
 
-- [with-typescript](https://github.com/vercel/next.js/tree/canary/examples/with-typescript)
-- [with-styled-components](https://github.com/vercel/next.js/tree/canary/examples/with-styled-components)
+execute such command before start the project in online environment, such as QA and PROD
+```bash
+export NEXT_PUBLIC_BACKEND_URL=[the internal url to call bridge backend service in cloud cluster]
+```
+
+## Environment Variables For Development
+create a .env.local at the root path with below content:
+>  NEXT_PUBLIC_BACKEND_URL="https://bridge.qa.davionlabs.com"

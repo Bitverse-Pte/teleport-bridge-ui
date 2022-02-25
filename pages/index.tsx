@@ -1,20 +1,18 @@
 import React, { useEffect } from 'react'
-import { Provider, connect, useDispatch } from 'react-redux'
-import ReactDOM from 'react-dom'
+import { useDispatch } from 'react-redux'
 import '@reach/dialog/styles.css'
 // import 'inter-ui'
+import { isAddress } from 'web3-utils'
 
+import requestor from 'helpers/requestor'
 import BridgeUI from 'components/BridgeUI'
 import ThemeProvider from 'theme'
 // import { globalStyle } from './styles'
 // import { store } from 'store/store'
-import getLibrary from 'helpers/getLibrary'
 import Web3Manager from 'components/Web3Manager'
-import { NetworkContextName, ZERO_ADDRESS } from 'constants/misc'
-import axios from 'axios'
+import { ZERO_ADDRESS } from 'constants/misc'
 import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS } from 'constants/index'
-import { fillRpc } from 'helpers'
-import { isAddress } from 'web3-utils'
+
 // const GlobalStyle = createGlobalStyle`
 //   ${globalStyle}
 // `
@@ -143,48 +141,43 @@ export async function getStaticProps() {
 // )
 export async function getServerSideProps() {
   // Fetch data from external API
-  const { data: chains } = await axios.get<Chain[]>(AVAILABLE_CHAINS_URL)
+  const { data: chains } = await requestor.get<Chain[]>(AVAILABLE_CHAINS_URL)
   const map = new Map<number, ExtChain>()
   const bridgePairs = new Map<string, BridgePair>()
-
   // dispatch.application.setSrcChainId(chains[0].chainId)
   try {
     const subTasks: Promise<void>[] = []
     await Promise.all(
       chains.map(async (chain) => {
-        fillRpc(chain)
-        return axios
-          .get<Chain[]>(COUNTERPARTY_CHAINS_URL + '/' + chain.chainId)
-          .then(({ data: destChains }) => {
-            for (const destChain of destChains) {
-              fillRpc(destChain)
-              const key = `${chain.chainId}-${destChain.chainId}`
-              subTasks.push(
-                axios.get<BridgePair>(BRIDGE_TOKENS_URL + `/${chain.chainId}/${destChain.chainId}`).then(({ data }) => {
-                  data.tokens.forEach((token) => {
-                    if (!isAddress(token.srcToken.address) || ZERO_ADDRESS == token.srcToken.address) {
-                      token.srcToken.isNative = true
-                    }
-                  })
-                  bridgePairs.set(key, data)
+        return requestor.get<Chain[]>(COUNTERPARTY_CHAINS_URL + '/' + chain.chainId).then(({ data: destChains }) => {
+          for (const destChain of destChains) {
+            const key = `${chain.chainId}-${destChain.chainId}`
+            subTasks.push(
+              requestor.get<BridgePair>(BRIDGE_TOKENS_URL + `/${chain.chainId}/${destChain.chainId}`).then(({ data }) => {
+                data.tokens.forEach((token) => {
+                  if (!isAddress(token.srcToken.address) || ZERO_ADDRESS == token.srcToken.address) {
+                    token.srcToken.isNative = true
+                  }
                 })
-              )
-            }
-            map.set(chain.chainId, chain as ExtChain)
-            ;(chain as ExtChain).destChains = destChains
-          })
-          .catch((err: any) => {
-            console.error(err)
-            return {
-              props: {
-                error: `failed to get couter party chains for chainId ${chain.name}`,
-              },
-            }
-          })
+                bridgePairs.set(key, data)
+              })
+            )
+          }
+          map.set(chain.chainId, chain as ExtChain)
+          ;(chain as ExtChain).destChains = destChains
+        })
+        // .catch((err: any) => {
+        //   console.error(err)
+        //   return {
+        //     props: {
+        //       error: `failed to get couter party chains for chainId ${chain.name}`,
+        //     },
+        //   }
+        // })
       })
     )
     await Promise.all(subTasks)
-    axios.defaults.timeout = 10000
+    requestor.defaults.timeout = 10000
     // dispatch.application.setAvailableChains(map)
     // dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
     // dispatch.application.setSelectedTokenName(store.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
