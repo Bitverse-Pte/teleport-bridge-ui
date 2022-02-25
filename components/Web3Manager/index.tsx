@@ -1,20 +1,15 @@
 // import { Trans } from '@lingui'
-import React, { useCallback, useLayoutEffect } from 'react'
-import { useWeb3React } from '@web3-react/core'
-import { Text } from 'rebass'
 import { useEffect } from 'react'
-import styled from 'styled-components'
-
-import { network } from '../../connectors'
-import { useDispatch } from 'hooks/index'
-import { NetworkContextName } from '../../constants/misc'
-import { useActiveWeb3React, useEagerConnect, useInactiveListener } from '../../hooks/web3'
 import { useSelector } from 'react-redux'
-import { RootState } from 'store'
-import { pick } from 'lodash'
-import { NetworkSelectModalMode } from 'constants/types'
 
-const MessageWrapper = styled.div`
+import { useDispatch } from 'hooks/index'
+import { useActiveWeb3React, useEagerConnect, useInactiveListener } from 'hooks/web3'
+import { RootState } from 'store'
+import { NetworkSelectModalMode } from 'constants/types'
+// import { network } from 'connectors'
+
+
+/* const MessageWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,7 +18,7 @@ const MessageWrapper = styled.div`
 
 const Message = styled.h2`
   color: ${({ theme }) => theme.secondary1};
-`
+` */
 
 export default function Web3Manager({ children }: { children: JSX.Element }) {
   const {
@@ -79,11 +74,11 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
   }, [active, chainId, availableChains, connectStatus, account, library])
 
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
-  useEffect(() => {
+/*   useEffect(() => {
     if (triedEager && !networkActive && !networkError && !active) {
       activateNetwork(network)
     }
-  }, [triedEager, networkActive, networkError, activateNetwork, active])
+  }, [triedEager, networkActive, networkError, activateNetwork, active]) */
 
   /*   useEffect(() => {
     if (connectStatus && (active || networkActive) && (library || networkLibrary)) {

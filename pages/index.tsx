@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { NextApiResponse } from 'next'
+import { useDispatch, useSelector } from 'react-redux'
 import '@reach/dialog/styles.css'
 // import 'inter-ui'
 import { isAddress } from 'web3-utils'
@@ -12,6 +13,8 @@ import ThemeProvider from 'theme'
 import Web3Manager from 'components/Web3Manager'
 import { ZERO_ADDRESS } from 'constants/misc'
 import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS } from 'constants/index'
+import { useActiveWeb3React } from 'hooks'
+import { RootState } from 'store'
 
 // const GlobalStyle = createGlobalStyle`
 //   ${globalStyle}
@@ -139,13 +142,14 @@ export async function getStaticProps() {
 
 // document.getElementById('root'),
 // )
-export async function getServerSideProps() {
-  // Fetch data from external API
-  const { data: chains } = await requestor.get<Chain[]>(AVAILABLE_CHAINS_URL)
-  const map = new Map<number, ExtChain>()
-  const bridgePairs = new Map<string, BridgePair>()
-  // dispatch.application.setSrcChainId(chains[0].chainId)
+export async function getServerSideProps({ res }: { res: NextApiResponse }) {
+  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=59')
   try {
+    // Fetch data from external API
+    const { data: chains } = await requestor.get<Chain[]>(AVAILABLE_CHAINS_URL)
+    const map = new Map<number, ExtChain>()
+    const bridgePairs = new Map<string, BridgePair>()
+    // dispatch.application.setSrcChainId(chains[0].chainId)
     const subTasks: Promise<void>[] = []
     await Promise.all(
       chains.map(async (chain) => {
@@ -170,17 +174,25 @@ export async function getServerSideProps() {
         //   console.error(err)
         //   return {
         //     props: {
-        //       error: `failed to get couter party chains for chainId ${chain.name}`,
+        //       error: `failed to get counter party chains for chainId ${chain.name}`,
         //     },
         //   }
         // })
       })
     )
     await Promise.all(subTasks)
-    requestor.defaults.timeout = 10000
     // dispatch.application.setAvailableChains(map)
     // dispatch.application.setDestChainId(map.get(chains[0].chainId)!.destChains[0].chainId)
     // dispatch.application.setSelectedTokenName(store.getState().application.bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name)
+    return {
+      props: {
+        toSetBridgePairs: [...bridgePairs.entries()],
+        toSetSrcChainId: chains[0].chainId,
+        toSetAvailableChains: [...map.entries()],
+        toSetDestChainId: map.get(chains[0].chainId)!.destChains[0].chainId,
+        toSetSelectedTokenName: bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name,
+      },
+    }
   } catch (err) {
     return {
       props: {
@@ -191,13 +203,4 @@ export async function getServerSideProps() {
   }
 
   // Pass data to the page via props
-  return {
-    props: {
-      toSetBridgePairs: [...bridgePairs.entries()],
-      toSetSrcChainId: chains[0].chainId,
-      toSetAvailableChains: [...map.entries()],
-      toSetDestChainId: map.get(chains[0].chainId)!.destChains[0].chainId,
-      toSetSelectedTokenName: bridgePairs.get(`${chains[0].chainId}-${map.get(chains[0].chainId)!.destChains[0].chainId}`)!.tokens[0]!.srcToken.name,
-    },
-  }
 }

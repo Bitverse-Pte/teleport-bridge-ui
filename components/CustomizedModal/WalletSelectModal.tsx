@@ -72,11 +72,11 @@ export default function WalletSelectModal() {
           })
           .catch((error: any) => {
             if (error.code === -32002) {
-              errorNoti(`Unabled to connect to your selection, as you have a same connection request awaiting your action in your wallet, please take action`)
+              errorNoti(`Unable to connect to your selection, as you have a same connection request awaiting your action in your wallet, please take action`)
               return
             }
             errorNoti(
-              `Unabled to connect to your selection, please use another wallet or connected to a available chains:${Array.from(availableChains.values())
+              `Unable to connect to your selection, please use another wallet or connected to a available chains:${Array.from(availableChains.values())
                 .map((e) => e.name)
                 .join(', ')}`
             )

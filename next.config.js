@@ -7,7 +7,7 @@ module.exports = {
       fallback: [
         {
           source: '/bridge/:path*',
-          destination: process.env.NEXT_PUBLIC_BACKEND_URL + '/bridge/:path*',
+          destination: process.env.BACKEND_URL + '/bridge/:path*',
         },
       ],
     }

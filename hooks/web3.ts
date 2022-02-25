@@ -81,7 +81,7 @@ export function useEagerConnect() {
         }
       })
     }
-  }, [activate, setTriedSafe, triedSafe, gnosisSafe])
+  }, [activate, triedSafe, gnosisSafe])
 
   // then, if that fails, try connecting to an injected connector
   useEffect(() => {

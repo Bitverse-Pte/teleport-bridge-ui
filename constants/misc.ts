@@ -5,7 +5,7 @@ export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const NetworkContextName = 'NETWORK'
 
 export function useIsInFrame() {
-  const [isInFrame, setIsInFrame] = useState(false)
+  const [isInFrame, setIsInFrame] = useState(true)
   useEffect(() => {
     setIsInFrame(window.parent !== window)
   }, [])

@@ -4,7 +4,7 @@ import { InjectedConnector } from '@web3-react/injected-connector'
 // import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 // import { WalletLinkConnector } from '@web3-react/walletlink-connector'
 
-import { SupportedChainId } from 'constants/chains'
+// import { SupportedChainId } from 'constants/chains'
 // import { FortmaticConnector } from './Fortmatic'
 // import { NetworkConnector } from './NetworkConnector'
 
@@ -31,11 +31,8 @@ import { SupportedChainId } from 'constants/chains'
 //   [SupportedChainId.ARBITRUM_RINKEBY]: `https://arbitrum-rinkeby.infura.io/v3/${INFURA_KEY}`,
 // }
 
-// export const network = new NetworkConnector({
-//   urls: NETWORK_URLS,
-//   defaultChainId: 1,
-// })
 /* 
+
 export const bscConnector = new NetworkConnector({
   urls: { [BSC_CHAIN_ID]: 'https://bsc-dataseed.binance.org' },
   defaultChainId: 56,
@@ -46,6 +43,11 @@ export function getNetworkLibrary(): Web3Provider {
   return (networkLibrary = networkLibrary ?? getLibrary(network.provider))
 } */
 
+/* export const network = new NetworkConnector({
+  urls: [],
+  defaultChainId: 1,
+})
+ */
 export const injected = new InjectedConnector({
   // supportedChainIds: ALL_SUPPORTED_CHAIN_IDS,
 })
