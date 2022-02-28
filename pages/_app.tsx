@@ -23,7 +23,9 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
         <link rel="icon" href="/favicon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
-        <meta name="description" content="Web site created using create-react-app" />
+        <meta name="description" content="Teleport Cross Chains Bridge" />
+        <meta name="keywords" content="block chain teleport bridge" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/ico" />
         <link rel="apple-touch-icon" href="/logo64.png" />
         <link rel="manifest" href="/manifest.json" />
         <title>Teleport Bridge</title>
