@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { NextApiResponse } from 'next'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import '@reach/dialog/styles.css'
 // import 'inter-ui'
 import { isAddress } from 'web3-utils'
@@ -13,8 +13,6 @@ import ThemeProvider from 'theme'
 import Web3Manager from 'components/Web3Manager'
 import { ZERO_ADDRESS } from 'constants/misc'
 import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS } from 'constants/index'
-import { useActiveWeb3React } from 'hooks'
-import { RootState } from 'store'
 
 // const GlobalStyle = createGlobalStyle`
 //   ${globalStyle}

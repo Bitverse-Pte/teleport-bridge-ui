@@ -15,6 +15,7 @@ const isServer = typeof window === 'undefined'
 requestor.interceptors.request.use(
   async (config) => {
     if (isServer) {
+      console.log(process.env.BACKEND_URL)
       config.baseURL = process.env.BACKEND_URL
     }
     return config
