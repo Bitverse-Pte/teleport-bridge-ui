@@ -162,8 +162,8 @@ export default function BridgeUI() {
       justifyContent={'center'}
     >
       <SLayout flexDirection={'column'} justifyContent={'center'}>
-        <Image src={bg1} layout="fill" alt='' objectFit="cover" quality={100}></Image>
-        <Image src={bg2} layout="fill" alt='' objectFit="cover" quality={100}></Image>
+        <Image src={bg1} layout="fill" alt={'Icon'}  objectFit="cover" quality={100}></Image>
+        <Image src={bg2} layout="fill" alt={'Icon'}  objectFit="cover" quality={100}></Image>
         <Flex className={'bg2'} flex={1} flexDirection={'column'} justifyContent={'space-between'}>
           <Header />
           {showBody()}
