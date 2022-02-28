@@ -85,8 +85,7 @@ const SHeader = styled(Flex)`
 const SBlockie = styled(Blockie)`
   ${({ theme }) => theme.mediaWidth.upToMedium`
   margin-right: 0;
-`}
-  margin-right: 10px;
+`}// margin-right: 10px;
 `
 
 export const AutoColumn = styled.div<{
@@ -134,7 +133,7 @@ const HeaderFunctionalArea = styled(Flex)<{ ready: boolean }>`
   justify-content: ${({ ready }) => (ready ? 'space-evenly' : 'end')};
   & {
     .header-btn-img {
-      margin-right: 1rem;
+      // margin-right: 1rem;
     }
     .header-btn-text {
       min-width: fit-content;
@@ -215,7 +214,7 @@ export default function Header() {
             >
               {connectedChain && (
                 <>
-                  <StyledLogo className={'header-btn-img'} srcs={[connectedChain?.icon]} size={'1.5rem'}></StyledLogo>
+                  <StyledLogo className={'header-btn-img'} srcs={[connectedChain?.icon]} size={'20px'} style={{ minWidth: '32px' }}></StyledLogo>
                   <Text1 className={'header-btn-text'} /* max={20} min={2} mode="single" */>{connectedChain?.name}</Text1>
                 </>
               )}
@@ -231,7 +230,7 @@ export default function Header() {
               }} */
             >
               <Flex alignItems="center">
-                <SBlockie className={'header-btn-img'} address={address} size={24} style={{ minWidth: '24px' }} />
+                <SBlockie className={'header-btn-img'} address={address} size={20} style={{ minWidth: '32px' }} />
                 {/* <MouseoverTooltip text={address}> */}
                 {/* <Hash ellipsis={true} hash={address} copyable={false} showCounts={4} /> */}
                 <Text1 className={'header-btn-text'} /* max={20} min={2} mode="single"  */ style={{ fontWeight: 600 }}>

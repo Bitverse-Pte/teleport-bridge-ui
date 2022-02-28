@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { Slash } from 'react-feather'
 import CssValueParser from 'parse-unit'
-import { ImageProps } from 'rebass'
+import { Box, ImageProps } from 'rebass'
 import styled from 'styled-components'
+import { remToPx } from 'polished'
 
 import { MEDIA_WIDTHS, DefaultButtonRadius } from 'theme'
 import { useTheme } from 'hooks/useTheme'
+import Image from 'next/image'
 
 const BAD_SRCS: { [tokenAddress: string]: true } = {}
 
@@ -16,7 +18,7 @@ interface LogoProps extends Pick<ImageProps, 'style' | 'alt' | 'className'> {
 /**
  * Renders an image by sequentially trying a list of URIs, and then eventually a fallback triangle alert
  */
-export default function Logo({ srcs, alt, style, ...rest }: LogoProps) {
+export default function Logo({ srcs, alt, size, style, ...rest }: { size: string } & LogoProps) {
   const [, refresh] = useState<number>(0)
 
   const theme = useTheme()
@@ -25,16 +27,19 @@ export default function Logo({ srcs, alt, style, ...rest }: LogoProps) {
 
   if (src) {
     return (
-      <img
-        {...rest}
-        alt={alt}
-        src={src}
-        style={style}
-        onError={() => {
-          if (src) BAD_SRCS[src] = true
-          refresh((i) => i + 1)
-        }}
-      />
+      <Box style={style} height={size} width={size}>
+        <Image
+          {...rest}
+          alt={alt}
+          height={size.endsWith('rem') ? remToPx(size) : size}
+          width={size.endsWith('rem') ? remToPx(size) : size}
+          src={src}
+          onError={() => {
+            if (src) BAD_SRCS[src] = true
+            refresh((i) => i + 1)
+          }}
+        />
+      </Box>
     )
   }
 

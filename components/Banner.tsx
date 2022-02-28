@@ -34,7 +34,7 @@ const SBanner = styled.div`
 const Banner = () => (
   <SBannerWrapper>
     <SBanner>
-      <Image src={logo} quality={100} />
+      <Image src={logo} quality={100} alt="" />
     </SBanner>
     {/* <img src={logo} alt={'Icon'} /> */}
     {/* <span>{''}</span> */}

@@ -382,7 +382,7 @@ export default function AppBody({ ...rest }) {
               </Flex>
             </Container>
             <WormHoleWrapper>
-              <Image width={'196px'} src={WormHole} objectFit="cover" objectPosition="center" quality={100} />
+              <Image alt="" width={'196px'} src={WormHole} objectFit="cover" objectPosition="center" quality={100} />
               <ArrowWrapper clickable={chainReady && walletReady} onClick={() => turnOverSrcAndDestChain(undefined)}>
                 <Icon size={48} src={chainReady && walletReady ? SwitchSvg : DisabledSwitchSvg} />
               </ArrowWrapper>

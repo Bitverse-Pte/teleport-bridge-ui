@@ -781,7 +781,8 @@ export const application = createModel<RootModel>()({
                     const tokenInfo = bridgePair?.tokens.find((token) => token.srcToken.address === toUpdateOne.token_address)?.srcToken
                     parsedTransactionAmount = new BigNumber(toUpdateOne.amount).shiftedBy(-tokenInfo!.decimals).toString()
                   }
-                  warnNoti(`failed to transfer this amount: ${parsedTransactionAmount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
+                  console.warn(`failed to transfer this amount: ${parsedTransactionAmount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
+                  // warnNoti(`failed to transfer this amount: ${parsedTransactionAmount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
                 }
               }
               newTxes.splice(newOneIndex, 1)
@@ -799,7 +800,8 @@ export const application = createModel<RootModel>()({
           dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(newTransactions, 10))
           dispatch.application.saveTransactions(transactions)
         } catch (err) {
-          warnNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
+          console.warn(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
+          // warnNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
         }
       }, 10 * 1000)
       dispatch.application.setTransactionHistoryUpdatingTimer(timer)
