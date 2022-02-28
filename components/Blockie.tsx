@@ -1,6 +1,8 @@
 import React, { HTMLAttributes } from 'react'
 import * as blockies from 'blockies-ts'
 import styled from 'styled-components'
+import Image from 'next/image'
+import { size } from 'lodash'
 
 interface IBlockieStyleProps {
   size?: number
@@ -32,7 +34,7 @@ const Blockie = (props: IBlockieProps & HTMLAttributes<HTMLDivElement>) => {
     .toDataURL()
   return (
     <SBlockieWrapper {...props} size={props.size}>
-      <img src={imgUrl} alt={props.address} />
+      <Image src={imgUrl} alt={props.address} width={props.size} height={props.size} />
     </SBlockieWrapper>
   )
 }
