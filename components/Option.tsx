@@ -153,7 +153,7 @@ export default function Option({
         {subheader && <SubHeader>{subheader}</SubHeader>}
       </OptionCardLeft>
       {type === OPTION_TYPE.WALLET && (
-        <Icon size={size} src={icon} alt={'Icon'} />
+        <Icon size={size} src={icon} alt={'option-icon'} />
         /*    <IconWrapper size={size}>
           <img src={icon} alt={'Icon'} />
         </IconWrapper> */

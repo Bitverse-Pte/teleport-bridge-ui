@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Slash } from 'react-feather'
 import CssValueParser from 'parse-unit'
-import { Box, ImageProps } from 'rebass'
-import styled from 'styled-components'
+import { Flex, ImageProps } from 'rebass'
+import styled, { css } from 'styled-components'
 import { remToPx } from 'polished'
 
 import { MEDIA_WIDTHS, DefaultButtonRadius } from 'theme'
@@ -12,22 +12,52 @@ import Image from 'components/Image'
 const BAD_SRCS: { [tokenAddress: string]: true } = {}
 
 interface LogoProps extends Pick<ImageProps, 'style' | 'alt' | 'className'> {
-  srcs: string[]
+  srcs: Array<string | StaticImageData>
 }
 
 /**
  * Renders an image by sequentially trying a list of URIs, and then eventually a fallback triangle alert
  */
-export default function Logo({ srcs, alt, size, style, ...rest }: { size: string } & LogoProps) {
+export function StyledLogo({ srcs, alt, size, style, isSelected, ...rest }: { isSelected?: boolean; size: string } & LogoProps) {
   const [, refresh] = useState<number>(0)
 
   const theme = useTheme()
 
-  const src: string | undefined = srcs.find((src) => !BAD_SRCS[src])
+  const src: string | StaticImageData | undefined = srcs.find((src) => {
+    if (typeof src === 'string') {
+      return !BAD_SRCS[src]
+    } else {
+      return !BAD_SRCS[src.src]
+    }
+  })
 
-  if (src) {
-    return (
-      <Box style={style} height={size} width={size}>
+  return (
+    <Flex
+      justifyContent={'center'}
+      alignItems={'center'}
+      css={css`
+        height: ${size};
+        width: ${size};
+        min-height: ${size}!important;
+        min-width: ${size}!important;
+        background: radial-gradient(white 50%, #ffffff00 calc(75% + 1px), #ffffff00 100%);
+        border-radius: 50%;
+        -mox-box-shadow: 0 0 1px black;
+        -webkit-box-shadow: 0 0 1px black;
+        box-shadow: 0 0 1px black;
+        border: 0px solid rgba(255, 255, 255, 0);
+        ${isSelected &&
+        `
+            -mox-box-shadow: 0 0 ${size} ${theme.green1};
+            -webkit-box-shadow: 0 0 ${size} ${theme.green1};
+            box-shadow: 0 0 ${size} ${theme.green1};
+        `}
+        span {
+          border-radius: 50% !important;
+        }
+      `}
+    >
+      {src && (
         <Image
           {...rest}
           alt={alt}
@@ -35,15 +65,14 @@ export default function Logo({ srcs, alt, size, style, ...rest }: { size: string
           width={size.endsWith('rem') ? remToPx(size) : size}
           src={src}
           onError={() => {
-            if (src) BAD_SRCS[src] = true
+            if (src) BAD_SRCS[typeof src === 'string' ? src : src.src] = true
             refresh((i) => i + 1)
           }}
         />
-      </Box>
-    )
-  }
-
-  return <Slash {...rest} style={{ ...style, color: theme.bg4 }} />
+      )}
+      {!src && <Slash {...rest} style={{ ...style, color: theme.bg4 }} />}
+    </Flex>
+  )
 }
 
 const SimpleLogo = styled.img`
@@ -64,20 +93,31 @@ export const SelectorLogo = styled(SimpleLogo)<{ left?: string; interactive?: bo
   } */
 `
 
-export const StyledLogo = styled(({ size, isSelected, ...rest }) => <Logo size={size} {...rest} />)<{ size: string; isSelected?: boolean }>`
-  width: ${({ size }) => size};
-  height: ${({ size }) => size};
-  background: radial-gradient(white 50%, #ffffff00 calc(75% + 1px), #ffffff00 100%);
-  border-radius: 50%;
-  -mox-box-shadow: 0 0 1px black;
-  -webkit-box-shadow: 0 0 1px black;
-  box-shadow: 0 0 1px black;
-  border: 0px solid rgba(255, 255, 255, 0);
-  ${({ isSelected, theme, size }) =>
-    isSelected &&
-    `
-    -mox-box-shadow: 0 0 ${size} ${theme.green1};
-    -webkit-box-shadow: 0 0 ${size} ${theme.green1};
-    box-shadow: 0 0 ${size} ${theme.green1};
-  `}
-`
+// export const StyledLogo = styled(
+//   Logo /* ({ size, isSelected, style, ...rest }) => (
+//   <Box>
+//     <Logo size={size} {...rest} />
+//   </Box>
+// ) */
+// )<{ size: string; isSelected?: boolean }>`
+//   div {
+//     height: ${({ size }) => size};
+//     width: ${({ size }) => size};
+//     background: radial-gradient(white 50%, #ffffff00 calc(75% + 1px), #ffffff00 100%);
+//     border-radius: 50%;
+//     -mox-box-shadow: 0 0 1px black;
+//     -webkit-box-shadow: 0 0 1px black;
+//     box-shadow: 0 0 1px black;
+//     border: 0px solid rgba(255, 255, 255, 0);
+//     ${({ isSelected, theme, size }) =>
+//       isSelected &&
+//       `
+//         -mox-box-shadow: 0 0 ${size} ${theme.green1};
+//         -webkit-box-shadow: 0 0 ${size} ${theme.green1};
+//         box-shadow: 0 0 ${size} ${theme.green1};
+//     `}
+//     span {
+//       border-radius: 50% !important;
+//     }
+//   }
+// `

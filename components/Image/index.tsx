@@ -4,8 +4,7 @@ export default function OriginalSrcImage(props: Omit<ImageProps, 'loader'>) {
   return (
     <Image
       {...props}
-      //   alt={props.alt ?? 'Icon'}
-      alt={''}
+      alt={props.alt ?? ''}
       loader={({ src }) => {
         return src
       }}

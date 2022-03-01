@@ -132,9 +132,6 @@ const HeaderFunctionalArea = styled(Flex)<{ ready: boolean }>`
   width: 50%;
   justify-content: ${({ ready }) => (ready ? 'space-evenly' : 'end')};
   & {
-    .header-btn-img {
-      // margin-right: 1rem;
-    }
     .header-btn-text {
       min-width: fit-content;
     }
@@ -214,7 +211,7 @@ export default function Header() {
             >
               {connectedChain && (
                 <>
-                  <StyledLogo className={'header-btn-img'} srcs={[connectedChain?.icon]} size={'20px'} style={{ minWidth: '32px' }}></StyledLogo>
+                  <StyledLogo className={'header-btn-img'} srcs={[connectedChain?.icon]} size={'1.25rem'} style={{ minWidth: '32px' }}></StyledLogo>
                   <Text1 className={'header-btn-text'} /* max={20} min={2} mode="single" */>{connectedChain?.name}</Text1>
                 </>
               )}

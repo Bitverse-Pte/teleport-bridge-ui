@@ -111,7 +111,7 @@ const WormHoleWrapper = styled(Flex)`
   flex-direction: row-reverse;
   & > span:first-of-type {
     right: calc(50% - 98px);
-   }
+  }
 `
 
 const DarkenedSelectorButton = styled(SelectorButton)`
@@ -382,7 +382,7 @@ export default function AppBody({ ...rest }) {
               </Flex>
             </Container>
             <WormHoleWrapper>
-              <Image alt={'Icon'}  width={'196px'} src={WormHole} objectFit="cover" objectPosition="center" quality={100} />
+              <Image alt={'wormhole'} width={'196px'} src={WormHole} objectFit="cover" objectPosition="center" quality={100} />
               <ArrowWrapper clickable={chainReady && walletReady} onClick={() => turnOverSrcAndDestChain(undefined)}>
                 <Icon size={48} src={chainReady && walletReady ? SwitchSvg : DisabledSwitchSvg} />
               </ArrowWrapper>
