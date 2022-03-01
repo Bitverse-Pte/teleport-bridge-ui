@@ -20,7 +20,7 @@ import { useActiveWeb3React, useDispatch } from 'hooks'
 import { BodyWrapper } from 'components/BodyWrapper'
 import { errorNoti } from 'helpers/notifaction'
 import { INIT_STATUS } from 'constants/types'
-import Image from 'next/image'
+import Image from 'components/Image'
 // import { demo } from 'helpers/demo'
 
 const SLayout = styled(Flex)`

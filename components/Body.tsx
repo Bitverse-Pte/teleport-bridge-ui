@@ -5,7 +5,7 @@ import styled, { css } from 'styled-components'
 import { Flex } from 'rebass'
 import { debounce } from 'lodash'
 import BigNumber from 'bignumber.js'
-import Image from 'next/image'
+import Image from 'components/Image'
 
 import { NetworkSelectModalMode, TRANSFER_STATUS, CURRENCY_INPUT_ERROR } from 'constants/types'
 import { useActiveWeb3React } from 'hooks/web3'

@@ -7,7 +7,7 @@ import { remToPx } from 'polished'
 
 import { MEDIA_WIDTHS, DefaultButtonRadius } from 'theme'
 import { useTheme } from 'hooks/useTheme'
-import Image from 'next/image'
+import Image from 'components/Image'
 
 const BAD_SRCS: { [tokenAddress: string]: true } = {}
 

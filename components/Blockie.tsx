@@ -1,7 +1,7 @@
 import React, { HTMLAttributes } from 'react'
 import * as blockies from 'blockies-ts'
 import styled from 'styled-components'
-import Image from 'next/image'
+import Image from 'components/Image'
 import { size } from 'lodash'
 
 interface IBlockieStyleProps {

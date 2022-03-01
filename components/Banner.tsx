@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import logo from 'public/logo.svg'
 import { fonts, colors } from 'theme/styles'
-import Image from 'next/image'
+import Image from 'components/Image'
 
 const SBannerWrapper = styled.div`
   display: flex;
