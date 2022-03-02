@@ -6,7 +6,7 @@ import FORTMATIC_ICON_URL from 'public/images/fortmaticIcon.png'
 import METAMASK_ICON_URL from 'public/images/metamask.png'
 import PORTIS_ICON_URL from 'public/images/portisIcon.png'
 import WALLETCONNECT_ICON_URL from 'public/images/walletConnectIcon.svg'
-import { injected } from '../connectors'
+import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
 
 interface WalletInfo {
   connector?: AbstractConnector
@@ -38,8 +38,7 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
     href: null,
     color: '#E8831D',
   },
-  /*
-  only enable metamask in testnet for first release
+
   WALLET_CONNECT: {
     connector: walletconnect,
     name: 'WalletConnect',
@@ -83,5 +82,5 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
     href: null,
     color: '#4A6C9B',
     mobile: true,
-  }, */
+  },
 }

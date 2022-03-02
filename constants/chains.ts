@@ -278,13 +278,15 @@ export enum SupportedChainId {
   RINKEBY = 4,
   GOERLI = 5,
   KOVAN = 42,
-  BSC = 56,
+  /* BSC = 56,
   BSC_TESTNET = 97,
-  TELEPORT = 7001,
+  TELEPORT = 7001, */
   ARBITRUM_ONE = 42161,
   ARBITRUM_RINKEBY = 421611,
   OPTIMISM = 10,
   OPTIMISTIC_KOVAN = 69,
+  POLYGON = 137,
+  POLYGON_MUMBAI = 80001,
 }
 
 export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = [
@@ -293,9 +295,11 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = [
   SupportedChainId.RINKEBY,
   SupportedChainId.GOERLI,
   SupportedChainId.KOVAN,
-  SupportedChainId.BSC,
+  /*
+  SupportedChainId.BSC, 
   SupportedChainId.BSC_TESTNET,
-  SupportedChainId.TELEPORT,
+  SupportedChainId.TELEPORT, 
+  */
   SupportedChainId.ARBITRUM_ONE,
   SupportedChainId.ARBITRUM_RINKEBY,
   SupportedChainId.OPTIMISM,
@@ -333,8 +337,7 @@ export interface L2ChainInfo extends L1ChainInfo {
 
 export type ChainInfo = { readonly [chainId: number]: L1ChainInfo | L2ChainInfo } & {
   readonly [chainId in SupportedL2ChainId]: L2ChainInfo
-} &
-  { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
+} & { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
 /* 
 id(pin):56
 name(pin):"BSC"
@@ -349,7 +352,7 @@ drop_gas_cost_amt(pin):"100000000000000"
 drop_gas_balance_alert(pin):"0" */
 
 export const CHAIN_INFO: ChainInfo = {
-  [SupportedChainId.BSC]: {
+  /*  [SupportedChainId.BSC]: {
     blockWaitMsBeforeWarning: ms`10m`,
     bridge: 'https://www.binance.org/en/bridge',
     defaultListUrl: '',
@@ -360,7 +363,7 @@ export const CHAIN_INFO: ChainInfo = {
     logoUrl: BSCLogo,
     nativeCurrency: { name: 'Binance Coin', symbol: 'BNB', decimals: 18 },
     rpcUrls: ['https://bsc-dataseed.binance.org/'],
-  },
+  }, */
   /* [ChainId.BSC]: {
     chainId: '0x38',
     chainName: 'Binance Smart Chain',
