@@ -135,6 +135,7 @@ export interface TransactionDetail {
 */
 
 export const HistoryChainButton = styled(ButtonLight)`
+  padding: 0 0.5rem;
   box-shadow: 0 0 0 1pt ${({ theme, disabled }) => !disabled && darken(0.03, theme.bg1)};
   border: 1px solid ${({ theme }) => theme.bg3};
   background-color: ${({ theme, disabled }) => !disabled && darken(0.03, theme.bg2)};

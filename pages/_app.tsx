@@ -7,14 +7,19 @@ import getLibrary from 'helpers/getLibrary'
 import { Web3ReactProvider } from '@web3-react/core'
 
 // import { useStore } from 'store/store'
-import { store } from 'store/store'
+import withRematch from 'store/withRematch'
+// import { store } from 'store/store'
 
 import 'theme/rootStyle.css'
+import { Store } from 'store/store'
 
 const Web3ReactProviderDefault = dynamic(() => import('../components/DefaultProvider'), { ssr: false })
+interface Props extends AppProps {
+  reduxStore: Store
+}
 
 // import { RootState, Dispatch } from 'store/store'
-export default function App({ Component, pageProps }: AppProps): ReactElement {
+function MyApp({ Component, pageProps, reduxStore }: Props): ReactElement {
   // const store = useStore(pageProps.initialReduxState)
   return (
     <>
@@ -30,7 +35,7 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
         <link rel="manifest" href="/manifest.json" />
         <title>Teleport Bridge</title>
       </Head>
-      <Provider store={store}>
+      <Provider store={reduxStore}>
         <Web3ReactProvider getLibrary={getLibrary}>
           <Web3ReactProviderDefault getLibrary={getLibrary}>
             <Component {...pageProps} />
@@ -40,6 +45,8 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
     </>
   )
 }
+
+export default withRematch(MyApp)
 /* 
 export async function getServerSideProps() {
   await store.dispatch.application.initChains()

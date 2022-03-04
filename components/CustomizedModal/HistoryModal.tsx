@@ -31,7 +31,7 @@ export default function HistoryModal() {
         </Flex> */}
       {/* <ModalContentWrapper flex={1}> */}
       <Flex width="100%" /* maxHeight="calc(61.8vh - 40px - 2rem)" */ flexDirection={'column'} overflowX={'hidden'} overflowY={'auto'} justifyContent={transactions.isEmpty() ? 'center' : 'flex-start'} alignItems={'center'}>
-        {transactions.isEmpty() && (
+        {transactions.isEmpty && transactions.isEmpty() && (
           <>
             <Icon src={Empty} size={100} />
             <Text
@@ -48,7 +48,8 @@ export default function HistoryModal() {
             </Text>
           </>
         )}
-        {!transactions.isEmpty() &&
+        {transactions.isEmpty &&
+          !transactions.isEmpty() &&
           [...transactions].reverse().map((transaction) => {
             return <HistoryRecord key={transaction.send_tx_hash} transaction={transaction} />
           })}

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { NextApiResponse } from 'next'
-import { useDispatch } from 'react-redux'
+import Store2 from 'store2'
 // import 'inter-ui'
 import { isAddress } from 'web3-utils'
 
@@ -11,7 +11,9 @@ import ThemeProvider from 'theme'
 // import { store } from 'store/store'
 import Web3Manager from 'components/Web3Manager'
 import { ZERO_ADDRESS } from 'constants/misc'
-import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS } from 'constants/index'
+import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS, TransactionDetail } from 'constants/index'
+import { FixedSizeQueue } from 'helpers/fixedQueue'
+import { useDispatch } from 'hooks'
 
 // const GlobalStyle = createGlobalStyle`
 //   ${globalStyle}
@@ -95,7 +97,7 @@ export default function Home({
   error: string
 }) {
   const {
-    application: { setBridgesPairs, setSelectedTokenName, setSrcChainId, setDestChainId, setAvailableChains, setInitStatus },
+    application: { setBridgesPairs, setSelectedTokenName, setSrcChainId, setDestChainId, setAvailableChains, setInitStatus, setTransactions, setConnectStatus },
   } = useDispatch()
   useEffect(() => {
     if (error) {
@@ -109,6 +111,16 @@ export default function Home({
       setSrcChainId(toSetSrcChainId)
       setDestChainId(toSetDestChainId)
       setInitStatus(INIT_STATUS.initialized)
+      /* 
+        setTransactions(state, transactions: FixedSizeQueue<TransactionDetail>) {
+        return {
+          ...state,
+          transactions: transactions.reborn(),
+        }
+      },
+     */
+      setTransactions(new FixedSizeQueue<TransactionDetail>(10))
+      setConnectStatus(Store2.get('connect-status'))
     }
   }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName, error])
   return (

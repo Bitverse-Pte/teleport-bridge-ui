@@ -51,6 +51,10 @@ import { models, RootModel } from './models'
 export const store = init({
   models,
 })
+export const initializeStore = (initialState?: RootModel): Store => {
+  return store
+}
+
 export type Store = typeof store
 export type Dispatch = RematchDispatch<RootModel>
 export type RootState = RematchRootState<RootModel>
