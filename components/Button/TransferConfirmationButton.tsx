@@ -1,15 +1,13 @@
 import React, { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { RootState } from 'store/store'
 import { useTransition, config, animated, useSprings, useSpringRef, AnimatedProps } from '@react-spring/web'
-import { BaseSpinner, TransitionSpinner } from 'components/Spinner'
-import { PrimaryButton } from '.'
-import { TRANSFER_STATUS } from 'constants/types'
-import { useDispatch } from 'hooks'
 import BigNumber from 'bignumber.js'
-import { Flex } from 'rebass'
-import styled, { css } from 'styled-components'
 import { darken } from 'polished'
+
+import { useDispatch } from 'hooks'
+import { RootState } from 'store/store'
+import styled, { css } from 'styled-components'
+import { TRANSFER_STATUS } from 'constants/types'
 import { getBalance } from 'helpers/web3'
 
 const StyledAnimatedBtn = styled(animated.button)<{ backgroundColor: string }>`

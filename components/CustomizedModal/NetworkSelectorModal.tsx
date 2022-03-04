@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import Option, { OPTION_TYPE } from 'components/Option'
 import { CircledCloseIcon } from 'components/Icon'
 import { PrimaryText, StyledText } from 'components/Text'
-import UniModal, { UniModalContentWrapper } from 'components/UniModal'
+import Modal from 'components/Modal'
 import { useActiveWeb3React } from 'hooks/web3'
 import { RootState } from 'store/store'
 import { useDispatch } from 'hooks'
@@ -16,12 +16,22 @@ import { NetworkSelectModalMode } from 'constants/index'
 const OptionGrid = styled(Box)`
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-gap: 10px;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  button {
+    width: calc(50% - 10px) !important;
+    margin: 5px;
+  }
   ${({ theme }) => theme.mediaWidth.upToMedium`
-    grid-template-columns: 1fr;
-    grid-gap: 10px;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: unset;
+    button {
+      width: calc(100%)!important;
+      margin: 0;
+    }
   `};
 `
 
@@ -84,22 +94,22 @@ export default function NetworkSelectModal() {
   }, [library, chainId, availableChains, networkModalMode, srcChainId, destChainId])
 
   return (
-    <UniModal
+    <Modal
       maxWidth="40rem"
-      maxHeight={61.8}
+      maxHeight={'61.8vh'}
       isOpen={!!networkModalMode}
-      onDismiss={() => {
+      /* onDismiss={() => {
         console.log('dismiss')
-      }}
+      }} */
       closeByKeyboard={true}
       setIsOpen={setNetworkModalMode}
       title="Select A Chain"
     >
-      <Flex flexDirection="column" width="100%" overflow="hidden">
-        <UniModalContentWrapper>
-          <OptionGrid>{getNetworkOptions()}</OptionGrid>
-        </UniModalContentWrapper>
-      </Flex>
-    </UniModal>
+      {/* <Flex flexDirection="column" width="100%" overflow="hidden" justifyContent={'flex-start'}> */}
+      {/* <ModalContentWrapper> */}
+      <OptionGrid>{getNetworkOptions()}</OptionGrid>
+      {/* </ModalContentWrapper> */}
+      {/* </Flex> */}
+    </Modal>
   )
 }

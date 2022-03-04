@@ -1,9 +1,15 @@
 import React, { HTMLProps, useCallback, useEffect, useState } from 'react'
 import { useTransition, config, animated, useSpringRef } from '@react-spring/web'
+import CircularProgress from '@mui/material/CircularProgress'
+import { transparentize } from 'polished'
+import LinearProgress from '@mui/material/LinearProgress'
 import { Flex } from 'rebass'
+import Modal from '@mui/material/Modal'
+import Fade, { FadeProps } from '@mui/material/Fade'
 import styled, { keyframes, css } from 'styled-components'
 
 import { CloseIcon } from 'components/Icon'
+import { StyledModalOverlay } from 'components/Modal'
 
 const rotate360 = keyframes`
 from {
@@ -55,85 +61,41 @@ const transitions = useTransition(pending, {
   )
 */
 
-export const TransitionSpinner = function ({ show, ...rest }: { show: boolean } & HTMLProps<HTMLDivElement>) {
-  const transitions = useTransition(show, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-    // reverse: show,
-    config: config.molasses,
-    // onRest: () => setPending(!pending),
-  })
+export const TransitionSpinner = function ({ show, size = '1rem', type = 'circular', color = 'white', ...rest }: { show: boolean; type?: 'linear' | 'circular'; size?: string | number } & Omit<FadeProps, 'children'>) {
   return (
-    <>
-      {transitions(
-        ({ opacity }, item) =>
-          item && (
-            <animated.div style={{ ...rest.style, opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1] }) }}>
-              <BaseSpinner warning={false} size={'1rem'}></BaseSpinner>
-            </animated.div>
-          )
-      )}
-    </>
+    <Fade in={show} {...rest}>
+      <Flex width="100%" color={transparentize(0.2, color)}>
+        {type === 'circular' && <CircularProgress thickness={6} size={size} color="inherit" disableShrink />}
+        {type === 'linear' && <LinearProgress color={'inherit'} style={{ width: '100%' }} />}
+      </Flex>
+    </Fade>
   )
 }
 
 export const TransitionSpinnerMask = function ({ show, children, ...rest }: { show: boolean } & HTMLProps<HTMLDivElement>) {
-  const transitions = useTransition(show, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-    reverse: show,
-    config: config.molasses,
-    // onRest: () => setPending(!pending),
-  })
   return (
-    <>
-      {transitions(
-        ({ opacity }, item) =>
-          item && (
-            <animated.div style={{ ...rest.style, opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1] }), position: 'absolute', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <BaseSpinner warning={false} size={'2rem'}></BaseSpinner>
-              {children}
-            </animated.div>
-          )
-      )}
-    </>
+    <Fade in={show}>
+      <Flex color="white" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress size="2rem" color="inherit" disableShrink />
+        {children}
+      </Flex>
+    </Fade>
   )
 }
 
 export default function Spinner({ showSpinner, setShowSpinner, closable = false, warning = false, size = '2rem', children }: { showSpinner: boolean; setShowSpinner?: (showSpinner: boolean) => void; closable?: boolean; warning?: boolean; size?: string | number } & { children?: React.ReactNode }) {
-  const [show, setShow] = useState(false)
+  const [showClose, setShowClose] = useState(false)
   const [timerId, setTimerId] = useState<number>()
-  const transRef = useSpringRef()
-  const closeTransRef = useSpringRef()
-  const transitions = useTransition(showSpinner, {
-    ref: transRef,
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-    // reverse: show,
-    config: config.gentle,
-    // onRest: () => setPending(!pending),
-  })
-  const closeTransitions = useTransition(show, {
-    ref: closeTransRef,
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-    // reverse: show,
-    config: config.gentle,
-    // onRest: () => setPending(!pending),
-  })
 
   const timerHandler = useCallback(() => {
-    !!(timerId === 0 || timerId) && setShow(true)
+    !!(timerId === 0 || timerId) && setShowClose(true)
     !!(timerId === 0 || timerId) && setTimerId(0)
   }, [timerId])
+
   useEffect(() => {
     if (!showSpinner) {
       window.clearTimeout(timerId)
-      setShow(false)
+      setShowClose(false)
       setTimerId(0)
     }
     if (showSpinner && !timerId) {
@@ -145,60 +107,51 @@ export default function Spinner({ showSpinner, setShowSpinner, closable = false,
     }
   }, [showSpinner, timerId, timerHandler])
 
-  useEffect(() => {
-    transRef.start()
-    return () => {
-      transRef.stop()
-    }
-  }, [showSpinner])
-  useEffect(() => {
-    closeTransRef.start()
-    return () => {
-      closeTransRef.stop()
-    }
-  }, [show])
-
   return (
-    <>
-      {transitions(({ opacity }, item) => {
-        return (
-          item && (
-            <animated.div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                alignItems: 'center',
-                position: 'absolute',
-                backgroundColor: 'rgba(0, 0, 0, 0.425)',
-                width: '100%',
-                height: '100%',
-                backdropFilter: 'blur(10px)',
-                zIndex: 999,
-                opacity: opacity.to({ range: [0.0, 1.0], output: [0, 1] }),
-              }}
-            >
-              <BaseSpinner warning={warning} size={`${size}`} />
-              <Flex width={'100%'} height={'1rem'}></Flex>
-              {children && children}
-              {closable &&
-                closeTransitions(
-                  ({ opacity: innerOpacity }, innerItem) =>
-                    innerItem && (
-                      <animated.div style={{ opacity: innerOpacity.to({ range: [0.0, 1.0], output: [0, 1] }) }}>
-                        <CloseIcon
-                          onClick={() => {
-                            setShow(false)
-                            setShowSpinner && setShowSpinner(false)
-                          }}
-                        />
-                      </animated.div>
-                    )
-                )}
-            </animated.div>
-          )
-        )
-      })}
-    </>
+    <Modal
+      open={showSpinner}
+      // onClose={handleClose}
+      closeAfterTransition
+    >
+      <Fade in={showSpinner}>
+        <StyledModalOverlay>
+          <Flex flexDirection={'column'} justifyContent="center" alignItems={'center'} color="white">
+            {/* <BaseSpinner warning={warning} size={`${size}`} /> */}
+            <CircularProgress size="2rem" color="inherit" disableShrink />
+            <Flex width={'100%'} height={'1rem'}></Flex>
+            {children && children}
+            {closable && (
+              <Fade in={showClose} style={{ marginTop: '1rem' }}>
+                <CloseIcon
+                  onClick={() => {
+                    setShowClose(false)
+                    setShowSpinner && setShowSpinner(false)
+                  }}
+                />
+              </Fade>
+            )}
+          </Flex>
+        </StyledModalOverlay>
+        {/*  
+          <BaseSpinner warning={warning} size={`${size}`} />
+          <Flex width={'100%'} height={'1rem'}></Flex>
+          {children && children}
+          {closable &&
+            closeTransitions(
+              ({ opacity: innerOpacity }, innerItem) =>
+                innerItem && (
+                  <animated.div style={{ opacity: innerOpacity.to({ range: [0.0, 1.0], output: [0, 1] }) }}>
+                    <CloseIcon
+                      onClick={() => {
+                        setShow(false)
+                        setShowSpinner && setShowSpinner(false)
+                      }}
+                    />
+                  </animated.div>
+                )
+            )}
+        </> */}
+      </Fade>
+    </Modal>
   )
 }

@@ -10,6 +10,8 @@ import { RootState } from 'store/store'
 import HistorySvg from 'public/history.svg'
 import { TRANSACTION_STATUS } from 'constants/index'
 import { TransitionSpinner } from 'components/Spinner'
+import { Fade } from '@mui/material'
+import { Flex } from 'rebass'
 
 const Wrapper = styled.div`
   position: relative;
@@ -49,30 +51,6 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
     window.setHasPending = setHasPending
   }, []) */
 
-  const transRef = useSpringRef()
-  const transitions = useTransition(hasPending, {
-    // from: { opacity: 1 },
-    // to: { opacity: 0 },
-    ref: transRef,
-    keys: null,
-    config: { ...config.gentle, duration: 400 },
-    from: {
-      opacity: 0 /* backgroundColor: '#00c6a9', color: 'white'  */ /* transform: 'translate3d(0,0,100%)' */,
-    },
-    enter: {
-      opacity: 1 /* , backgroundColor: '#2B1010', color: '#D25958', border: '1px solid #D25958', boxSizing: 'border-box' */,
-    },
-    leave: { opacity: 0 /*  transform: 'translate3d(0,0,-50%)' */ },
-    delay: 200,
-    // config: config.gentle,
-  })
-  useEffect(() => {
-    transRef.start()
-    return () => {
-      transRef.stop()
-    }
-  }, [hasPending])
-
   return (
     <>
       <ButtonDropdown
@@ -88,21 +66,12 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
         }}
       >
         <Wrapper className={'header-btn-img'}>
-          {transitions((styles, item) => {
-            return (
-              <>
-                {item ? (
-                  <animated.div style={{ ...styles }}>
-                    <TransitionSpinner show={item} />
-                  </animated.div>
-                ) : (
-                  <animated.div style={{ ...styles }}>
-                    <Icon size={20} src={HistorySvg} />
-                  </animated.div>
-                )}
-              </>
-            )
-          })}
+          <TransitionSpinner show={hasPending} />
+          <Fade in={!hasPending}>
+            <Flex>
+              <Icon size={20} src={HistorySvg} />
+            </Flex>
+          </Fade>
         </Wrapper>
         <Text1 className={'header-btn-text'}>
           <Textfit max={20} min={2} mode="single">

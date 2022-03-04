@@ -3,7 +3,7 @@ import { Flex, Text } from 'rebass'
 import { useSelector } from 'react-redux'
 
 import { Text1, Text4 } from 'components/Text'
-import UniModal, { UniModalContentWrapper } from 'components/UniModal'
+import Modal from 'components/Modal'
 import styled from 'styled-components'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store'
@@ -51,18 +51,7 @@ export default function TransferConfirmationModal() {
   }, [transferConfirmationModalOpen])
 
   return (
-    <UniModal
-      isOpen={transferConfirmationModalOpen}
-      maxHeight={61.8}
-      minHeight={'fit-content'}
-      minWidth={'fit-content'}
-      onDismiss={() => {
-        console.log('dismiss')
-      }}
-      closeByKeyboard={true}
-      setIsOpen={setTransferConfirmationModalOpen}
-      title="Transfer"
-    >
+    <Modal isOpen={transferConfirmationModalOpen} maxHeight={'61.8vh'} maxWidth={'30rem'} minHeight={'fit-content'} minWidth={'fit-content'} closeByKeyboard={true} setIsOpen={setTransferConfirmationModalOpen} title="Transfer">
       {/*   <Flex flexDirection="column" width="100%" overflow="hidden" height={'fit-content'}>
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
@@ -70,55 +59,55 @@ export default function TransferConfirmationModal() {
           </StyledText>
           <CircledCloseIcon onClick={() => setTransferConfirmationModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex> */}
-      <UniModalContentWrapper minWidth={'fit-content'}>
-        <Flex flex={1} minWidth={'fit-content'} flexDirection={'column'} justifyContent="center">
-          <Flex minWidth={'fit-content'} justifyContent={'space-between'} color={'white'} width="100%">
-            <Flex minWidth={'fit-content'} marginRight="1rem">
-              <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
-                {sourceChain?.icon && <StyledLogo size={'1.5rem'} srcs={[sourceChain.icon!]} />}
-              </Flex>
-              <Flex flexDirection={'column'} minWidth={'fit-content'} alignItems={'start'}>
-                <Text1 style={{ whiteSpace: 'nowrap' }} minWidth={'fit-content'} fontWeight={600}>
-                  {sourceChain?.name}
-                </Text1>
-                <Text4 minWidth={'fit-content'} style={{ whiteSpace: 'nowrap' }} fontSize={'0.5rem'}>
-                  Source Chain
-                </Text4>
-              </Flex>
+      {/* <ModalContentWrapper minWidth={'fit-content'}> */}
+      <Flex flex={1} minWidth={'fit-content'} flexDirection={'column'} justifyContent="center" overflow="hidden">
+        <Flex minWidth={'fit-content'} justifyContent={'space-between'} color={'white'} width="100%">
+          <Flex minWidth={'fit-content'} marginRight="1rem">
+            <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
+              {sourceChain?.icon && <StyledLogo size={'1.5rem'} srcs={[sourceChain.icon!]} />}
             </Flex>
-            <Flex flexDirection={'column'} minWidth={'fit-content'}>
-              <Text1 fontWeight={600} color="#D25958" minWidth={'fit-content'}>
-                -{amount}
+            <Flex flexDirection={'column'} minWidth={'fit-content'} alignItems={'start'}>
+              <Text1 style={{ whiteSpace: 'nowrap' }} minWidth={'fit-content'} fontWeight={600}>
+                {sourceChain?.name}
               </Text1>
-              <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
+              <Text4 minWidth={'fit-content'} style={{ whiteSpace: 'nowrap' }} fontSize={'0.5rem'}>
+                Source Chain
+              </Text4>
             </Flex>
           </Flex>
-          <Flex minWidth={'fit-content'} justifyContent={'space-between'} color={'white'} width="100%">
-            <Flex minWidth={'fit-content'} marginRight="1rem">
-              <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
-                {destChain?.icon && <StyledLogo size={'1.5rem'} srcs={[destChain.icon!]} />}
-              </Flex>
-              <Flex flexDirection={'column'} minWidth={'fit-content'} alignItems={'start'}>
-                <Text1 style={{ whiteSpace: 'nowrap' }} minWidth={'fit-content'} fontWeight={600}>
-                  {destChain?.name}
-                </Text1>
-                <Text4 minWidth={'fit-content'} style={{ whiteSpace: 'nowrap' }} fontSize={'0.5rem'}>
-                  Source Chain
-                </Text4>
-              </Flex>
-            </Flex>
-            <Flex flexDirection={'column'} minWidth={'fit-content'}>
-              <Text1 fontWeight={600} color="#83F2C4">
-                +{amount}
-              </Text1>
-              <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
-            </Flex>
+          <Flex flexDirection={'column'} minWidth={'fit-content'}>
+            <Text1 fontWeight={600} color="#D25958" minWidth={'fit-content'}>
+              -{amount}
+            </Text1>
+            <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
           </Flex>
-          <EstimationBlock width="100%" margin={'1rem 0'} />
-          <TransferConfirmationButton />
         </Flex>
-      </UniModalContentWrapper>
+        <Flex minWidth={'fit-content'} justifyContent={'space-between'} color={'white'} width="100%">
+          <Flex minWidth={'fit-content'} marginRight="1rem">
+            <Flex justifyContent={'center'} alignItems={'center'} padding="0.5rem">
+              {destChain?.icon && <StyledLogo size={'1.5rem'} srcs={[destChain.icon!]} />}
+            </Flex>
+            <Flex flexDirection={'column'} minWidth={'fit-content'} alignItems={'start'}>
+              <Text1 style={{ whiteSpace: 'nowrap' }} minWidth={'fit-content'} fontWeight={600}>
+                {destChain?.name}
+              </Text1>
+              <Text4 minWidth={'fit-content'} style={{ whiteSpace: 'nowrap' }} fontSize={'0.5rem'}>
+                Source Chain
+              </Text4>
+            </Flex>
+          </Flex>
+          <Flex flexDirection={'column'} minWidth={'fit-content'}>
+            <Text1 fontWeight={600} color="#83F2C4">
+              +{amount}
+            </Text1>
+            <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
+          </Flex>
+        </Flex>
+        <EstimationBlock width="100%" margin={'1rem 0'} />
+        <TransferConfirmationButton />
+      </Flex>
+      {/* </ModalContentWrapper> */}
       {/*   </Flex> */}
-    </UniModal>
+    </Modal>
   )
 }

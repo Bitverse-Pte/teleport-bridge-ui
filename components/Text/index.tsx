@@ -73,6 +73,7 @@ export const DarkGreenText = styled(Text)`
   color: #83f2c4;
   overflow: hidden;
   max-width: 5rem;
+  min-width: fit-content !important;
   // text-overflow: ellipsis;
 `
 

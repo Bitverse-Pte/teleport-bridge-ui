@@ -3,7 +3,7 @@ import { Flex, Text } from 'rebass'
 import { useSelector } from 'react-redux'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
-import UniModal, { UniModalContentWrapper } from 'components/UniModal'
+import Modal from 'components/Modal'
 import styled from 'styled-components'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store'
@@ -24,7 +24,7 @@ export default function CurrencySelectModal() {
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])
 
   return (
-    <UniModal
+    <Modal
       isOpen={currencySelectModalOpen}
       maxHeight={61.8}
       onDismiss={() => {
@@ -42,16 +42,14 @@ export default function CurrencySelectModal() {
           </StyledText>
           <CircledCloseIcon onClick={() => setCurrencySelectModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex> */}
-      <UniModalContentWrapper style={{ flex: 1 }}>
-        <Flex flex={1}>
-          <AutoSizer style={{ width: '100%', height: '100%' }}>
-            {({ height }) => {
-              return <CurrencyList height={height} tokenPairs={selectedTokenPairs} />
-            }}
-          </AutoSizer>
-        </Flex>
-      </UniModalContentWrapper>
+      {/* <ModalContentWrapper style={{ flex: 1 }}> */}
+      <AutoSizer style={{ width: '100%', height: '100%' }}>
+        {({ height }) => {
+          return <CurrencyList height={height} tokenPairs={selectedTokenPairs} />
+        }}
+      </AutoSizer>
+      {/* </ModalContentWrapper> */}
       {/* </Flex> */}
-    </UniModal>
+    </Modal>
   )
 }

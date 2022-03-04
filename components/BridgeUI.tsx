@@ -21,6 +21,12 @@ import { BodyWrapper } from 'components/BodyWrapper'
 import { errorNoti } from 'helpers/notifaction'
 import { INIT_STATUS } from 'constants/types'
 import Image from 'components/Image'
+import CurrencySelectModal from './CustomizedModal/CurrencySelectModal'
+import HistoryModal from './CustomizedModal/HistoryModal'
+import NetworkSelectModal from './CustomizedModal/NetworkSelectorModal'
+import TransactionDetailModal from './CustomizedModal/TransactionDetailModal'
+import TransferConfirmationModal from './CustomizedModal/TransferConfirmationModal'
+import WalletSelectModal from './CustomizedModal/WalletSelectModal'
 // import { demo } from 'helpers/demo'
 
 const SLayout = styled(Flex)`
@@ -131,6 +137,12 @@ export default function BridgeUI() {
             }}
           >
             <Body />
+            <NetworkSelectModal />
+            <CurrencySelectModal />
+            <TransferConfirmationModal />
+            <TransactionDetailModal />
+            <WalletSelectModal />
+            <HistoryModal />
           </ErrorBoundary>
         )
       case INIT_STATUS.error:

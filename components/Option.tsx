@@ -11,6 +11,7 @@ const InfoCard = styled.button<{ active?: boolean }>`
   border: 1px solid;
   border-radius: 12px;
   width: 100% !important;
+  max-height: 3rem;
   // &:focus {
   //   box-shadow: 0 0 0 1px ${({ theme }) => theme.primary1};
   // }

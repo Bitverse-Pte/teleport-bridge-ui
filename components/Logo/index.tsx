@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Slash } from 'react-feather'
 import CssValueParser from 'parse-unit'
-import { Flex, ImageProps } from 'rebass'
+import { Flex, FlexProps, ImageProps } from 'rebass'
 import styled, { css } from 'styled-components'
 import { remToPx } from 'polished'
 

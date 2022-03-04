@@ -16,8 +16,7 @@ export const CircledCloseIcon = styled(XCircle)`
 `
 
 export const CloseIcon = styled(X)`
-  position: absolute;
-  transform: translate(-10px, 10px);
+  position: relative;
   color: ${({ theme }) => theme.primary1};
   path {
     stroke: ${({ theme }) => theme.primary1};

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { NextApiResponse } from 'next'
 import { useDispatch } from 'react-redux'
-import '@reach/dialog/styles.css'
 // import 'inter-ui'
 import { isAddress } from 'web3-utils'
 

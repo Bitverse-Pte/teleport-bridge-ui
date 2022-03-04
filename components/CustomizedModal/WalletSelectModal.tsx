@@ -6,7 +6,7 @@ import { AbstractConnector } from '@web3-react/abstract-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 
 import MetamaskIcon from 'public/images/metamask.png'
-import UniModal, { UniModalContentWrapper } from 'components/UniModal'
+import Modal from 'components/Modal'
 import Option, { OPTION_TYPE } from 'components/Option'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { injected /* ,portis */ } from 'connectors'
@@ -94,35 +94,35 @@ export default function WalletSelectModal() {
     return Object.keys(SUPPORTED_WALLETS).map((key) => {
       const option = SUPPORTED_WALLETS[key]
       // check for mobile options
-      if (isMobile) {
-        //disable portis on mobile for now
-        // if (option.connector === portis) {
-        //   return null
-        // }
+      // if (isMobile) {
+      //   //disable portis on mobile for now
+      //   // if (option.connector === portis) {
+      //   //   return null
+      //   // }
 
-        if (!window.web3 && !window.ethereum && option.mobile) {
-          return (
-            <Option
-              onClick={() => {
-                tryActivation(option.connector) /* && tryActivation(option.connector)*/
-                /*  ? setWalletView(WALLET_VIEWS.ACCOUNT) : !option.href */
-                // option.connector !== connector && !option.href && tryActivation(option.connector)
-                /* option.connector !== connector */
-              }}
-              id={`connect-${key}`}
-              key={key}
-              active={connectStatus && active && option.connector && option.connector === connector}
-              color={option.color}
-              link={option.href}
-              header={option.name}
-              subheader={null}
-              icon={option.iconURL}
-              type={OPTION_TYPE.WALLET}
-            />
-          )
-        }
-        return null
-      }
+      //   if (!window.web3 && !window.ethereum && option.mobile) {
+      //     return (
+      //       <Option
+      //         onClick={() => {
+      //           tryActivation(option.connector) /* && tryActivation(option.connector)*/
+      //           /*  ? setWalletView(WALLET_VIEWS.ACCOUNT) : !option.href */
+      //           // option.connector !== connector && !option.href && tryActivation(option.connector)
+      //           /* option.connector !== connector */
+      //         }}
+      //         id={`connect-${key}`}
+      //         key={key}
+      //         active={connectStatus && active && option.connector && option.connector === connector}
+      //         color={option.color}
+      //         link={option.href}
+      //         header={option.name}
+      //         subheader={null}
+      //         icon={option.iconURL}
+      //         type={OPTION_TYPE.WALLET}
+      //       />
+      //     )
+      //   }
+      //   return null
+      // }
 
       // overwrite injected when needed
       if (option.connector === injected) {
@@ -146,7 +146,7 @@ export default function WalletSelectModal() {
 
       // return rest of options
       return (
-        !isMobile &&
+        // !isMobile &&
         !option.mobileOnly && (
           <Option
             id={`connect-${key}`}
@@ -167,16 +167,7 @@ export default function WalletSelectModal() {
     })
   }, [connector, connectStatus, tryActivation])
   return (
-    <UniModal
-      isOpen={walletModalOpen}
-      maxHeight={61.8}
-      onDismiss={() => {
-        console.log('dismiss')
-      }}
-      closeByKeyboard={true}
-      setIsOpen={setWalletModalOpen}
-      title="Select A Wallet"
-    >
+    <Modal isOpen={walletModalOpen} maxHeight={'61.8vh'} maxWidth={'40rem'} closeByKeyboard={true} setIsOpen={setWalletModalOpen} title="Select A Wallet">
       {/* <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
@@ -184,10 +175,10 @@ export default function WalletSelectModal() {
           </StyledText>
           <CircledCloseIcon onClick={() => setWalletModalOpen(false)} style={{ position: 'absolute' }} />
         </Flex> */}
-      <UniModalContentWrapper>
-        <OptionGrid>{getOptions()}</OptionGrid>
-      </UniModalContentWrapper>
+      {/* <ModalContentWrapper> */}
+      <OptionGrid>{getOptions()}</OptionGrid>
+      {/* </ModalContentWrapper> */}
       {/*  </Flex> */}
-    </UniModal>
+    </Modal>
   )
 }

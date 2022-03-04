@@ -2,7 +2,7 @@ import React, { CSSProperties, useCallback, useEffect, useMemo, useState } from 
 import { useSelector } from 'react-redux'
 import { RootState } from 'store/store'
 import { useTransition, config, animated, useSprings, useSpringRef, AnimatedProps } from '@react-spring/web'
-import { BaseSpinner, TransitionSpinner } from 'components/Spinner'
+import { TransitionSpinner } from 'components/Spinner'
 import { PrimaryButton } from '.'
 import { CURRENCY_INPUT_ERROR, NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
 import { useActiveWeb3React, useDispatch } from 'hooks'
@@ -112,9 +112,11 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
       case TRANSFER_STATUS.NO_INPUT:
         return 'Please input your amount.'
       case TRANSFER_STATUS.PENDING_ALLOWANCE:
+        return 'Judging Allowance'
       case TRANSFER_STATUS.READY_TO_TRANSFER:
         return 'Transfer'
       case TRANSFER_STATUS.PENDING_APPROVE:
+        return 'Approving'
       case TRANSFER_STATUS.READY_TO_APPROVE:
         return 'Approve'
       default:
@@ -131,7 +133,7 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
 
   return (
     <PrimaryButton disabled={btnDisabled} width="100%" fontWeight={900} onClick={clickHandler}>
-      <TransitionSpinner style={{ position: 'absolute', left: 'calc(50% - 4rem)' }} show={pending} />
+      <TransitionSpinner color={'#83F2C4'} type="linear" style={{ position: 'absolute', bottom: 0, width: 'calc(100% - 0.5rem)', display: 'flex', justifyContent: 'center' }} show={pending} />
       <Flex
         css={css`
           width: 100%;

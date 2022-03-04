@@ -1,20 +1,19 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Flex, Box } from 'rebass'
 import { useSelector } from 'react-redux'
 import BigNumberJS from 'bignumber.js'
 import { Check } from 'react-feather'
 import { css } from 'styled-components'
 
-import { CircledCloseIcon } from 'components/Icon'
 import { StyledText, Text1, Text2, Text4 } from 'components/Text'
-import UniModal, { UniModalContentWrapper } from 'components/UniModal'
+import Modal from 'components/Modal'
 import styled, { StyledComponent } from 'styled-components'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
 import { Hash } from 'components/Hash'
 import { TooltippedAmount } from 'components/TooltippedAmount'
 import { StyledLogo } from 'components/Logo'
-import { TokenPair } from 'constants/index'
+import { TokenPair, TransactionDetail } from 'constants/index'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -83,11 +82,16 @@ export default function TransactionDetailModal() {
     return { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs, availableChains }
   })
 
-  const selectedTx = useMemo(() => {
-    return transactions.find((t) => {
-      return t.send_tx_hash === selectedTransactionId || t.receive_tx_hash === selectedTransactionId
-    })
-  }, [selectedTransactionId, transactions])
+  const [selectedTx, setSelectedTx] = useState<TransactionDetail>()
+
+  useEffect(() => {
+    selectedTransactionId &&
+      setSelectedTx(
+        transactions.find((t) => {
+          return t.send_tx_hash === selectedTransactionId || t.receive_tx_hash === selectedTransactionId
+        })
+      )
+  }, [transactions, selectedTransactionId])
 
   /*   const tokenInfo = useMemo(() => {
     if (selectedTx) {
@@ -124,17 +128,7 @@ export default function TransactionDetailModal() {
   }, [selectedTx, bridgePairs])
 
   return (
-    <UniModal
-      isOpen={transactionDetailModalOpen}
-      maxHeight={'500px'}
-      maxWidth={'35rem'}
-      onDismiss={() => {
-        console.log('dismiss')
-      }}
-      closeByKeyboard={true}
-      setIsOpen={closeTransactionDetailModal}
-      title="Transaction Details"
-    >
+    <Modal isOpen={transactionDetailModalOpen} maxHeight={'500px'} maxWidth={'35rem'} closeByKeyboard={true} setIsOpen={closeTransactionDetailModal} title="Transaction Details">
       {/* <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
@@ -142,81 +136,81 @@ export default function TransactionDetailModal() {
           </StyledText>
           <CircledCloseIcon onClick={closeTransactionDetailModal} style={{ position: 'absolute' }} />
         </Flex> */}
-      <UniModalContentWrapper justifyContent="space-evenly" flexDirection="column">
-        {selectedTx && tokenInfo.srcToken && (
-          <>
-            <Wrapper>
-              <StyledStatusMark success={!!selectedTx.send_tx_hash}>
-                <StyledCheck size={12} strokeWidth={6} />
-              </StyledStatusMark>
-              <Flex>
-                <Text2>You Send</Text2>
+      {/* <ModalContentWrapper justifyContent="space-evenly" flexDirection="column"> */}
+      {selectedTx && tokenInfo.srcToken && (
+        <Flex justifyContent={'space-between'} flexDirection="column" width="100%">
+          <Wrapper>
+            <StyledStatusMark success={!!selectedTx.send_tx_hash}>
+              <StyledCheck size={12} strokeWidth={6} />
+            </StyledStatusMark>
+            <Flex>
+              <Text2>You Send</Text2>
+            </Flex>
+            <Flex justifyContent={'space-between'} alignItems={'center'}>
+              <Flex justifyContent={'flex-start'} alignItems={'center'} width="50%">
+                <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.src_chain_id)!.icon!]} />
+                &nbsp;
+                <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
+                  {selectedTx?.src_chain}
+                </Text1>
               </Flex>
-              <Flex justifyContent={'space-between'} alignItems={'center'}>
-                <Flex justifyContent={'flex-start'} alignItems={'center'} width="50%">
-                  <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.src_chain_id)!.icon!]} />
-                  &nbsp;
-                  <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
-                    {selectedTx?.src_chain}
-                  </Text1>
-                </Flex>
-                {/* 
+              {/* 
                     {new BigNumberJS(balance.toString()).shiftedBy(-currency.decimals).toFixed(4)}
                   */}
-                <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
-                  <TooltippedAmount direction={'-'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.srcToken.decimals).toFixed(4)}`} AmountText={RedAmountText} />
-                  &nbsp;
-                  <Text1 color="#D25958">&nbsp;{tokenInfo!.srcToken.symbol.toUpperCase()}</Text1>
-                </Flex>
+              <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
+                <TooltippedAmount direction={'-'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.srcToken.decimals).toFixed(4)}`} AmountText={RedAmountText} />
+                &nbsp;
+                <Text1 color="#D25958">&nbsp;{tokenInfo!.srcToken.symbol.toUpperCase()}</Text1>
               </Flex>
-              <Flex justifyContent={'space-between'}>
-                <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
-                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.send_tx_hash} copyable={true} />
-              </Flex>
-              <Flex justifyContent={'space-between'}>
-                <Text2 style={{ whiteSpace: 'nowrap' }}>Sender Address</Text2>
-                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.sender} copyable={true} />
-              </Flex>
-            </Wrapper>
-            <Wrapper>
-              <StyledStatusMark success={!!selectedTx.receive_tx_hash}>
-                <StyledCheck size={12} strokeWidth={6} />
-              </StyledStatusMark>
-              <Flex>
-                <Text2>To</Text2>
-              </Flex>
-              <Flex justifyContent={'space-between'} alignItems={'center'}>
-                <Flex justifyContent={'flex-start'} alignItems={'center'} width="50%">
-                  {tokenInfo!.destToken && (
-                    <>
-                      <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.dest_chain_id)!.icon!]} />
-                      &nbsp;
-                      <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
-                        {selectedTx?.dest_chain}
-                      </Text1>
-                    </>
-                  )}
-                </Flex>
+            </Flex>
+            <Flex justifyContent={'space-between'}>
+              <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
+              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.send_tx_hash} copyable={true} />
+            </Flex>
+            <Flex justifyContent={'space-between'}>
+              <Text2 style={{ whiteSpace: 'nowrap' }}>Sender Address</Text2>
+              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.sender} copyable={true} />
+            </Flex>
+          </Wrapper>
+          <Wrapper>
+            <StyledStatusMark success={!!selectedTx.receive_tx_hash}>
+              <StyledCheck size={12} strokeWidth={6} />
+            </StyledStatusMark>
+            <Flex>
+              <Text2>To</Text2>
+            </Flex>
+            <Flex justifyContent={'space-between'} alignItems={'center'}>
+              <Flex justifyContent={'flex-start'} alignItems={'center'} width="50%">
                 {tokenInfo!.destToken && (
-                  <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
-                    <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
-                    <Text1 color="#83F2C4">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
-                  </Flex>
+                  <>
+                    <StyledLogo size={'1rem'} srcs={[availableChains.get(+selectedTx.dest_chain_id)!.icon!]} />
+                    &nbsp;
+                    <Text1 style={{ whiteSpace: 'nowrap' }} fontSize={16} fontWeight={600}>
+                      {selectedTx?.dest_chain}
+                    </Text1>
+                  </>
                 )}
               </Flex>
-              <Flex justifyContent={'space-between'}>
-                <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
-                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receive_tx_hash} copyable={true} />
-              </Flex>
-              <Flex justifyContent={'space-between'}>
-                <Text2 style={{ whiteSpace: 'nowrap' }}>Receiver Address</Text2>
-                <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receiver} copyable={true} />
-              </Flex>
-            </Wrapper>
-          </>
-        )}
-      </UniModalContentWrapper>
+              {tokenInfo!.destToken && (
+                <Flex justifyContent={'flex-end'} alignItems={'center'} width="50%">
+                  <TooltippedAmount direction={'+'} amount={`${new BigNumberJS(selectedTx.amount).shiftedBy(-tokenInfo!.destToken.decimals).toFixed(4)}`} AmountText={GreenAmountText} />
+                  <Text1 color="#83F2C4">&nbsp;{tokenInfo!.destToken.symbol.toUpperCase()}</Text1>
+                </Flex>
+              )}
+            </Flex>
+            <Flex justifyContent={'space-between'}>
+              <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
+              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receive_tx_hash} copyable={true} />
+            </Flex>
+            <Flex justifyContent={'space-between'}>
+              <Text2 style={{ whiteSpace: 'nowrap' }}>Receiver Address</Text2>
+              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receiver} copyable={true} />
+            </Flex>
+          </Wrapper>
+        </Flex>
+      )}
+      {/* </ModalContentWrapper> */}
       {/* </Flex> */}
-    </UniModal>
+    </Modal>
   )
 }

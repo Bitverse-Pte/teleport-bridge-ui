@@ -325,14 +325,15 @@ export default function AppBody({ ...rest }) {
                   <Text1 fontWeight={600}>From</Text1>
                 </Flex>
                 <Flex justifyContent="space-between" padding={'0.5rem'}>
-                  <BalanceWrapper clickable={!!(walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
-                    <DarkGreenText>{'Max ≈'}&nbsp;</DarkGreenText>
+                  <BalanceWrapper alignItems={'center'} clickable={!!(walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance)} onClick={transferBalanceToFromValue}>
+                    <DarkGreenText height={'fit-content'}>{'Max ≈'}&nbsp;</DarkGreenText>
                     {walletReady && selectedTokenName && selectedTokenPair && currentTokenBalance ? (
                       <Balance balance={currentTokenBalance!} currency={selectedTokenPair!.srcToken} />
-                    ) : walletReady && connectStatus && account ? (
-                      <Loader size={17} color="primary1" />
                     ) : (
-                      <DarkGreenText>N/A</DarkGreenText>
+                      <>
+                        <Loader style={{ height: 'fit-content' }} show={!!(walletReady && connectStatus && account)} size={12} color="primary1" />
+                        {!(walletReady && connectStatus && account) && <DarkGreenText>N/A</DarkGreenText>}
+                      </>
                     )}
                   </BalanceWrapper>
                 </Flex>
@@ -456,10 +457,6 @@ export default function AppBody({ ...rest }) {
         </BodyWrapper>
         <EstimationBlock style={{ width: '44vw', maxWidth: '512px', borderRadius: '0 0 0.5rem 0.5rem', borderWidth: '0px 1px 1px 1px' }} />
       </Flex>
-      {networkModalMode && <NetworkSelectModal />}
-      {currencySelectModalOpen && <CurrencySelectModal />}
-      {transferConfirmationModalOpen && <TransferConfirmationModal />}
-      {transactionDetailModalOpen && <TransactionDetailModal />}
     </>
   )
 }

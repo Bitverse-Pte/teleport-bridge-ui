@@ -72,7 +72,7 @@ function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number;
           {token.name}
         </ThemedText.DarkGray>
       </Column>
-      {<RowFixed style={{ justifySelf: 'flex-end' }}>{balance ? <Balance matchCurrentToken={true} balance={balance} currency={token} /> : account ? <Loader size={16} color={'primary1'} /> : null}</RowFixed>}
+      {<RowFixed style={{ justifySelf: 'flex-end' }}>{balance ? <Balance matchCurrentToken={true} balance={balance} currency={token} /> : <Loader show={!!account} size={16} color={'primary1'} />}</RowFixed>}
     </MenuItem>
   )
 }

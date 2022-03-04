@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 import { Flex, Box, Button as RebassButton, ButtonProps as ButtonPropsOriginal, Text } from 'rebass/styled-components'
 import { darken } from 'polished'
 
-import Loader from '../Loader'
+// import Loader from '../Loader'
 import { colors, fonts, shadows, transitions } from 'theme/styles'
 
 export type BaseButtonProps = {
@@ -243,7 +243,7 @@ const SButton = styled.button<IButtonStyleProps>`
   }
 `
 
-export const SButtonPrimary = (props: IButtonProps) => (
+/* export const SButtonPrimary = (props: IButtonProps) => (
   <SButton {...props} type={props.type} outline={props.outline} color={props.color} disabled={props.disabled} icon={props.icon} left={props.left}>
     <SHoverLayer />
     <SIcon />
@@ -259,7 +259,7 @@ SButtonPrimary.defaultProps = {
   disabled: false,
   icon: null,
   left: false,
-}
+} */
 
 export const ButtonGray = styled(BaseButton)`
   background-color: ${({ theme }) => theme.bg1};

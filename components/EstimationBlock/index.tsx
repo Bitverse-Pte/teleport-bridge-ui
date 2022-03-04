@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { Flex, FlexProps, Text } from 'rebass'
-import { RootState } from 'store'
 import styled, { css } from 'styled-components'
+import Tooltip from '@mui/material/Tooltip'
+
+import { RootState } from 'store'
 import { Text2, Text3 } from 'components/Text'
 import { HelpIcon } from 'components/Icon/HelpIcon'
-import { MouseoverTooltip, MouseoverTooltipContent } from 'components/Tooltip'
 import { TransitionSpinnerMask } from 'components/Spinner'
 
 const EstimationRow = styled(Flex)`
@@ -80,9 +81,9 @@ export function EstimationBlock({ ...rest }: FlexProps) {
       <EstimationRow>
         <Text2>
           Fee&nbsp;
-          <MouseoverTooltip text={<Text>Transfer is free on Testnet</Text>}>
+          <Tooltip title={<Text>Transfer is free on Testnet</Text>}>
             <HelpIcon size={12} />
-          </MouseoverTooltip>
+          </Tooltip>
         </Text2>
         <Text3>
           {amount && selectedToken ? (
@@ -97,9 +98,9 @@ export function EstimationBlock({ ...rest }: FlexProps) {
       <EstimationRow>
         <Text2>
           Min Received&nbsp;
-          <MouseoverTooltip text={<Text>Transfer is free on Testnet</Text>}>
+          <Tooltip title={<Text>Transfer is free on Testnet</Text>}>
             <HelpIcon size={12} />
-          </MouseoverTooltip>
+          </Tooltip>
         </Text2>
         <Text3>
           {amount && selectedToken ? (

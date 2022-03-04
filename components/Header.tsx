@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 // import { Text1 } from 'react-Text1'
 import styled, { css } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
-import { pick } from 'lodash'
+import Grow from '@mui/material/Grow'
 
 import { useDispatch } from 'hooks'
 import { useActiveWeb3React } from 'hooks/web3'
@@ -17,7 +17,6 @@ import { ButtonPrimary, ButtonSecondary, ButtonDropdown } from 'components/Butto
 import HistorySvg from 'public/history.svg'
 import WalletSelectModal from 'components/CustomizedModal/WalletSelectModal'
 import HistoryModal from 'components/CustomizedModal/HistoryModal'
-import { MouseoverTooltip } from 'components/Tooltip'
 import { HistoryButton } from './Button/HistoryButton'
 import { Hash } from './Hash'
 import { MEDIA_WIDTHS } from 'theme'
@@ -211,8 +210,10 @@ export default function Header() {
             >
               {connectedChain && (
                 <>
-                  <StyledLogo className={'header-btn-img'} srcs={[connectedChain?.icon]} size={'1.25rem'} style={{ minWidth: '32px' }}></StyledLogo>
-                  <Text1 className={'header-btn-text'} /* max={20} min={2} mode="single" */>{connectedChain?.name}</Text1>
+                  <StyledLogo className={'header-btn-img'} srcs={[connectedChain?.icon]} size={'1.25rem'} />
+                  <Text1 style={{ marginLeft: '6px' }} className={'header-btn-text'} /* max={20} min={2} mode="single" */>
+                    {connectedChain?.name}
+                  </Text1>
                 </>
               )}
               {!connectedChain && <Text1 /* max={20} min={2} mode="single" */ style={{ fontWeight: 800, width: '100%' }}>Wrong Network</Text1>}
@@ -228,14 +229,12 @@ export default function Header() {
             >
               <Flex alignItems="center">
                 <SBlockie className={'header-btn-img'} address={address} size={20} style={{ minWidth: '32px' }} />
-                {/* <MouseoverTooltip text={address}> */}
                 {/* <Hash ellipsis={true} hash={address} copyable={false} showCounts={4} /> */}
                 <Text1 className={'header-btn-text'} /* max={20} min={2} mode="single"  */ style={{ fontWeight: 600 }}>
                   {`${address.substring(0, 4)}...${address.substring(address.length - 4, address.length)}`}
                 </Text1>
-                {/* </MouseoverTooltip> */}
               </Flex>
-              {flyoutMenuShow && (
+              <Grow in={flyoutMenuShow}>
                 <FlyoutMenu
                   onMouseLeave={() => {
                     setFlyoutMenuShow(false)
@@ -258,7 +257,7 @@ export default function Header() {
                     <Text1 /*  max={20} min={2} mode="single" */ style={{ fontWeight: 800, width: '100%' }}>Logout</Text1>
                   </ActiveRowWrapper>
                 </FlyoutMenu>
-              )}
+              </Grow>
             </Web3StatusConnected>
           </>
         )}
@@ -268,8 +267,6 @@ export default function Header() {
           </PrimaryButton>
         )}
       </HeaderFunctionalArea>
-      {walletModalOpen && <WalletSelectModal />}
-      {historyModalOpen && <HistoryModal />}
     </SHeader>
   )
 }

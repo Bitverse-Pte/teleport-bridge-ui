@@ -5,9 +5,9 @@ export default function OriginalSrcImage(props: Omit<ImageProps, 'loader'>) {
     <Image
       {...props}
       alt={props.alt ?? ''}
-      loader={({ src }) => {
+      /* loader={({ src }) => {
         return src
-      }}
+      }} */
     />
   )
 }
