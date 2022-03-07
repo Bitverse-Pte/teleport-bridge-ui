@@ -53,7 +53,6 @@ export type IAppState = {
   destinationChains: Map<number, Chain>
   waitWallet: boolean
   initStatus: INIT_STATUS
-  inFetching: boolean
   availableChains: Map<number, ExtChain>
   srcChainId: number
   destChainId: number
@@ -77,7 +76,6 @@ export const initialState: IAppState = {
   networkModalMode: false, //NetworkSelectModalMode.CLOSE,
   walletModalOpen: false,
   initStatus: INIT_STATUS.starting,
-  inFetching: false,
   historyModalOpen: false,
   transferConfirmationModalOpen: false,
   currencySelectModalOpen: false,
@@ -89,7 +87,6 @@ export const initialState: IAppState = {
   bridgePairs: new Map(),
   library: undefined,
   account: undefined,
-  // wrongChain: false,
   selectedTokenName: '',
   transferStatus: Store2.get('connect-status') ? TRANSFER_STATUS.NO_INPUT : TRANSFER_STATUS.UNCONNECTED,
   currentTokenBalance: undefined,
@@ -280,12 +277,6 @@ export const application = createModel<RootModel>()({
       return {
         ...state,
         initStatus,
-      }
-    },
-    setInFetching(state, inFetching: boolean) {
-      return {
-        ...state,
-        inFetching,
       }
     },
   },

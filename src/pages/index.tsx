@@ -9,7 +9,6 @@ import BridgeUI from 'components/BridgeUI'
 import ThemeProvider from 'theme'
 // import { globalStyle } from './styles'
 // import { store } from 'store/store'
-import Web3Manager from 'components/Web3Manager'
 import { ZERO_ADDRESS } from 'constants/misc'
 import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS, TransactionDetail } from 'constants/index'
 import { FixedSizeQueue } from 'helpers/fixedQueue'
@@ -127,12 +126,10 @@ export default function Home({
     <>
       {/* <GlobalStyle /> */}
       {/* <Provider store={store}> */}
-      <Web3Manager>
-        <ThemeProvider>
-          {/* <StatefulBridgeUI />*/}
-          <BridgeUI />
-        </ThemeProvider>
-      </Web3Manager>
+      <ThemeProvider>
+        {/* <StatefulBridgeUI />*/}
+        <BridgeUI />
+      </ThemeProvider>
       {/* </Provider> */}
     </>
   )
@@ -247,6 +244,7 @@ async function fetchChainsDataOnServer() {
 export async function getServerSideProps({ res }: { res: NextApiResponse }) {
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=59')
   if (dataCache && dataCache.props) {
+    console.log(`use cache stored`)
     return { props: dataCache.props }
   } else {
     fetchRequest = fetchChainsDataOnServer()

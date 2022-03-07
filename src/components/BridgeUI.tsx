@@ -88,14 +88,15 @@ export default function BridgeUI() {
   const { account } = useActiveWeb3React()
   const theme = useTheme()
   const {
-    application: { initChains, initTransactions, setWaitWallet, resetApp, stopTransactionHistoryUpdating, setInitStatus, setInFetching },
+    application: { initChains, initTransactions, setWaitWallet, resetApp, stopTransactionHistoryUpdating, setInitStatus },
   } = useDispatch()
   /*  const [initStatus, setInitStatus] = useState(INIT_STATUS.initialized)
-  const [inFetching, setInFetching] = useState(true) */
+   */
+  const [inFetching, setInFetching] = useState(false)
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
   const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
   const initStatus = useSelector((state: RootState) => state.application.initStatus)
-  const inFetching = useSelector((state: RootState) => state.application.inFetching)
+  // const inFetching = useSelector((state: RootState) => state.application.inFetching)
 
   const initEssentialData = useCallback(() => {
     if (inFetching) {

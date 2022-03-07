@@ -8,7 +8,6 @@ import { RootState } from 'store'
 import { NetworkSelectModalMode } from 'constants/types'
 // import { network } from 'connectors'
 
-
 /* const MessageWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -20,7 +19,7 @@ const Message = styled.h2`
   color: ${({ theme }) => theme.secondary1};
 ` */
 
-export default function Web3Manager({ children }: { children: JSX.Element }) {
+export default function EvmManager(/* { children }: { children: JSX.Element } */) {
   const {
     application: { /* setDestinationChain, */ setLibrary, setAccount, changeNetwork, setNetworkModalMode, setSrcChainId },
   } = useDispatch()
@@ -29,7 +28,7 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
     const { connectStatus, availableChains, srcChainId, networkModalMode } = state.application
     return { connectStatus, availableChains, srcChainId, networkModalMode }
   })
-  const { active, chainId, account, library, active: networkActive, error: networkError, activate: activateNetwork, chainId: networkChainId } = useActiveWeb3React()
+  const { active, chainId, account, library, error, activate } = useActiveWeb3React()
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect()
 
@@ -74,7 +73,7 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
   }, [active, chainId, availableChains, connectStatus, account, library])
 
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
-/*   useEffect(() => {
+  /*   useEffect(() => {
     if (triedEager && !networkActive && !networkError && !active) {
       activateNetwork(network)
     }
@@ -104,5 +103,5 @@ export default function Web3Manager({ children }: { children: JSX.Element }) {
     )
   }
  */
-  return children
+  return null
 }

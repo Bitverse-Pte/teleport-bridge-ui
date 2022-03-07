@@ -10,6 +10,7 @@ import { Web3ReactProvider } from '@web3-react/core'
 import withRematch from 'store/withRematch'
 // import { store } from 'store/store'
 
+import { EvmManager } from 'components/Web3Manager'
 import 'theme/rootStyle.css'
 import { Store } from 'store/store'
 
@@ -35,12 +36,13 @@ function MyApp({ Component, pageProps, reduxStore }: Props): ReactElement {
         <link rel="manifest" href="/manifest.json" />
         <title>Teleport Bridge</title>
       </Head>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <Web3ReactProviderDefault getLibrary={getLibrary}>
+          <EvmManager />
+        </Web3ReactProviderDefault>
+      </Web3ReactProvider>
       <Provider store={reduxStore}>
-        <Web3ReactProvider getLibrary={getLibrary}>
-          <Web3ReactProviderDefault getLibrary={getLibrary}>
-            <Component {...pageProps} />
-          </Web3ReactProviderDefault>
-        </Web3ReactProvider>
+        <Component {...pageProps} />
       </Provider>
     </>
   )
