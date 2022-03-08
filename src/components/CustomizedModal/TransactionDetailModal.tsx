@@ -204,18 +204,14 @@ export default function TransactionDetailModal() {
 
   const [passedTime, setPassedTime] = useState<string>()
 
-  const [startTime] = useState(selectedTx ? selectedTx!.createTime! : 0)
+  const startTime = useMemo(() => (selectedTx ? selectedTx!.createTime! : 0), [selectedTx])
   const { seconds, minutes, hours, days, isRunning, start, pause, resume, restart } = useTimer({ expiryTimestamp: new Date(/* (selectedTx ? selectedTx!.createTime! : 0) */ startTime + 1000 * 60 * 5), onExpire: () => console.warn('onExpire called') })
-  // start()
-  /*   useEffect(() => {
-    start()
-  }, []) */
 
   useEffect(() => {
     if (selectedTx) {
       if (Date.now() < startTime + 1000 * 60 * 5 && !isRunning && selectedTx.status === TRANSACTION_STATUS.PENDING) {
-        // start()
-        resume()
+        start()
+        // resume()
       } else if (Date.now() >= startTime + 1000 * 60 * 5 && isRunning) {
         pause()
       }
@@ -223,7 +219,7 @@ export default function TransactionDetailModal() {
         pause()
       }
     }
-  }, [selectedTx, isRunning, sendTxStatusMarkType, receiveTxStatusMarkType])
+  }, [selectedTx, isRunning, sendTxStatusMarkType, receiveTxStatusMarkType, start, pause])
 
   useEffect(() => {
     selectedTx && isRunning && setPassedTime(millisToSeconds(Number(new Date()) - startTime /* selectedTx.createTime */))
