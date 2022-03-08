@@ -394,6 +394,10 @@ export interface TransactionDetail {
   status: TRANSACTION_STATUS
 }
 
+export interface TransactionDetailWithCreateTime extends TransactionDetail {
+  createTime: number
+}
+
 export interface Estimation {
   id?: number
   rate: number

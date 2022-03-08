@@ -99,6 +99,7 @@ export default function BridgeUI() {
   const waitWallet = useSelector((state: RootState) => state.application.waitWallet)
   const connectStatus = useSelector((state: RootState) => state.application.connectStatus)
   const initStatus = useSelector((state: RootState) => state.application.initStatus)
+  const transactions = useSelector((state: RootState) => state.application.transactions)
   // const inFetching = useSelector((state: RootState) => state.application.inFetching)
 
   const initEssentialData = useCallback(() => {
@@ -144,7 +145,7 @@ export default function BridgeUI() {
             <NetworkSelectModal />
             <CurrencySelectModal />
             <TransferConfirmationModal />
-            <TransactionDetailModal />
+            {!transactions.isEmpty() && <TransactionDetailModal />}
             <WalletSelectModal />
             <HistoryModal />
           </ErrorBoundary>
@@ -163,7 +164,7 @@ export default function BridgeUI() {
       default:
         return <Spinner closable={false} showSpinner={true} />
     }
-  }, [initStatus, inFetching])
+  }, [initStatus, inFetching, transactions])
 
   return (
     <Flex

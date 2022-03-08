@@ -46,9 +46,9 @@ enum TransferConfirmButtonStatus {
 }
 
 export const TransferConfirmationButton = function () {
-  const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account, currentTokenBalance } = useSelector((state: RootState) => {
-    const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account, currentTokenBalance } = state.application
-    return { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, library, account, currentTokenBalance }
+  const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, currentTokenBalance } = useSelector((state: RootState) => {
+    const { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, currentTokenBalance } = state.application
+    return { transferStatus, estimation, selectedTokenName, bridgePairs, srcChainId, destChainId, currentTokenBalance }
   })
   const {
     application: { transferTokens, saveCurrentTokenBalance },

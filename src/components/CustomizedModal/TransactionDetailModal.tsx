@@ -1,19 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Flex, Box } from 'rebass'
+import ReactLoading from 'react-loading'
+import { Flex, Box, Text } from 'rebass'
 import { useSelector } from 'react-redux'
 import BigNumberJS from 'bignumber.js'
-import { Check } from 'react-feather'
-import { css } from 'styled-components'
+import { Check, X, Frown } from 'react-feather'
+import styled, { css, StyledComponent } from 'styled-components'
+import { useTimer } from 'react-timer-hook'
 
 import { StyledText, Text1, Text2, Text4 } from 'components/Text'
 import Modal from 'components/Modal'
-import styled, { StyledComponent } from 'styled-components'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
 import { Hash } from 'components/Hash'
 import { TooltippedAmount } from 'components/TooltippedAmount'
 import { StyledLogo } from 'components/Logo'
-import { TokenPair, TransactionDetail } from 'constants/index'
+import { TokenPair, TransactionDetail, TransactionDetailWithCreateTime, TRANSACTION_STATUS } from 'constants/index'
+import { darken } from 'polished'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -57,21 +59,73 @@ const GreenAmountText = styled(AmountText)`
   color: ${({ theme }) => theme.green1};
 `
 
-const StyledCheck = styled(Check)`
-  transform: rotate(90deg) translateX(-22px);
-`
+const StyledCheck = styled(Check)``
 
-const StyledStatusMark = styled(Box)<{ success: boolean }>`
-  transform: rotate(270deg);
-  height: 0;
-  width: 25px;
-  border-top: 25px solid ${({ success }) => (success ? '#00c6a9' : '#4f4f4f')};
-  border-left: 8px solid transparent;
-  border-bottom: 15px solid transparent;
-  position: absolute;
-  top: -1rem;
-  right: 25px;
-`
+const StyleX = styled(X)``
+
+enum STATUS_MARK_TYPE {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  INPROGRESS = 'INPROGRESS',
+  UNKNOWN = 'UNKNOWN',
+}
+
+/*   ${({ type }) => {
+  switch (type) {
+    case STATUS_MARK_TYPE.SUCCESS:
+      return '#00c6a9'
+    case STATUS_MARK_TYPE.INPROGRESS:
+      return '#fdaf14'
+    case STATUS_MARK_TYPE.FAILED:
+      return '#4f4f4f'
+    default:
+      return 'gray'
+  }
+}}; */
+const StyledStatusMark = ({ type }: { type: STATUS_MARK_TYPE }) => {
+  const backgroundColor = useMemo(() => {
+    switch (type) {
+      case STATUS_MARK_TYPE.SUCCESS:
+        return '#00c6a9'
+      case STATUS_MARK_TYPE.INPROGRESS:
+        return '#fdaf14'
+      case STATUS_MARK_TYPE.FAILED:
+        return darken(0.1, 'red')
+      default:
+        return 'gray'
+    }
+  }, [type])
+
+  const showIcon = useCallback(() => {
+    switch (type) {
+      case STATUS_MARK_TYPE.SUCCESS:
+        return <StyledCheck size={'1rem'} strokeWidth={6} />
+      case STATUS_MARK_TYPE.INPROGRESS:
+        return <ReactLoading type={'spinningBubbles'} color="#fff" height="1rem" width={'1rem'} />
+      case STATUS_MARK_TYPE.FAILED:
+        return <Frown size={'1rem'} color={'rgba(255,255,255,0.6)'} strokeWidth={2} />
+      default:
+        return <StyleX size={'1rem'} strokeWidth={6} />
+    }
+  }, [type])
+  return (
+    <Flex width="2rem" height={'2rem'} flexDirection="column" margin="0!important" padding={'0'} style={{ position: 'absolute', top: '-1.5px', right: '1rem' }}>
+      <Flex width="2rem" height={'2rem'} backgroundColor={backgroundColor} margin="0!important" padding={'0'} justifyContent="center" alignItems={'center'}>
+        {showIcon()}
+      </Flex>
+      <Flex
+        width="0"
+        height={'0'}
+        margin="0!important"
+        padding={'0'}
+        css={css`
+          border-right: 2rem solid transparent;
+          border-top: 0.5rem solid ${backgroundColor};
+        `}
+      ></Flex>
+    </Flex>
+  )
+}
 
 export default function TransactionDetailModal() {
   const {
@@ -82,15 +136,10 @@ export default function TransactionDetailModal() {
     return { transactionDetailModalOpen, selectedTransactionId, transactions, bridgePairs, availableChains }
   })
 
-  const [selectedTx, setSelectedTx] = useState<TransactionDetail>()
-
-  useEffect(() => {
-    selectedTransactionId &&
-      setSelectedTx(
-        transactions.find((t) => {
-          return t.send_tx_hash === selectedTransactionId || t.receive_tx_hash === selectedTransactionId
-        })
-      )
+  const selectedTx = useMemo<TransactionDetailWithCreateTime>(() => {
+    return transactions.find((t) => {
+      return t.send_tx_hash === selectedTransactionId || t.receive_tx_hash === selectedTransactionId
+    })! as TransactionDetailWithCreateTime
   }, [transactions, selectedTransactionId])
 
   /*   const tokenInfo = useMemo(() => {
@@ -127,8 +176,61 @@ export default function TransactionDetailModal() {
     return {}
   }, [selectedTx, bridgePairs])
 
+  const sendTxStatusMarkType = useMemo(() => {
+    if (selectedTx?.send_tx_hash && selectedTx?.receive_tx_hash) {
+      return STATUS_MARK_TYPE.SUCCESS
+    } else if (selectedTx?.send_tx_hash && !selectedTx?.receive_tx_hash && selectedTx.status === TRANSACTION_STATUS.PENDING) {
+      return STATUS_MARK_TYPE.INPROGRESS
+    } else if (selectedTx?.send_tx_hash && selectedTx.status === TRANSACTION_STATUS.FAILED) {
+      return STATUS_MARK_TYPE.FAILED
+    } else {
+      return STATUS_MARK_TYPE.UNKNOWN
+    }
+  }, [selectedTx?.send_tx_hash, selectedTx?.receive_tx_hash, selectedTx?.status])
+
+  const receiveTxStatusMarkType = useMemo(() => {
+    if (selectedTx?.send_tx_hash && selectedTx?.receive_tx_hash && selectedTx.status === TRANSACTION_STATUS.SUCCEEDED) {
+      return STATUS_MARK_TYPE.SUCCESS
+    } else if (selectedTx?.send_tx_hash && selectedTx?.receive_tx_hash && selectedTx.status === TRANSACTION_STATUS.PENDING) {
+      return STATUS_MARK_TYPE.INPROGRESS
+    } else if (selectedTx?.send_tx_hash && selectedTx?.receive_tx_hash && selectedTx.status === TRANSACTION_STATUS.FAILED) {
+      return STATUS_MARK_TYPE.FAILED
+    } else if (selectedTx?.send_tx_hash && !selectedTx?.receive_tx_hash) {
+      return STATUS_MARK_TYPE.UNKNOWN
+    } else {
+      return STATUS_MARK_TYPE.UNKNOWN
+    }
+  }, [selectedTx?.send_tx_hash, selectedTx?.receive_tx_hash, selectedTx?.status])
+
+  const [passedTime, setPassedTime] = useState<string>()
+
+  const [startTime] = useState(selectedTx ? selectedTx!.createTime! : 0)
+  const { seconds, minutes, hours, days, isRunning, start, pause, resume, restart } = useTimer({ expiryTimestamp: new Date(/* (selectedTx ? selectedTx!.createTime! : 0) */ startTime + 1000 * 60 * 5), onExpire: () => console.warn('onExpire called') })
+  // start()
+  /*   useEffect(() => {
+    start()
+  }, []) */
+
+  useEffect(() => {
+    if (selectedTx) {
+      if (Date.now() < startTime + 1000 * 60 * 5 && !isRunning && selectedTx.status === TRANSACTION_STATUS.PENDING) {
+        // start()
+        resume()
+      } else if (Date.now() >= startTime + 1000 * 60 * 5 && isRunning) {
+        pause()
+      }
+      if (selectedTx.status === TRANSACTION_STATUS.FAILED || selectedTx.status === TRANSACTION_STATUS.SUCCEEDED) {
+        pause()
+      }
+    }
+  }, [selectedTx, isRunning, sendTxStatusMarkType, receiveTxStatusMarkType])
+
+  useEffect(() => {
+    selectedTx && isRunning && setPassedTime(millisToSeconds(Number(new Date()) - startTime /* selectedTx.createTime */))
+  }, [seconds, isRunning, selectedTx, startTime])
+
   return (
-    <Modal isOpen={transactionDetailModalOpen} maxHeight={'500px'} maxWidth={'35rem'} closeByKeyboard={true} setIsOpen={closeTransactionDetailModal} title="Transaction Details">
+    <Modal isOpen={transactionDetailModalOpen} maxHeight={'600px'} maxWidth={'35rem'} closeByKeyboard={true} setIsOpen={closeTransactionDetailModal} title="Transaction Details">
       {/* <Flex flexDirection="column" width="100%" overflow="hidden">
         <Flex height="40px" width="100%" justifyContent="flex-end">
           <StyledText style={{ lineHeight: '40px', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
@@ -140,9 +242,7 @@ export default function TransactionDetailModal() {
       {selectedTx && tokenInfo.srcToken && (
         <Flex justifyContent={'space-between'} flexDirection="column" width="100%">
           <Wrapper>
-            <StyledStatusMark success={!!selectedTx.send_tx_hash}>
-              <StyledCheck size={12} strokeWidth={6} />
-            </StyledStatusMark>
+            <StyledStatusMark type={sendTxStatusMarkType} />
             <Flex>
               <Text2>You Send</Text2>
             </Flex>
@@ -173,9 +273,7 @@ export default function TransactionDetailModal() {
             </Flex>
           </Wrapper>
           <Wrapper>
-            <StyledStatusMark success={!!selectedTx.receive_tx_hash}>
-              <StyledCheck size={12} strokeWidth={6} />
-            </StyledStatusMark>
+            <StyledStatusMark type={receiveTxStatusMarkType} />
             <Flex>
               <Text2>To</Text2>
             </Flex>
@@ -207,10 +305,24 @@ export default function TransactionDetailModal() {
               <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receiver} copyable={true} />
             </Flex>
           </Wrapper>
+
+          {isRunning && (
+            <Flex color={'rgba(255,255,255,0.6)'} padding="0 1rem" justifyContent={'space-between'} alignItems="center">
+              <Text>Time Used</Text>
+              <Text>{passedTime}/5m</Text>
+            </Flex>
+          )}
         </Flex>
       )}
       {/* </ModalContentWrapper> */}
       {/* </Flex> */}
     </Modal>
   )
+}
+
+function millisToSeconds(millis: number) {
+  var seconds = (millis / 1000).toFixed(1)
+  //ES6 interpolated literals/template literals
+  //If seconds is less than 10 put a zero in front.
+  return `${seconds}s`
 }

@@ -28,6 +28,7 @@ import {
   TRANSITION_DURATION,
   INIT_STATUS,
   WALLET_TYPE,
+  TransactionDetailWithCreateTime,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
 import { getContract } from 'helpers'
@@ -354,7 +355,7 @@ export const application = createModel<RootModel>()({
       const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!.srcToken
       try {
         if (bridge && tokenInfo) {
-          const targetAddress = bridge.srcChain.is_tele || bridge.destChain.is_tele ? bridge.srcChain.transfer!.address : bridge.srcChain.proxy!.address
+          const targetAddress = bridge.srcChain.transfer!.address
           const erc20Contract = getContract(tokenInfo.address, ERC20ABI, library!, account!)
           const receipt = await erc20Contract.approve(targetAddress, MaxUint256)
           receipt
@@ -436,14 +437,19 @@ export const application = createModel<RootModel>()({
               tokenAddress: selectedTokenPair.relayToken, // erc20 in teleport
               receiver: account!,
               amount: parsedAmount,
+              refund: account!, //'address',
               destChain: bridge.destChain.name, // double jump destChain
               relayChain: '',
             }
             const proxyContract = getContract(bridge.srcChain.proxy!.address!, bridge.srcChain.proxy!.abi!, library!, account!)
+            const multiCallContract = getContract(bridge.srcChain.multicall!.address!, bridge.srcChain.multicall!.abi!, library!, account!)
+            const multiCallData = await proxyContract.send(account!, 'teleport', ERC20TransferData, rccTransfer)
             if (srcToken.address === ZERO_ADDRESS || srcToken.isNative) {
-              transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer, { value: parsedAmount /* parsedAmount */ }) // destChainName : teleport
+              transaction = await multiCallContract.multicall(multiCallData, { value: parsedAmount /* parsedAmount */ })
+              // transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer, { value: parsedAmount /* parsedAmount */ }) // destChainName : teleport
             } else {
-              transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer)
+              transaction = await multiCallContract.multicall(multiCallData)
+              // transaction = await proxyContract.send('teleport', ERC20TransferData, ERC20TransferData.receiver, rccTransfer)
             }
             // } else {
             //   // native token
@@ -463,7 +469,8 @@ export const application = createModel<RootModel>()({
             token: selectedTokenName,
             token_address: srcToken?.isNative ? ZERO_ADDRESS : srcToken.address,
             status: TRANSACTION_STATUS.PENDING,
-          } as TransactionDetail
+            createTime: Date.now(),
+          } as TransactionDetailWithCreateTime
           transactions.push(transactionDetail)
           dispatch.application.saveTransactions(transactions)
           transaction!
@@ -803,7 +810,7 @@ export const application = createModel<RootModel>()({
             )
           }
           dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(newTransactions, 10))
-          dispatch.application.saveTransactions(transactions)
+          // dispatch.application.saveTransactions(transactions)
         } catch (err) {
           console.warn(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
           // warnNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)

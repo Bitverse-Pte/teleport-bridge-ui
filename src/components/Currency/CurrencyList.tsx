@@ -51,6 +51,7 @@ function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number;
   useEffect(() => {
     library && account && getBalance(token, library, account).then((res) => setBalance(res))
   }, [token.name])
+  
   useEffect(() => {
     if (isSelected && balance) {
       saveCurrentTokenBalance(balance)
@@ -65,6 +66,7 @@ function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number;
     const btn = document.getElementById('Select-A-Token-close-btn')
     btn?.dispatchEvent(new MouseEvent('click', { view: window, bubbles: true }))
   }, [isSelected, token])
+
   return (
     <MenuItem style={style} className={`token-item-${key}`} onClick={selectToken} /* disabled={isSelected} selected={isSelected} */>
       <StyledLogo isSelected={isSelected} size={'1.5rem'} srcs={[token.logoURI!]} alt={`${token?.symbol ?? 'token'} logo`} />

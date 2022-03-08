@@ -10,9 +10,9 @@ import { Flex } from 'rebass'
 import { css } from 'styled-components'
 
 const TRANSFER_STATUS_BUTTONS_MAP = {
-  [TRANSFER_STATUS.PENDING_APPROVE]: 3,
-  [TRANSFER_STATUS.READY_TO_APPROVE]: 3,
-  [TRANSFER_STATUS.PENDING_ALLOWANCE]: 2,
+  [TRANSFER_STATUS.PENDING_APPROVE]: 5,
+  [TRANSFER_STATUS.READY_TO_APPROVE]: 4,
+  [TRANSFER_STATUS.PENDING_ALLOWANCE]: 3,
   [TRANSFER_STATUS.READY_TO_TRANSFER]: 2,
   [TRANSFER_STATUS.NO_INPUT]: 1,
   [TRANSFER_STATUS.UNCONNECTED]: 0,
@@ -157,7 +157,7 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
         `}
       >
         {transitions((styles, item) => {
-          return <animated.div style={{ ...styles }}>{text}</animated.div>
+          return <>{item === index && <animated.div style={{ ...styles }}>{text}</animated.div>}</>
         })}
       </Flex>
     </PrimaryButton>
