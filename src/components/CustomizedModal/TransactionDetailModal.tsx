@@ -210,7 +210,7 @@ export default function TransactionDetailModal() {
   useEffect(() => {
     if (selectedTx) {
       if (Date.now() < startTime + 1000 * 60 * 5 && !isRunning && selectedTx.status === TRANSACTION_STATUS.PENDING) {
-        start()
+        restart(new Date(startTime + 1000 * 60 * 5))
         // resume()
       } else if (Date.now() >= startTime + 1000 * 60 * 5 && isRunning) {
         pause()
@@ -219,7 +219,7 @@ export default function TransactionDetailModal() {
         pause()
       }
     }
-  }, [selectedTx, isRunning, sendTxStatusMarkType, receiveTxStatusMarkType, start, pause])
+  }, [selectedTx, isRunning, sendTxStatusMarkType, receiveTxStatusMarkType, restart, pause, startTime])
 
   useEffect(() => {
     selectedTx && isRunning && setPassedTime(millisToSeconds(Number(new Date()) - startTime /* selectedTx.createTime */))
