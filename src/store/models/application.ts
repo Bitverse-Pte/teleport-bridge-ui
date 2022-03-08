@@ -27,6 +27,7 @@ import {
   ZERO_ADDRESS,
   TRANSITION_DURATION,
   INIT_STATUS,
+  WALLET_TYPE,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
 import { getContract } from 'helpers'
@@ -57,8 +58,8 @@ export type IAppState = {
   srcChainId: number
   destChainId: number
   bridgePairs: Map<string, BridgePair>
-  library: Web3Provider | undefined
-  account: string | null | undefined
+  // library: Web3Provider | undefined
+  // account: string | null | undefined
   transactionHistoryUpdatingTimer: number
   // wrongChain: boolean
   selectedTokenName: string
@@ -69,6 +70,7 @@ export type IAppState = {
   estimationUpdating: boolean
   selectedTransactionId: string
   transactionDetailModalOpen: boolean
+  walletType: WALLET_TYPE
 }
 
 export const initialState: IAppState = {
@@ -85,8 +87,8 @@ export const initialState: IAppState = {
   destChainId: 0,
   availableChains: new Map(),
   bridgePairs: new Map(),
-  library: undefined,
-  account: undefined,
+  // library: undefined,
+  // account: undefined,
   selectedTokenName: '',
   transferStatus: Store2.get('connect-status') ? TRANSFER_STATUS.NO_INPUT : TRANSFER_STATUS.UNCONNECTED,
   currentTokenBalance: undefined,
@@ -96,6 +98,7 @@ export const initialState: IAppState = {
   selectedTransactionId: '',
   transactionDetailModalOpen: false,
   transactionHistoryUpdatingTimer: 0,
+  walletType: WALLET_TYPE.UNSET,
 }
 
 export const application = createModel<RootModel>()({
@@ -279,6 +282,12 @@ export const application = createModel<RootModel>()({
         initStatus,
       }
     },
+    setWalletType(state, walletType: WALLET_TYPE) {
+      return {
+        ...state,
+        walletType,
+      }
+    },
   },
   effects: (dispatch) => ({
     changeTransferStatus(transferStatus: TRANSFER_STATUS) {
@@ -337,7 +346,8 @@ export const application = createModel<RootModel>()({
     },
     async approveAmount(rest = {}, state) {
       dispatch.application.setWaitWallet(true)
-      const { availableChains: sourceChains, library, account, bridgePairs, selectedTokenName, srcChainId, destChainId } = state.application
+      const { availableChains: sourceChains, bridgePairs, selectedTokenName, srcChainId, destChainId } = state.application
+      const { library, account } = state.evmCompatibles
       const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChain?.destChains.find((e) => e.chainId === destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
@@ -373,7 +383,8 @@ export const application = createModel<RootModel>()({
     },
     async transferTokens({ amount }: { amount: string }, state) {
       dispatch.application.setWaitWallet(true)
-      const { availableChains: sourceChains, library, account, bridgePairs, selectedTokenName, srcChainId, destChainId, transactions } = state.application
+      const { availableChains: sourceChains, bridgePairs, selectedTokenName, srcChainId, destChainId, transactions } = state.application
+      const { library, account } = state.evmCompatibles
       const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
@@ -543,11 +554,11 @@ export const application = createModel<RootModel>()({
     },
     async turnOverSrcAndDestChain(rest = {}) {
       dispatch.application.setWaitWallet(true)
-      const network = await store!.getState().application.library?.getNetwork()
+      const network = await store!.getState().evmCompatibles.library?.getNetwork()
       const { srcChainId: cachedSrcChainId, destChainId: cachedDestChainId } = store!.getState().application
       if (network) {
         const result = await switchToNetwork({
-          library: store!.getState().application.library,
+          library: store!.getState().evmCompatibles.library,
           chainId: cachedDestChainId,
         })
         dispatch.application.setWaitWallet(false)
@@ -560,7 +571,7 @@ export const application = createModel<RootModel>()({
     async changeNetwork({ chainId }, state) {
       dispatch.application.setWaitWallet(true)
       const result = await switchToNetwork({
-        library: state.application.library,
+        library: state.evmCompatibles.library,
         chainId,
       })
       dispatch.application.setWaitWallet(false)
@@ -594,7 +605,8 @@ export const application = createModel<RootModel>()({
       }
     },
     async judgeAllowance({ value, tokenInfo }: { value: string; tokenInfo: TokenInfo }, state) {
-      const { library, account, bridgePairs, srcChainId, destChainId } = store!.getState().application
+      const { bridgePairs, srcChainId, destChainId } = store!.getState().application
+      const { library, account } = store!.getState().evmCompatibles
       const bridge = bridgePairs.get(`${srcChainId}-${destChainId}`)
 
       if (!tokenInfo.isNative && bridge) {
@@ -631,7 +643,8 @@ export const application = createModel<RootModel>()({
       }
     },
     async saveCurrentTokenBalance(balance: EtherBigNumber | undefined, state) {
-      const { library, account, bridgePairs, srcChainId, destChainId, selectedTokenName } = state.application
+      const { bridgePairs, srcChainId, destChainId, selectedTokenName } = state.application
+      const { library, account } = state.evmCompatibles
       const pair = bridgePairs.get(`${srcChainId}-${destChainId}`)
       if (pair) {
         const { tokens } = pair
@@ -740,7 +753,8 @@ export const application = createModel<RootModel>()({
     },
     async startTransactionHistoryUpdating(rest = {}, state) {
       const timer = window.setInterval(async () => {
-        const { account, transactions } = store!.getState().application
+        const { transactions } = store!.getState().application
+        const { account } = store!.getState().evmCompatibles
         if (!account) {
           return
         }

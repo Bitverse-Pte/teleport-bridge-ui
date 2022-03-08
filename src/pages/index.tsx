@@ -10,9 +10,11 @@ import ThemeProvider from 'theme'
 // import { globalStyle } from './styles'
 // import { store } from 'store/store'
 import { ZERO_ADDRESS } from 'constants/misc'
-import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS, TransactionDetail } from 'constants/index'
+import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS, TransactionDetail, NetworkSelectModalMode } from 'constants/index'
 import { FixedSizeQueue } from 'helpers/fixedQueue'
 import { useDispatch } from 'hooks'
+import { RootState } from 'store/store'
+import { useSelector } from 'react-redux'
 
 // const GlobalStyle = createGlobalStyle`
 //   ${globalStyle}
@@ -86,7 +88,7 @@ export default function Home({
   toSetAvailableChains,
   toSetDestChainId,
   toSetSelectedTokenName,
-  error,
+  error: propsError,
 }: {
   toSetBridgePairs: Array<[string, BridgePair]>
   toSetSrcChainId: number
@@ -96,10 +98,40 @@ export default function Home({
   error: string
 }) {
   const {
-    application: { setBridgesPairs, setSelectedTokenName, setSrcChainId, setDestChainId, setAvailableChains, setInitStatus, setTransactions, setConnectStatus },
+    application: { changeNetwork, setNetworkModalMode, setBridgesPairs, setSelectedTokenName, setSrcChainId, setDestChainId, setAvailableChains, setInitStatus, setTransactions, setConnectStatus },
   } = useDispatch()
+
+  const { connectStatus, availableChains, srcChainId, networkModalMode } = useSelector((state: RootState) => {
+    const { connectStatus, availableChains, srcChainId, networkModalMode } = state.application
+    return { connectStatus, availableChains, srcChainId, networkModalMode }
+  })
+  const { active, chainId, account, library, error } = useSelector((state: RootState) => {
+    const { active, chainId, account, library, error } = state.evmCompatibles
+    return { active, chainId, account, library, error }
+  })
+
   useEffect(() => {
-    if (error) {
+    if (active && chainId && availableChains.size) {
+      if (chainId && chainId !== srcChainId && networkModalMode !== NetworkSelectModalMode.SRC) {
+        if (!(window.web3 || window.ethereum)) {
+          return
+        }
+        if (availableChains.has(chainId)) {
+          library && changeNetwork({ chainId: chainId })
+          return
+        }
+        account && connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
+      }
+      /*    if (availableChains.has(chainId)) {
+        chainId && chainId !== srcChainId && changeNetwork({ chainId: chainId })
+      } else {
+        // changeNetwork({ chainId: availableChains.values().next().value.chainId })
+        connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
+      } */
+    }
+  }, [active, chainId, availableChains, connectStatus, account, library])
+  useEffect(() => {
+    if (propsError) {
       setInitStatus(INIT_STATUS.error)
       return
     }
@@ -121,7 +153,7 @@ export default function Home({
       setTransactions(new FixedSizeQueue<TransactionDetail>(10))
       setConnectStatus(Store2.get('connect-status'))
     }
-  }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName, error])
+  }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName, propsError])
   return (
     <>
       {/* <GlobalStyle /> */}

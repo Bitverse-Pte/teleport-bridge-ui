@@ -4,13 +4,9 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 
 import Option, { OPTION_TYPE } from 'components/Option'
-import { CircledCloseIcon } from 'components/Icon'
-import { PrimaryText, StyledText } from 'components/Text'
 import Modal from 'components/Modal'
-import { useActiveWeb3React } from 'hooks/web3'
 import { RootState } from 'store/store'
 import { useDispatch } from 'hooks'
-import { pick } from 'lodash'
 import { NetworkSelectModalMode } from 'constants/index'
 
 const OptionGrid = styled(Box)`
@@ -36,7 +32,10 @@ const OptionGrid = styled(Box)`
 `
 
 export default function NetworkSelectModal() {
-  const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
+  const { active, account, chainId, library } = useSelector((state: RootState) => {
+    const { active, account, chainId, library } = state.evmCompatibles
+    return { active, account, chainId, library }
+  })
   const { waitWallet, networkModalMode, availableChains, srcChainId, destChainId, connectStatus } = useSelector((state: RootState) => {
     const { waitWallet, networkModalMode, availableChains, srcChainId, destChainId, connectStatus } = state.application
     return { waitWallet, networkModalMode, availableChains, srcChainId, destChainId, connectStatus }

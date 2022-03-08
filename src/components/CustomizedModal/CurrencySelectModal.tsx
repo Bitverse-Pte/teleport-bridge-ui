@@ -7,7 +7,6 @@ import Modal from 'components/Modal'
 import styled from 'styled-components'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store'
-import { useActiveWeb3React } from 'hooks/web3'
 import CurrencyList from '../Currency/CurrencyList'
 
 export default function CurrencySelectModal() {
@@ -18,7 +17,7 @@ export default function CurrencySelectModal() {
     const { currencySelectModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId } = state.application
     return { currencySelectModalOpen, selectedTokenName, bridgePairs, srcChainId, destChainId }
   })
-  const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
+
   const selectedTokenPairs = useMemo(() => {
     return bridgePairs.get(`${srcChainId}-${destChainId}`)?.tokens || []
   }, [bridgePairs, selectedTokenName, srcChainId, destChainId])

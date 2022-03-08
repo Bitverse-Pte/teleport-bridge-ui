@@ -5,7 +5,7 @@ import { useTransition, config, animated, useSprings, useSpringRef, AnimatedProp
 import { TransitionSpinner } from 'components/Spinner'
 import { PrimaryButton } from '.'
 import { CURRENCY_INPUT_ERROR, NetworkSelectModalMode, TRANSFER_STATUS } from 'constants/types'
-import { useActiveWeb3React, useDispatch } from 'hooks'
+import { useDispatch } from 'hooks'
 import { Flex } from 'rebass'
 import { css } from 'styled-components'
 
@@ -19,7 +19,10 @@ const TRANSFER_STATUS_BUTTONS_MAP = {
 }
 
 export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERROR }) {
-  const { account, active, chainId } = useActiveWeb3React()
+  const { account, active, chainId } = useSelector((state: RootState) => {
+    const { account, active, chainId } = state.evmCompatibles
+    return { account, active, chainId }
+  })
   const { transferStatus, connectStatus, availableChains, srcChainId } = useSelector((state: RootState) => {
     const { transferStatus, connectStatus, availableChains, srcChainId } = state.application
     return { transferStatus, connectStatus, availableChains, srcChainId }

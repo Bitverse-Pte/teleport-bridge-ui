@@ -413,3 +413,9 @@ export enum INIT_STATUS {
   initialized = 'initialized',
   error = 'error',
 }
+
+export enum WALLET_TYPE {
+  EVM = 'EVM',
+  COSMOS = 'COSMOS',
+  UNSET = 'UNSET',
+}

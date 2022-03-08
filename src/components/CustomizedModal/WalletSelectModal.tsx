@@ -8,13 +8,13 @@ import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 import MetamaskIcon from 'public/images/metamask.png'
 import Modal from 'components/Modal'
 import Option, { OPTION_TYPE } from 'components/Option'
-import { SUPPORTED_WALLETS } from 'constants/wallet'
+import { SUPPORTED_WALLETS, WalletInfo } from 'constants/wallet'
 import { injected /* ,portis */ } from 'connectors'
 import { isMobile } from 'helpers/userAgent'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
-import { useActiveWeb3React } from 'hooks/web3'
 import { errorNoti } from 'helpers/notifaction'
+import { WALLET_TYPE } from 'constants/index'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -29,23 +29,19 @@ const OptionGrid = styled.div`
 
 export default function WalletSelectModal() {
   const {
-    application: { loggedIn, setWalletModalOpen, setWaitWallet },
+    application: { loggedIn, setWalletModalOpen, setWaitWallet, setWalletType },
   } = useDispatch()
   const { connectStatus, walletModalOpen, availableChains } = useSelector((state: RootState) => {
     const { connectStatus, walletModalOpen, availableChains } = state.application
     return { connectStatus, walletModalOpen, availableChains }
   })
-  const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
+  const { active, connector, activate } = useSelector((state: RootState) => {
+    const { active, connector, activate } = state.evmCompatibles
+    return { active, connector, activate }
+  })
 
   const tryActivation = useCallback(
-    async (connector: AbstractConnector | undefined) => {
-      let name = ''
-      Object.keys(SUPPORTED_WALLETS).map((key) => {
-        if (connector === SUPPORTED_WALLETS[key].connector) {
-          return (name = SUPPORTED_WALLETS[key].name)
-        }
-        return true
-      })
+    async ({ walletType, connector }: WalletInfo) => {
       // log selected wallet
       /* ReactGA.event({
       category: 'Wallet',
@@ -65,12 +61,14 @@ export default function WalletSelectModal() {
           .then(() => {
             return Promise.resolve()
               .then(() => {
+                setWalletType(walletType)
                 loggedIn()
               })
               .then(() => setWalletModalOpen(false))
             // logMonitoringEvent({ walletAddress })
           })
           .catch((error: any) => {
+            setWalletType(WALLET_TYPE.UNSET)
             if (error.code === -32002) {
               errorNoti(`Unable to connect to your selection, as you have a same connection request awaiting your action in your wallet, please take action`)
               return
@@ -86,13 +84,15 @@ export default function WalletSelectModal() {
           })
           .finally(() => setWaitWallet(false))
     },
-    [connector]
+    [connector, activate]
   )
 
   const getOptions = useCallback(() => {
     const isMetamask = window.ethereum && window.ethereum.isMetaMask
-    return Object.keys(SUPPORTED_WALLETS).map((key) => {
-      const option = SUPPORTED_WALLETS[key]
+    return Array.from(SUPPORTED_WALLETS.values()).map((option) => {
+      if (!option) {
+        return
+      }
       // check for mobile options
       // if (isMobile) {
       //   //disable portis on mobile for now
@@ -129,7 +129,7 @@ export default function WalletSelectModal() {
         // don't show injected if there's no injected provider
         if (!(window.web3 || window.ethereum)) {
           if (option.name === 'MetaMask') {
-            return <Option id={`connect-${key}`} type={OPTION_TYPE.WALLET} key={key} color={'#E8831D'} header={<Text>Install Metamask</Text>} subheader={null} link={'https://metamask.io/'} icon={MetamaskIcon} />
+            return <Option id={`connect-${option.name}`} type={OPTION_TYPE.WALLET} key={option.name} color={'#E8831D'} header={<Text>Install Metamask</Text>} subheader={null} link={'https://metamask.io/'} icon={MetamaskIcon} />
           } else {
             return null //dont want to return install twice
           }
@@ -149,11 +149,11 @@ export default function WalletSelectModal() {
         // !isMobile &&
         !option.mobileOnly && (
           <Option
-            id={`connect-${key}`}
+            id={`connect-${option.name}`}
             onClick={() => {
-              /*  option.connector !== connector  */ /*  ? setWalletView(WALLET_VIEWS.ACCOUNT) : !option.href */ /*  &&  */ tryActivation(option.connector)
+              /*  option.connector !== connector  */ /*  ? setWalletView(WALLET_VIEWS.ACCOUNT) : !option.href */ /*  &&  */ tryActivation(option)
             }}
-            key={key}
+            key={option.name}
             active={connectStatus && active && option.connector === connector}
             color={option.color}
             link={option.href}

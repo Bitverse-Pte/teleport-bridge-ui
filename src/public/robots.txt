@@ -1,3 +1,0 @@
-User-agent: *
-Sitemap: https://bridge.qa.davionlabs.com/sitemap.xml
-Disallow: *_next*

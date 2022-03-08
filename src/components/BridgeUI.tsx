@@ -13,10 +13,10 @@ import bg2 from 'public/bg-2.svg'
 import Header from 'components/Header'
 // import { hashPersonalMessage, recoverPublicKey, recoverPersonalSignature, formatTestTransaction, getChainData } from './helpers/utils'
 import Body from 'components/Body'
-import { RootState, store } from 'store'
+import { RootState } from 'store'
 import Spinner from 'components/Spinner'
 import { TextPrimary1 } from 'components/Text'
-import { useActiveWeb3React, useDispatch } from 'hooks'
+import { useDispatch } from 'hooks'
 import { BodyWrapper } from 'components/BodyWrapper'
 import { errorNoti } from 'helpers/notifaction'
 import { INIT_STATUS } from 'constants/types'
@@ -85,7 +85,10 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 }
 
 export default function BridgeUI() {
-  const { account } = useActiveWeb3React()
+  const { account } = useSelector((state: RootState) => {
+    const { account } = state.evmCompatibles
+    return { account }
+  })
   const theme = useTheme()
   const {
     application: { initChains, initTransactions, setWaitWallet, resetApp, stopTransactionHistoryUpdating, setInitStatus },

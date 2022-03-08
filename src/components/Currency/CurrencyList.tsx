@@ -5,7 +5,6 @@ import { BigNumber } from '@ethersproject/bignumber'
 import styled from 'styled-components'
 
 import { TokenPair, TokenInfo } from 'constants/types'
-import { useActiveWeb3React } from 'hooks/web3'
 import { ThemedText } from 'theme'
 import Column from 'components/Column'
 import Loader from 'components/Loader'
@@ -36,7 +35,10 @@ const MenuItem = styled(SpaceBetweenRow)`
 `
 
 function CurrencyRow({ data, index, style }: { data: TokenPair[]; index: number; style: CSSProperties }) {
-  const { account, library } = useActiveWeb3React()
+  const { account, library } = useSelector((state: RootState) => {
+    const { account, library } = state.evmCompatibles
+    return { account, library }
+  })
   const {
     application: { /* changeToken, */ setSelectedTokenName, setCurrencySelectModalOpen, saveCurrentTokenBalance },
   } = useDispatch()

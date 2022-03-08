@@ -8,12 +8,9 @@ import BigNumber from 'bignumber.js'
 import Image from 'components/Image'
 
 import { NetworkSelectModalMode, TRANSFER_STATUS, CURRENCY_INPUT_ERROR } from 'constants/types'
-import { useActiveWeb3React } from 'hooks/web3'
 import { SelectorButton, ButtonGray, PrimaryButton } from 'components/Button'
 import { RootState } from 'store/store'
-import NetworkSelectModal from 'components/CustomizedModal/NetworkSelectorModal'
 import { useDispatch } from 'hooks'
-import CurrencySelectModal from 'components/CustomizedModal/CurrencySelectModal'
 import { HelpIcon, Icon } from 'components/Icon'
 import { Balance } from 'components/Currency'
 import Loader from 'components/Loader'
@@ -24,8 +21,6 @@ import SwitchSvg from 'public/switch.svg'
 import DisabledSwitchSvg from 'public/disabled-switch.svg'
 import { BodyWrapper } from 'components/BodyWrapper'
 import { TransferButton } from 'components/Button/TransferButton'
-import TransferConfirmationModal from 'components/CustomizedModal/TransferConfirmationModal'
-import TransactionDetailModal from 'components/CustomizedModal/TransactionDetailModal'
 import { EstimationBlock } from 'components/EstimationBlock'
 
 const Container = styled(Flex)<{ hideInput: boolean }>`
@@ -160,7 +155,10 @@ export default function AppBody({ ...rest }) {
     return { availableChains, selectedTokenName, currentTokenBalance, bridgePairs, currencySelectModalOpen, connectStatus, transferStatus, srcChainId, destChainId, networkModalMode, transferConfirmationModalOpen, transactionDetailModalOpen }
   })
   const [inputError, setInputError] = useState<CURRENCY_INPUT_ERROR>(CURRENCY_INPUT_ERROR.OK)
-  const { active, account, activate, chainId, error, library, connector, setError } = useActiveWeb3React()
+  const { active, account, chainId, library } = useSelector((state: RootState) => {
+    const { active, account, chainId, library } = state.evmCompatibles
+    return { active, account, chainId, library }
+  })
   const fromValueInputRef = useRef<any>({})
   const toValueInputRef = useRef<any>({})
 

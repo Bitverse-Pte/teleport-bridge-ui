@@ -83,7 +83,7 @@ export const evmCompatibles = createModel<RootModel>()({
         active,
       }
     },
-    setError(state, error) {
+    setErrorObj(state, error) {
       return {
         ...state,
         error,

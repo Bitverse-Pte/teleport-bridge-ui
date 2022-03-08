@@ -7,7 +7,6 @@ import { Flex } from 'rebass/styled-components'
 import Grow from '@mui/material/Grow'
 
 import { useDispatch } from 'hooks'
-import { useActiveWeb3React } from 'hooks/web3'
 import { RootState } from 'store/store'
 import Blockie from 'components/Blockie'
 import Banner from 'components/Banner'
@@ -157,7 +156,10 @@ const BannerArea = styled(Flex)`
 `
 
 export default function Header() {
-  const { active, account, connector, activate, chainId, error, deactivate } = useActiveWeb3React()
+  const { account, active, chainId, deactivate } = useSelector((state: RootState) => {
+    const { account, active, chainId, deactivate } = state.evmCompatibles
+    return { account, active, chainId, deactivate }
+  })
   const {
     application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen, setNetworkModalMode },
   } = useDispatch()
@@ -190,7 +192,7 @@ export default function Header() {
   const logout = useCallback(() => {
     deactivate()
     manuallyLogout()
-  }, [])
+  }, [deactivate])
 
   return (
     <SHeader>

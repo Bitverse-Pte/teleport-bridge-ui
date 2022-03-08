@@ -1,10 +1,8 @@
 // import { Trans } from '@lingui'
 import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
 
-import { useDispatch } from 'hooks/index'
 import { useActiveWeb3React, useEagerConnect, useInactiveListener } from 'hooks/web3'
-import { RootState } from 'store'
+import { store } from 'store'
 import { NetworkSelectModalMode } from 'constants/types'
 // import { network } from 'connectors'
 
@@ -20,15 +18,7 @@ const Message = styled.h2`
 ` */
 
 export default function EvmManager(/* { children }: { children: JSX.Element } */) {
-  const {
-    application: { /* setDestinationChain, */ setLibrary, setAccount, changeNetwork, setNetworkModalMode, setSrcChainId },
-  } = useDispatch()
-
-  const { connectStatus, availableChains, srcChainId, networkModalMode } = useSelector((state: RootState) => {
-    const { connectStatus, availableChains, srcChainId, networkModalMode } = state.application
-    return { connectStatus, availableChains, srcChainId, networkModalMode }
-  })
-  const { active, chainId, account, library, error, activate } = useActiveWeb3React()
+  const { activate, setError, deactivate, connector, library, chainId, account, active, error } = useActiveWeb3React()
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect()
 
@@ -47,30 +37,17 @@ export default function EvmManager(/* { children }: { children: JSX.Element } */
     }
   }, []) */
   useEffect(() => {
+    const { setActivate, setSetError, setDeactivate, setConnector, setLibrary, setChainId, setAccount, setActive, setErrorObj } = store.dispatch.evmCompatibles
+    setActivate(activate)
+    setSetError(setError)
+    setDeactivate(deactivate)
+    setConnector(connector)
     setLibrary(library)
+    setChainId(chainId)
     setAccount(account)
-  }, [library, account])
-
-  useEffect(() => {
-    if (active && chainId && availableChains.size) {
-      if (chainId && chainId !== srcChainId && networkModalMode !== NetworkSelectModalMode.SRC) {
-        if (!(window.web3 || window.ethereum)) {
-          return
-        }
-        if (availableChains.has(chainId)) {
-          library && changeNetwork({ chainId: chainId })
-          return
-        }
-        account && connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
-      }
-      /*    if (availableChains.has(chainId)) {
-        chainId && chainId !== srcChainId && changeNetwork({ chainId: chainId })
-      } else {
-        // changeNetwork({ chainId: availableChains.values().next().value.chainId })
-        connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
-      } */
-    }
-  }, [active, chainId, availableChains, connectStatus, account, library])
+    setActive(active)
+    setErrorObj(error)
+  }, [activate, setError, deactivate, connector, library, chainId, account, active, error])
 
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
   /*   useEffect(() => {

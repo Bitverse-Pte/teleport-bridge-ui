@@ -6,9 +6,9 @@ export function useDispatch() {
   return useReduxDispatch<Dispatch>()
 }
 
-export function useProviderController() {
+/* export function useProviderController() {
   return useSelector((state: RootState) => state.application)
-}
+} */
 
 export * from './useInterval'
 export * from './useTheme'

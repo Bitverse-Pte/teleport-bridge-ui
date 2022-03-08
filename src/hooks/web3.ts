@@ -120,18 +120,13 @@ export function useEagerConnect() {
  */
 export function useInactiveListener(suppress = false) {
   const { active, error, activate, account, library, connector } = useWeb3React()
-  const {
-    application: { setDestChainId, setSrcChainId, resetWhenAccountChange },
-  } = useDispatch()
-  const { srcChainId, destChainId, availableChains } = useSelector((state: RootState) => {
-    const { srcChainId, destChainId, availableChains } = state.application
-    return { srcChainId, destChainId, availableChains }
-  })
+  const { setDestChainId, setSrcChainId, resetWhenAccountChange } = store.dispatch.application
+  const { srcChainId, destChainId, availableChains } = store.getState().application
   const [cachedAccount, setCachedAccount] = useState('')
   const handleConnect = useCallback(() => {
     console.log("Handling 'connect' event")
     activate(injected)
-  }, [])
+  }, [activate])
   const handleChainChanged = useCallback(
     (chainId: string | number) => {
       console.log("Handling 'chainChanged' event with payload", chainId)
@@ -147,7 +142,7 @@ export function useInactiveListener(suppress = false) {
       }
       activate(injected)
     },
-    [srcChainId, availableChains]
+    [srcChainId, availableChains, activate]
   )
   const handleAccountsChanged = useCallback((accounts: string[]) => {
     console.log("Handling 'accountsChanged' event with payload", accounts)
@@ -155,10 +150,13 @@ export function useInactiveListener(suppress = false) {
       activate(injected)
     }
   }, [])
-  const handleNetworkChanged = useCallback((networkId: string | number) => {
-    console.log("Handling 'networkChanged' event with payload", networkId)
-    activate(injected)
-  }, [])
+  const handleNetworkChanged = useCallback(
+    (networkId: string | number) => {
+      console.log("Handling 'networkChanged' event with payload", networkId)
+      activate(injected)
+    },
+    [activate]
+  )
 
   useEffect(() => {
     if (account && account != cachedAccount) {
