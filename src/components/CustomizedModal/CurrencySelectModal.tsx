@@ -26,9 +26,9 @@ export default function CurrencySelectModal() {
     <Modal
       isOpen={currencySelectModalOpen}
       maxHeight={61.8}
-      onDismiss={() => {
+      /* onDismiss={() => {
         console.log('dismiss')
-      }}
+      }} */
       closeByKeyboard={true}
       setIsOpen={setCurrencySelectModalOpen}
       maxWidth={'40rem'}

@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import styled, { css } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
 import Grow from '@mui/material/Grow'
+import { LogOut } from 'react-feather'
 
 import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
@@ -118,12 +119,23 @@ const FlyoutMenu = styled.div`
   }
 `
 
-const ActiveRowWrapper = styled.div`
+const ActiveRowWrapper = styled(Flex)`
   background-color: ${({ theme }) => theme.bg1};
   border-radius: 8px;
   cursor: pointer;
   padding: 8px;
   width: 100%;
+  .hidden-when-narrow {
+    ${({ theme }) => theme.mediaWidth.upToMedium`
+      display: none;
+    `}
+  }
+  .keep-when-narrow {
+    ${({ theme }) => theme.mediaWidth.upToMedium`
+      justify-content: center;
+      width: 100%;
+  `}
+  }
 `
 
 const HeaderFunctionalArea = styled(Flex)<{ ready: boolean }>`
@@ -194,6 +206,12 @@ export default function Header() {
     manuallyLogout()
   }, [deactivate])
 
+  const [delayedCloseMenuTimer, setDelayedCloseMenuTimer] = useState(NaN)
+
+  const delayedCloseMenu = useCallback(() => {
+    flyoutMenuShow && setFlyoutMenuShow(false)
+  }, [flyoutMenuShow])
+
   return (
     <SHeader>
       <BannerArea>
@@ -225,9 +243,9 @@ export default function Header() {
               onClick={() => {
                 setFlyoutMenuShow(true)
               }}
-              /* onMouseLeave={() => {
-                flyoutMenuShow && setFlyoutMenuShow(false)
-              }} */
+              onMouseLeave={() => {
+                setDelayedCloseMenuTimer(window.setTimeout(() => delayedCloseMenu(), 500))
+              }}
             >
               <Flex alignItems="center">
                 <SBlockie className={'header-btn-img'} address={address} size={20} style={{ minWidth: '32px' }} />
@@ -240,6 +258,10 @@ export default function Header() {
                 <FlyoutMenu
                   onMouseLeave={() => {
                     setFlyoutMenuShow(false)
+                  }}
+                  onMouseOver={() => {
+                    window.clearTimeout(delayedCloseMenuTimer)
+                    setFlyoutMenuShow(true)
                   }}
                   ref={flyoutMenuRef}
                   style={{ overflow: 'hidden' }}
@@ -256,7 +278,13 @@ export default function Header() {
                       logout()
                     }}
                   >
-                    <Text1 /*  max={20} min={2} mode="single" */ style={{ fontWeight: 800, width: '100%' }}>Logout</Text1>
+                    <Flex flex={1} className="hidden-when-narrow"></Flex>
+                    <Flex minWidth="fit-content" className="hidden-when-narrow">
+                      <Text1 /*  max={20} min={2} mode="single" */ style={{ fontWeight: 650, width: '100%' }}>Logout</Text1>
+                    </Flex>
+                    <Flex className="keep-when-narrow" flex={1} paddingLeft="0.25rem" alignItems={'center'}>
+                      <LogOut size="1rem" strokeWidth="3.5" />
+                    </Flex>
                   </ActiveRowWrapper>
                 </FlyoutMenu>
               </Grow>
