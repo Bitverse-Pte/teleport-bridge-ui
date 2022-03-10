@@ -172,8 +172,13 @@ export default function Header() {
     const { account, active, chainId, deactivate } = state.evmCompatibles
     return { account, active, chainId, deactivate }
   })
+  const { walletAddress: keplrWalletAddress } = useSelector((state: RootState) => {
+    const { walletAddress } = state.comoscompatibles
+    return { walletAddress }
+  })
   const {
     application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen, setNetworkModalMode },
+    comoscompatibles: { disconnect: disconnectKeplr },
   } = useDispatch()
   const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = useSelector((state: RootState) => {
     const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = state.application
@@ -186,8 +191,8 @@ export default function Header() {
     }
   }, [availableChains, chainId])
   const [flyoutMenuShow, setFlyoutMenuShow] = useState(false)
-  const address = useMemo(() => account ?? '', [account])
-  const ready = useMemo(() => connectStatus && active && !!account, [connectStatus, active, account])
+  const address = useMemo(() => (keplrWalletAddress || account) ?? '', [keplrWalletAddress, account])
+  const ready = useMemo(() => connectStatus && ((active && !!account) || !!keplrWalletAddress), [connectStatus, active, account, keplrWalletAddress])
 
   /*   useEffect(() => {
     const clickHandler = function (evt: MouseEvent) {

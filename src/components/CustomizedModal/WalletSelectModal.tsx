@@ -61,14 +61,14 @@ export default function WalletSelectModal() {
           .then(() => {
             return Promise.resolve()
               .then(() => {
-                setWalletType(walletType)
-                loggedIn()
+                // setWalletType(walletType)
+                loggedIn(walletType)
               })
               .then(() => setWalletModalOpen(false))
             // logMonitoringEvent({ walletAddress })
           })
           .catch((error: any) => {
-            setWalletType(WALLET_TYPE.UNSET)
+            // setWalletType(WALLET_TYPE.UNSET)
             if (error.code === -32002) {
               errorNoti(`Unable to connect to your selection, as you have a same connection request awaiting your action in your wallet, please take action`)
               return

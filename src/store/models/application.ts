@@ -44,6 +44,10 @@ if (!Store2.has('connect-status')) {
   Store2.set('connect-status', false)
 }
 
+if (!Store2.has('connect-status')) {
+  Store2.set('wallet-type', WALLET_TYPE.UNSET)
+}
+
 let estimationClockId: number
 export type IAppState = {
   connectStatus: boolean
@@ -56,7 +60,7 @@ export type IAppState = {
   waitWallet: boolean
   initStatus: INIT_STATUS
   availableChains: Map<number, ExtChain>
-  srcChainId: number
+  srcChainId: number | string
   destChainId: number
   bridgePairs: Map<string, BridgePair>
   // library: Web3Provider | undefined
@@ -99,7 +103,7 @@ export const initialState: IAppState = {
   selectedTransactionId: '',
   transactionDetailModalOpen: false,
   transactionHistoryUpdatingTimer: 0,
-  walletType: WALLET_TYPE.UNSET,
+  walletType: Store2.get('wallet-type'),
 }
 
 export const application = createModel<RootModel>()({
@@ -318,12 +322,16 @@ export const application = createModel<RootModel>()({
       dispatch.application.setSelectedTokenName(selectedTokenName)
       dispatch.application.setCurrencySelectModalOpen(false)
     }, */
-    loggedIn() {
+    loggedIn(walletType: WALLET_TYPE) {
       Store2.set('connect-status', true)
+      Store2.set('wallet-type', walletType)
+      dispatch.application.setWalletType(walletType)
       dispatch.application.setConnectStatus(true)
     },
     manuallyLogout() {
       Store2.set('connect-status', false)
+      Store2.set('wallet-type', WALLET_TYPE.UNSET)
+      dispatch.application.setWalletType(WALLET_TYPE.UNSET)
       dispatch.application.setConnectStatus(false)
       dispatch.application.changeTransferStatus(TRANSFER_STATUS.UNCONNECTED)
     },
@@ -349,7 +357,7 @@ export const application = createModel<RootModel>()({
       dispatch.application.setWaitWallet(true)
       const { availableChains: sourceChains, bridgePairs, selectedTokenName, srcChainId, destChainId } = state.application
       const { library, account } = state.evmCompatibles
-      const sourceChain = sourceChains.get(srcChainId)
+      const sourceChain = sourceChains.get(+srcChainId)
       const destinationChain = sourceChain?.destChains.find((e) => e.chainId === destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!.srcToken
@@ -386,7 +394,7 @@ export const application = createModel<RootModel>()({
       dispatch.application.setWaitWallet(true)
       const { availableChains: sourceChains, bridgePairs, selectedTokenName, srcChainId, destChainId, transactions } = state.application
       const { library, account } = state.evmCompatibles
-      const sourceChain = sourceChains.get(srcChainId)
+      const sourceChain = sourceChains.get(+srcChainId)
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!
@@ -779,11 +787,9 @@ export const application = createModel<RootModel>()({
                 mergeWith(toUpdateOne, newOne, function (objValue, srcValue) {
                   return srcValue || objValue
                 })
+                const currentState = store.getState()
                 if (newOne.status === TRANSACTION_STATUS.SUCCEEDED) {
-                  const tokenInfo = store!
-                    .getState()
-                    .application.bridgePairs.get(`${toUpdateOne.src_chain_id}-${toUpdateOne.dest_chain_id}`)
-                    ?.tokens.find((token) => token.srcToken.address === toUpdateOne.token_address)?.srcToken
+                  const tokenInfo = currentState.application.bridgePairs.get(`${toUpdateOne.src_chain_id}-${toUpdateOne.dest_chain_id}`)?.tokens.find((token) => token.srcToken.address === toUpdateOne.token_address)?.srcToken
                   successNoti(`succeeded to transfer ${new BigNumber(toUpdateOne.amount).shiftedBy(-tokenInfo!.decimals).toString()} of ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}!`, toUpdateOne.send_tx_hash)
                 }
                 if (newOne.status === TRANSACTION_STATUS.FAILED) {
@@ -795,6 +801,13 @@ export const application = createModel<RootModel>()({
                   }
                   console.warn(`failed to transfer this amount: ${parsedTransactionAmount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
                   // warnNoti(`failed to transfer this amount: ${parsedTransactionAmount} for token: ${toUpdateOne.token} from chain: ${toUpdateOne.src_chain} to chain ${toUpdateOne.dest_chain}`, toUpdateOne.send_tx_hash)
+                }
+                if (newOne.status === TRANSACTION_STATUS.SUCCEEDED || newOne.status === TRANSACTION_STATUS.FAILED) {
+                  const tokens = currentState.application.bridgePairs.get(`${newOne.src_chain_id}-${newOne.dest_chain_id}`)?.tokens
+                  const targetToken = tokens!.find((e) => e.srcToken.address.toLowerCase() === newOne.token_address.toLowerCase()) || tokens!.find((e) => e.destToken.address.toLowerCase() === newOne.token_address.toLowerCase())
+                  if ((newOne.src_chain_id == currentState.application.srcChainId || newOne.dest_chain_id == currentState.application.srcChainId) && currentState.application.selectedTokenName === targetToken?.srcToken.name) {
+                    store.dispatch.application.saveCurrentTokenBalance(undefined)
+                  }
                 }
               }
               newTxes.splice(newOneIndex, 1)

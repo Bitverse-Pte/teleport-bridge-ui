@@ -91,7 +91,8 @@ declare global {
     box: any
     space: any
     ethereum: EthereumProvider
+    keplr: any
+    getOfflineSigner: Function
     [name: string]: any
   }
 }
-

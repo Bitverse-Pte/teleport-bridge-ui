@@ -8,6 +8,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@keplr-wallet/common": "^0.9.10",
+    "@keplr-wallet/cosmos": "^0.9.16",
+    "@keplr-wallet/stores": "^0.9.16",
+    "@keplr-wallet/types": "^0.9.12",
+    "@keplr-wallet/wc-client": "^0.9.12",
+    "@keplr-wallet/wc-qrcode-modal": "^0.9.0",
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@ethersproject/contracts": "^5.5.0",
@@ -26,6 +33,9 @@
     "@web3-react/portis-connector": "^6.2.11",
     "@web3-react/walletconnect-connector": "^6.2.10",
     "@web3-react/walletlink-connector": "^6.2.12",
+    "@walletconnect/client": "^1.6.5",
+    "@walletconnect/qrcode-modal": "^1.6.5",
+    "@cosmjs/cosmwasm-stargate": "^0.27.1",
     "axios": "^0.26.0",
     "bignumber.js": "^9.0.2",
     "blockies-ts": "^1.0.0",

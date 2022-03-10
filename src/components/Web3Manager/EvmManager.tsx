@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import { useActiveWeb3React, useEagerConnect, useInactiveListener } from 'hooks/web3'
 import { store } from 'store'
-import { NetworkSelectModalMode } from 'constants/types'
+import { NetworkSelectModalMode, WALLET_TYPE } from 'constants/types'
 // import { network } from 'connectors'
 
 /* const MessageWrapper = styled.div`
@@ -38,6 +38,7 @@ export default function EvmManager(/* { children }: { children: JSX.Element } */
   }, []) */
   useEffect(() => {
     const { setActivate, setSetError, setDeactivate, setConnector, setLibrary, setChainId, setAccount, setActive, setErrorObj } = store.dispatch.evmCompatibles
+    const { walletType } = store.getState().application
     setActivate(activate)
     setSetError(setError)
     setDeactivate(deactivate)

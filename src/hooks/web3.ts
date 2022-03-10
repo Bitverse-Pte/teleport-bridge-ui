@@ -14,44 +14,9 @@ import { store } from 'store/store'
 export function useActiveWeb3React() {
   const context = useWeb3React<Web3Provider>()
   const contextNetwork = useWeb3React<Web3Provider>(NetworkContextName)
-  // const {
-  //   application: { saveConnectStatus },
-  // } = useDispatch()
-
   return context.active ? context : contextNetwork
-  // tempContext.deactivate = wrap(tempContext.deactivate, function (func) {
-  //   func()
-  //   saveConnectStatus(false)
-  // })
-  // /* const originalDeactivate = tempContext.deactivate
-  // const wrappedDeactivate = () => {
-  //   originalDeactivate()
-  //   saveConnectStatus(false)
-  // }
-  // tempContext.deactivate = wrappedDeactivate */
-  // tempContext.activate = wrap(tempContext.activate, function (func, ...args) {
-  //   const [connector, onError, throwErrors] = args
-  //   return func(connector as AbstractConnector, onError as ((error: Error) => void) | undefined, throwErrors as boolean | undefined).then(() => saveConnectStatus(true))
-  // })
-  /*   const originalActivate = tempContext.activate
-  const wrappedActivate = (connector: AbstractConnector, onError?: ((error: Error) => void) | undefined, throwErrors?: boolean | undefined) => {
-    return originalActivate.apply(tempContext, [connector, onError, throwErrors]).then(() => {
-      saveConnectStatus(true)
-    })
-  }
-  tempContext.activate = wrappedActivate */
 }
 
-/* export function useConnectStatus() {
-  const { active } = useWeb3React<Web3Provider>()
-  const {
-    application: { saveConnectStatus },
-  } = useDispatch()
-  useEffect(() => {
-    active && saveConnectStatus(active)
-  }, [active])
-}
- */
 export function useEagerConnect() {
   const { activate, active } = useWeb3React()
   const [tried, setTried] = useState(false)

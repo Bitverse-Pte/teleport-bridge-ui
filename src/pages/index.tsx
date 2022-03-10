@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react'
 import { NextApiResponse } from 'next'
 import Store2 from 'store2'
-// import 'inter-ui'
 import { isAddress } from 'web3-utils'
 
 import requestor from 'helpers/requestor'
 import BridgeUI from 'components/BridgeUI'
 import ThemeProvider from 'theme'
-// import { globalStyle } from './styles'
 // import { store } from 'store/store'
 import { ZERO_ADDRESS } from 'constants/misc'
 import { BridgePair, ExtChain, Chain, AVAILABLE_CHAINS_URL, COUNTERPARTY_CHAINS_URL, BRIDGE_TOKENS_URL, INIT_STATUS, TransactionDetail, NetworkSelectModalMode } from 'constants/index'
@@ -16,72 +14,6 @@ import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
 import { useSelector } from 'react-redux'
 
-// const GlobalStyle = createGlobalStyle`
-//   ${globalStyle}
-// `
-
-// const Web3ProviderNetwork = createWeb3ReactRoot(NetworkContextName)
-
-// function Base() {
-//   const {
-//     application: { saveLibrary },
-//   } = useDispatch()
-//   const storeContext = useWeb3Context()
-//   // const context = useWeb3React<Web3Provider>()
-//   // const contextNetwork = useWeb3React<Web3Provider>(NetworkContextName)
-//   const context = useWeb3React()
-//   const contextNetwork = useWeb3React(NetworkContextName)
-
-//   // try to eagerly connect to an injected provider, if it exists and has granted access already
-//   const triedEager = useEagerConnect()
-
-//   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
-//   useEffect(() => {
-//     if (triedEager && !contextNetwork.active && !contextNetwork.error && !context.active) {
-//       contextNetwork.activate(network, (error) => {
-//         console.error(error)
-//       })
-//     } else if (context.active && Object.getOwnPropertyNames(storeContext).length < 1) {
-//       saveLibrary(context.active ? context : contextNetwork)
-//     }
-//   }, [triedEager, contextNetwork.active, contextNetwork.error, context.active, storeContext])
-
-//   // when there's no account connected, react to logins (broadly speaking) on the injected provider, if it exists
-//   useInactiveListener(!triedEager)
-//   return (
-//     <Flex
-//       flexDirection="column"
-//       css={`
-//         & {
-//           width: 100%;
-//           .App {
-//             width: 100%;
-//           }
-//         }
-//       `}
-//     >
-//       <Header></Header>
-//       <Flex>
-//         <Routes>
-//           <Route path="/" element={<App />} />
-//           <Route path="*" element={<App />} />
-//         </Routes>
-//       </Flex>
-//     </Flex>
-//   )
-// }
-
-/* const mapState = ({ application }: RootState) => ({
-  application,
-})
-
-const mapDispatch = ({ application }: Dispatch) => ({
-  application,
-})
-
-const StatefulBridgeUI = connect(mapState, mapDispatch)(BridgeUI) */
-
-// ReactDOM.render(
 export default function Home({
   toSetBridgePairs,
   toSetSrcChainId,
@@ -122,14 +54,9 @@ export default function Home({
         }
         account && connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
       }
-      /*    if (availableChains.has(chainId)) {
-        chainId && chainId !== srcChainId && changeNetwork({ chainId: chainId })
-      } else {
-        // changeNetwork({ chainId: availableChains.values().next().value.chainId })
-        connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
-      } */
     }
   }, [active, chainId, availableChains, connectStatus, account, library])
+
   useEffect(() => {
     if (propsError) {
       setInitStatus(INIT_STATUS.error)
@@ -166,20 +93,7 @@ export default function Home({
     </>
   )
 }
-/* 
-export async function getStaticProps() {
-  const store = initializeStore(undefined)
-  await store.dispatch.application.initChains()
 
-  return {
-    props: {
-      // usersList,
-    },
-  }
-} */
-
-// document.getElementById('root'),
-// )
 const isServer = typeof window === 'undefined'
 let dataCache:
   | {

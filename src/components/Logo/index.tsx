@@ -27,7 +27,12 @@ export function StyledLogo({ srcs, alt, size, style, isSelected, ...rest }: { is
     if (typeof src === 'string') {
       return !BAD_SRCS[src]
     } else {
-      return !BAD_SRCS[src.src]
+      try {
+        return !BAD_SRCS[src.src]
+      } catch (error) {
+        console.error(error)
+        return false
+      }
     }
   })
 

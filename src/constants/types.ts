@@ -343,6 +343,7 @@ export interface Chain {
 
 export interface ExtChain extends Chain {
   destChains: Chain[]
+  walletType: WALLET_TYPE
 }
 
 export interface BridgePair {
