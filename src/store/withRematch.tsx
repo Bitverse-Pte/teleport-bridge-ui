@@ -38,7 +38,7 @@ declare module 'next' {
 const withRematch = (A: (props: any) => JSX.Element) => {
   return class AppWithRematch extends React.Component<Props> {
     reduxStore: any
-    static async getInitialProps(appContext: AppContext) {
+    static async getStaticProps(appContext: AppContext) {
       const reduxStore = getOrCreateStore()
       appContext.ctx.reduxStore = reduxStore
 

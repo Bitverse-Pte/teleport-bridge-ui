@@ -56,12 +56,12 @@ export type IAppState = {
   networkModalMode: NetworkSelectModalMode | false
   historyModalOpen: boolean
   currencySelectModalOpen: boolean
-  destinationChains: Map<number, Chain>
+  destinationChains: Map<number | string, Chain>
   waitWallet: boolean
   initStatus: INIT_STATUS
-  availableChains: Map<number, ExtChain>
+  availableChains: Map<number | string, ExtChain>
   srcChainId: number | string
-  destChainId: number
+  destChainId: number | string
   bridgePairs: Map<string, BridgePair>
   // library: Web3Provider | undefined
   // account: string | null | undefined
@@ -357,7 +357,7 @@ export const application = createModel<RootModel>()({
       dispatch.application.setWaitWallet(true)
       const { availableChains: sourceChains, bridgePairs, selectedTokenName, srcChainId, destChainId } = state.application
       const { library, account } = state.evmCompatibles
-      const sourceChain = sourceChains.get(+srcChainId)
+      const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChain?.destChains.find((e) => e.chainId === destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       const tokenInfo = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!.srcToken
@@ -394,7 +394,7 @@ export const application = createModel<RootModel>()({
       dispatch.application.setWaitWallet(true)
       const { availableChains: sourceChains, bridgePairs, selectedTokenName, srcChainId, destChainId, transactions } = state.application
       const { library, account } = state.evmCompatibles
-      const sourceChain = sourceChains.get(+srcChainId)
+      const sourceChain = sourceChains.get(srcChainId)
       const destinationChain = sourceChains.get(destChainId)
       const bridge = bridgePairs.get(`${sourceChain?.chainId}-${destinationChain?.chainId}`)
       const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!
@@ -574,7 +574,7 @@ export const application = createModel<RootModel>()({
       if (network) {
         const result = await switchToNetwork({
           library: store!.getState().evmCompatibles.library,
-          chainId: cachedDestChainId,
+          chainId: +cachedDestChainId,
         })
         dispatch.application.setWaitWallet(false)
         if (result) {

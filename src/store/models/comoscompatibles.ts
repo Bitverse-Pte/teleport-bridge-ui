@@ -98,7 +98,7 @@ export const EmbedChainInfos = [
 ]
 
 export type IAppState = {
-  walletAddresss: string
+  walletAddress: string
   signingClient: SigningCosmWasmClient | null
   error: any
   chainStore: ChainStore | null
@@ -108,7 +108,7 @@ export type IAppState = {
 }
 
 export const initialState: IAppState = {
-  walletAddresss: '',
+  walletAddress: '',
   signingClient: null,
   error: null,
   chainStore: null,
