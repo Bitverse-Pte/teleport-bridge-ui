@@ -50,6 +50,35 @@ export default function EvmManager(/* { children }: { children: JSX.Element } */
     setErrorObj(error)
   }, [activate, setError, deactivate, connector, library, chainId, account, active, error])
 
+  useEffect(() => {
+    const { availableChains, connectStatus, srcChainId, networkModalMode } = store.getState().application
+    const { changeNetwork, setNetworkModalMode } = store.dispatch.application
+    if (active && chainId && availableChains.size) {
+      if (chainId && chainId !== srcChainId && networkModalMode !== NetworkSelectModalMode.SRC) {
+        if (!(window.web3 || window.ethereum)) {
+          return
+        }
+        if (availableChains.has(chainId)) {
+          library && changeNetwork({ chainId: chainId })
+        } else {
+          account && connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
+        }
+      } else if (chainId && chainId !== srcChainId && networkModalMode === NetworkSelectModalMode.SRC) {
+        if (!(window.web3 || window.ethereum)) {
+          return
+        }
+        if (availableChains.has(chainId)) {
+          library && changeNetwork({ chainId: chainId })
+        }
+      } else if (chainId && chainId === srcChainId) {
+        if (!(window.web3 || window.ethereum)) {
+          return
+        }
+        library && changeNetwork({ chainId: chainId })
+      }
+    }
+  }, [active, chainId, account, library])
+
   // after eagerly trying injected, if the network connect ever isn't active or in an error state, activate itd
   /*   useEffect(() => {
     if (triedEager && !networkActive && !networkError && !active) {

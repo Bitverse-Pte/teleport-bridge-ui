@@ -586,7 +586,7 @@ export const application = createModel<RootModel>()({
     async changeNetwork({ chainId }, state) {
       dispatch.application.setWaitWallet(true)
       const result = await switchToNetwork({
-        library: state.evmCompatibles.library,
+        library: store!.getState().evmCompatibles.library,
         chainId,
       })
       dispatch.application.setWaitWallet(false)

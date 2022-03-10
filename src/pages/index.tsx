@@ -43,21 +43,6 @@ export default function Home({
   })
 
   useEffect(() => {
-    if (active && chainId && availableChains.size) {
-      if (chainId && chainId !== srcChainId && networkModalMode !== NetworkSelectModalMode.SRC) {
-        if (!(window.web3 || window.ethereum)) {
-          return
-        }
-        if (availableChains.has(chainId)) {
-          library && changeNetwork({ chainId: chainId })
-          return
-        }
-        account && connectStatus && active && setNetworkModalMode(NetworkSelectModalMode.SRC)
-      }
-    }
-  }, [active, chainId, availableChains, connectStatus, account, library])
-
-  useEffect(() => {
     if (propsError) {
       setInitStatus(INIT_STATUS.error)
       return

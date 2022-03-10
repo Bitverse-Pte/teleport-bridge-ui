@@ -102,7 +102,7 @@ export function useInactiveListener(suppress = false) {
 
       if (chainId != srcChainId) {
         if (store.getState().application.availableChains.has(parseInt(`${chainId}`))) {
-          setSrcChainId(parseInt(`${chainId}`))
+          setSrcChainId(+chainId)
         }
       }
       activate(injected)
@@ -118,6 +118,11 @@ export function useInactiveListener(suppress = false) {
   const handleNetworkChanged = useCallback(
     (networkId: string | number) => {
       console.log("Handling 'networkChanged' event with payload", networkId)
+      if (networkId != srcChainId) {
+        if (store.getState().application.availableChains.has(parseInt(`${networkId}`))) {
+          setSrcChainId(+networkId)
+        }
+      }
       activate(injected)
     },
     [activate]
