@@ -17,14 +17,18 @@ import { errorNoti } from 'helpers/notifaction'
 import { WALLET_TYPE } from 'constants/index'
 
 const OptionGrid = styled.div`
-  display: grid;
+  display: flex;
   width: 100%;
-  grid-gap: 10px;
-  grid-template-columns: 1fr;
-  ${({ theme }) => theme.mediaWidth.upToMedium`
-    grid-template-columns: 100%;
-    grid-gap: 10px;
-  `};
+  flex-direction: column;
+  button {
+    margin: 0.5rem 0;
+  }
+  // grid-gap: 10px;
+  // grid-template-columns: 1fr;
+  // ${({ theme }) => theme.mediaWidth.upToMedium`
+  //   grid-template-columns: 100%;
+  //   grid-gap: 10px;
+  // `};
 `
 
 export default function WalletSelectModal() {

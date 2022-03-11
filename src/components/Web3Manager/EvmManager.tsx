@@ -17,7 +17,7 @@ const Message = styled.h2`
   color: ${({ theme }) => theme.secondary1};
 ` */
 
-export default function EvmManager(/* { children }: { children: JSX.Element } */) {
+export function EvmManager(/* { children }: { children: JSX.Element } */) {
   const { activate, setError, deactivate, connector, library, chainId, account, active, error } = useActiveWeb3React()
   // try to eagerly connect to an injected provider, if it exists and has granted access already
   const triedEager = useEagerConnect()

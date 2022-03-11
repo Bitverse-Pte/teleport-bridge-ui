@@ -1,12 +1,12 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 
-import INJECTED_ICON_URL from 'public/images/arrow-right.svg'
-import COINBASE_ICON_URL from 'public/images/coinbaseWalletIcon.svg'
-import FORTMATIC_ICON_URL from 'public/images/fortmaticIcon.png'
+// import INJECTED_ICON_URL from 'public/images/arrow-right.svg'
+// import COINBASE_ICON_URL from 'public/images/coinbaseWalletIcon.svg'
+// import FORTMATIC_ICON_URL from 'public/images/fortmaticIcon.png'
 import METAMASK_ICON_URL from 'public/images/metamask.png'
-import PORTIS_ICON_URL from 'public/images/portisIcon.png'
+// import PORTIS_ICON_URL from 'public/images/portisIcon.png'
 import WALLETCONNECT_ICON_URL from 'public/images/walletConnectIcon.svg'
-import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
+import { /* fortmatic, */ injected, /* portis, */ walletconnect /* walletlink */ } from '../connectors'
 import { WALLET_TYPE } from './types'
 
 export interface WalletInfo {
@@ -59,7 +59,7 @@ export const SUPPORTED_WALLETS = new Map<string, WalletInfo>(
         walletType: WALLET_TYPE.EVM,
       },
     ],
-    [
+    /*   [
       'WALLET_LINK',
       {
         connector: walletlink,
@@ -70,8 +70,8 @@ export const SUPPORTED_WALLETS = new Map<string, WalletInfo>(
         color: '#315CF5',
         walletType: WALLET_TYPE.EVM,
       },
-    ],
-    [
+    ], */
+    /*  [
       'COINBASE_LINK',
       {
         name: 'Open in Coinbase Wallet',
@@ -83,8 +83,8 @@ export const SUPPORTED_WALLETS = new Map<string, WalletInfo>(
         mobileOnly: true,
         walletType: WALLET_TYPE.EVM,
       },
-    ],
-    [
+    ], */
+    /*   [
       'FORTMATIC',
       {
         connector: fortmatic,
@@ -109,6 +109,6 @@ export const SUPPORTED_WALLETS = new Map<string, WalletInfo>(
         mobile: true,
         walletType: WALLET_TYPE.EVM,
       },
-    ],
+    ], */
   ]
 )

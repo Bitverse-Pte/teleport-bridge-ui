@@ -19,7 +19,7 @@ const Message = styled.h2`
   color: ${({ theme }) => theme.secondary1};
 ` */
 
-export default function CosmosManager({ children }: { children: JSX.Element }) {
+export function CosmosManager({ children }: { children: JSX.Element }) {
   const {
     application: { /* setDestinationChain, */ setLibrary, setAccount, changeNetwork, setNetworkModalMode, setSrcChainId },
   } = useDispatch()

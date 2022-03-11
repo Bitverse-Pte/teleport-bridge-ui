@@ -1,20 +1,21 @@
 import { createModel } from '@rematch/core'
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
-import { Bech32Address } from '@keplr-wallet/cosmos'
+/* import { Bech32Address } from '@keplr-wallet/cosmos' */
 
 import type { RootModel } from '.'
 import { store } from 'store/store'
 import { connectKeplr } from 'helpers/keplr'
-import { ChainStore, QueriesStore, QueriesWithCosmos, AccountStore, AccountWithCosmos } from '@keplr-wallet/stores'
-import { WALLET_TYPE } from 'constants/index'
+import { ChainInfo } from 'constants/keplr/chaininfo'
+import { WALLET_TYPE } from 'constants/types'
+/* import { ChainStore, QueriesStore, QueriesWithCosmos, AccountStore, AccountWithCosmos } from '@keplr-wallet/stores'
 import { ChainInfo } from '@keplr-wallet/types'
-import { IndexedDBKVStore } from '@keplr-wallet/common'
-import { getWCKeplr } from 'helpers/get-wc-keplr'
+import { IndexedDBKVStore } from '@keplr-wallet/common' */
+// import { getWCKeplr } from 'helpers/get-wc-keplr'
 
 const PUBLIC_RPC_ENDPOINT = process.env.NEXT_PUBLIC_CHAIN_RPC_ENDPOINT || ''
 const PUBLIC_CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID
 
-export const EmbedChainInfos = [
+/* export const EmbedChainInfos = [
   {
     rpc: 'https://rpc-cosmoshub.keplr.app',
     rest: 'https://lcd-cosmoshub.keplr.app',
@@ -96,14 +97,15 @@ export const EmbedChainInfos = [
     features: ['stargate', 'ibc-transfer'],
   },
 ]
-
+ */
 export type IAppState = {
   walletAddress: string
   signingClient: SigningCosmWasmClient | null
   error: any
-  chainStore: ChainStore | null
+  /*   chainStore: ChainStore | null
   queriesStore: QueriesStore<QueriesWithCosmos> | null
   accountStore: AccountStore<AccountWithCosmos> | null
+  */
   availableChains: ChainInfo[]
 }
 
@@ -111,9 +113,10 @@ export const initialState: IAppState = {
   walletAddress: '',
   signingClient: null,
   error: null,
-  chainStore: null,
+  /*   chainStore: null,
   queriesStore: null,
   accountStore: null,
+  */
   availableChains: [],
 }
 
@@ -126,6 +129,7 @@ export const comoscompatibles = createModel<RootModel>()({
         availableChains,
       }
     },
+    /*  
     setChainStore(state, chainStore: ChainStore) {
       return { ...state, chainStore }
     },
@@ -134,7 +138,7 @@ export const comoscompatibles = createModel<RootModel>()({
     },
     setAccountStore(state, accountStore: AccountStore<AccountWithCosmos>) {
       return { ...state, accountStore }
-    },
+    }, */
     setWalletAddresss(state, walletAddresss: string) {
       return { ...state, walletAddresss }
     },
@@ -147,22 +151,22 @@ export const comoscompatibles = createModel<RootModel>()({
   },
   effects: (dispatch) => ({
     initKeplr() {
-      // const availableChains = [...store.getState().application.availableChains.values()].filter((e) => e.walletType === WALLET_TYPE.COSMOS) as unknown as ChainInfo[]
-      const availableChains = EmbedChainInfos
+      const availableChains = [...store.getState().application.availableChains.values()].filter((e) => e.walletType === WALLET_TYPE.COSMOS) as unknown as ChainInfo[]
+      // const availableChains = EmbedChainInfos
       dispatch.comoscompatibles.setAvailableChains(availableChains)
-      const chainStore = new ChainStore<ChainInfo>(availableChains)
-      dispatch.comoscompatibles.setChainStore(chainStore)
-      const queriesStore = new QueriesStore(new IndexedDBKVStore('store_queries'), chainStore, getWCKeplr, QueriesWithCosmos)
-      dispatch.comoscompatibles.setQueriesStore(queriesStore)
-      const accountStore = new AccountStore(window, AccountWithCosmos, chainStore, queriesStore, {
-        defaultOpts: {
-          prefetching: false,
-          suggestChain: false,
-          autoInit: true,
-          getKeplr: getWCKeplr,
-        },
-      })
-      dispatch.comoscompatibles.setAccountStore(accountStore)
+      // const chainStore = new ChainStore<ChainInfo>(availableChains)
+      // dispatch.comoscompatibles.setChainStore(chainStore)
+      // const queriesStore = new QueriesStore(new IndexedDBKVStore('store_queries'), chainStore, getWCKeplr, QueriesWithCosmos)
+      // dispatch.comoscompatibles.setQueriesStore(queriesStore)
+      // const accountStore = new AccountStore(window, AccountWithCosmos, chainStore, queriesStore, {
+      //   defaultOpts: {
+      //     prefetching: false,
+      //     suggestChain: false,
+      //     autoInit: true,
+      //     getKeplr: getWCKeplr,
+      //   },
+      // })
+      // dispatch.comoscompatibles.setAccountStore(accountStore)
     },
 
     async connectWallet() {

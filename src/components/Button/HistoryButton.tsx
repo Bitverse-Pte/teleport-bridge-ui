@@ -10,7 +10,7 @@ import { RootState } from 'store/store'
 import HistorySvg from 'public/history.svg'
 import { TRANSACTION_STATUS } from 'constants/index'
 import { TransitionSpinner } from 'components/Spinner'
-import { Fade } from '@mui/material'
+import Fade from '@mui/material/Fade'
 import { Flex } from 'rebass'
 
 const Wrapper = styled.div`
@@ -43,7 +43,7 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
 
   const hasPending = useMemo(() => {
     return transactions.some((e) => {
-      return e.status === TRANSACTION_STATUS.PENDING && !!e.src_chain_id
+      return !!e.send_tx_hash && e.status === TRANSACTION_STATUS.PENDING && !!e.src_chain_id
     })
   }, [transactions])
 

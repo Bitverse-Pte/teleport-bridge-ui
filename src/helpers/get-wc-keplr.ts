@@ -1,3 +1,5 @@
+export {}
+/*
 import { Keplr } from '@keplr-wallet/types'
 import WalletConnect from '@walletconnect/client'
 import { KeplrQRCodeModalV1 } from '@keplr-wallet/wc-qrcode-modal'
@@ -70,3 +72,4 @@ export function getWCKeplr(): Promise<Keplr> {
 
   return promise
 }
+ */

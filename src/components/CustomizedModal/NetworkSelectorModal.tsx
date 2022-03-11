@@ -17,16 +17,18 @@ const OptionGrid = styled(Box)`
   justify-content: space-between;
   flex-wrap: wrap;
   button {
-    width: calc(50% - 10px) !important;
-    margin: 5px;
+    width: calc(50% - 0.5rem);
+    margin-bottom: 0.5rem;
   }
   ${({ theme }) => theme.mediaWidth.upToMedium`
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: flex-start;
     height: unset;
     button {
-      width: calc(100%)!important;
-      margin: 0;
+      width: calc(100%);
+    }
+    button:not(:last-child) {
+      margin-bottom: 0.5rem;
     }
   `};
 `
