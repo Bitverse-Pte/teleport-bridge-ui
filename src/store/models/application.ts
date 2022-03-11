@@ -400,6 +400,7 @@ export const application = createModel<RootModel>()({
       const selectedTokenPair = bridge?.tokens.find((e) => e.name === selectedTokenName || e.srcToken.name === selectedTokenName)!
       const { srcToken, destToken } = selectedTokenPair
       const cachedTokenName = selectedTokenName
+      const cachedSrcChainId = srcChainId
       let transaction: {
         hash: string | number | undefined
         wait: () => Promise<any>
@@ -483,13 +484,6 @@ export const application = createModel<RootModel>()({
           dispatch.application.saveTransactions(transactions)
           transaction!
             .wait()
-            .then(() => {
-              if (cachedTokenName === state.application.selectedTokenName) {
-                dispatch.application.saveCurrentTokenBalance(undefined)
-              }
-              // transactionDetail.status = TRANSACTION_STATUS.SUCCEEDED
-              // successNoti(`succeeded to transfer ${amount} of ${selectedTokenName} from chain: ${srcChainId} to chain ${destChainId}!`, toastId)
-            })
             .catch((err: any) => {
               console.error(err)
               transactionDetail.status = TRANSACTION_STATUS.FAILED
@@ -499,9 +493,12 @@ export const application = createModel<RootModel>()({
                 transaction.hash
               )
             })
-          /*  .finally(() => {
-              dispatch.application.setTransactions(transactions)
-            }) */
+            .finally(() => {
+              const currentState = store.getState().application
+              if (cachedTokenName === currentState.selectedTokenName && cachedSrcChainId === currentState.srcChainId) {
+                dispatch.application.saveCurrentTokenBalance(undefined)
+              }
+            })
           setTimeout(() => {
             dispatch.application.openTransactionDetailModal(transactionDetail.send_tx_hash)
           }, TRANSITION_DURATION)
