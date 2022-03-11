@@ -76,6 +76,7 @@
     "web3-utils": "^1.7.0"
   },
   "devDependencies": {
+    "@metamask/types": "^1.1.0",
     "@next/bundle-analyzer": "^12.1.0",
     "@types/lodash": "^4.14.178",
     "@types/ms.macro": "^2.0.0",

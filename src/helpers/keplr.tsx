@@ -1,4 +1,4 @@
-import { ChainInfo } from 'constants/keplr/chaininfo'
+import type { ChainInfo } from '@keplr-wallet/types'
 
 export const connectKeplr = async (chainInfo: ChainInfo) => {
   // Keplr extension injects the offline signer that is compatible with cosmJS.

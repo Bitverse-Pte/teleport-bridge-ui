@@ -1,5 +1,6 @@
 /// <reference types="react-scripts" />
 import '@metamask/types'
+import type { Window as KeplrWindow } from '@keplr-wallet/types'
 declare module '@walletconnect/web3-provider'
 declare module 'web3'
 declare module '*.tiff'
@@ -85,14 +86,12 @@ export interface EthereumProvider {
 // tslint:disable-next-line
 
 declare global {
-  interface Window {
+  interface Window extends KeplrWindow {
     Box: any
     web3: Record<string, unknown>
     box: any
     space: any
     ethereum: EthereumProvider
-    keplr: any
-    getOfflineSigner: Function
     [name: string]: any
   }
 }
