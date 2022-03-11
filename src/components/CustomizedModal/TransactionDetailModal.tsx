@@ -3,7 +3,7 @@ import ReactLoading from 'react-loading'
 import { Flex, Box, Text } from 'rebass'
 import { useSelector } from 'react-redux'
 import BigNumberJS from 'bignumber.js'
-import { Check, X, Frown } from 'react-feather'
+import { Check, Frown, Clock } from 'react-feather'
 import styled, { css, StyledComponent } from 'styled-components'
 import { useTimer } from 'react-timer-hook'
 
@@ -61,8 +61,6 @@ const GreenAmountText = styled(AmountText)`
 
 const StyledCheck = styled(Check)``
 
-const StyleX = styled(X)``
-
 enum STATUS_MARK_TYPE {
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
@@ -105,7 +103,7 @@ const StyledStatusMark = ({ type }: { type: STATUS_MARK_TYPE }) => {
       case STATUS_MARK_TYPE.FAILED:
         return <Frown size={'1rem'} color={'rgba(255,255,255,0.6)'} strokeWidth={2} />
       default:
-        return <StyleX size={'1rem'} strokeWidth={6} />
+        return <Clock size={'1rem'} strokeWidth={2} />
     }
   }, [type])
   return (
