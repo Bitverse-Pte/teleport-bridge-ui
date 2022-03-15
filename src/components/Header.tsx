@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { darken } from 'polished'
 import { useSelector } from 'react-redux'
 // import { Text1 } from 'react-Text1'
+import { AlertCircle } from 'react-feather'
 import styled, { css } from 'styled-components'
 import { Flex } from 'rebass/styled-components'
 import Grow from '@mui/material/Grow'
@@ -22,6 +23,7 @@ import { Hash } from './Hash'
 import { MEDIA_WIDTHS } from 'theme'
 import { NetworkSelectModalMode } from 'constants/types'
 import { StyledLogo } from 'components/Logo'
+import { Icon } from './Icon'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -189,6 +191,7 @@ export default function Header() {
     if (chainId) {
       return availableChains.get(chainId)
     }
+    return false
   }, [availableChains, chainId])
   const [flyoutMenuShow, setFlyoutMenuShow] = useState(false)
   const address = useMemo(() => (keplrWalletAddress || account) ?? '', [keplrWalletAddress, account])
@@ -241,7 +244,16 @@ export default function Header() {
                   </Text1>
                 </>
               )}
-              {!connectedChain && <Text1 /* max={20} min={2} mode="single" */ style={{ fontWeight: 800, width: '100%' }}>Wrong Network</Text1>}
+              {!connectedChain && (
+                <>
+                  <Flex minWidth="1.625rem" height={'1.625rem'} alignItems={'center'} justifyContent="flex-start">
+                    <AlertCircle size={'1.25rem'} className={'header-btn-img'} />
+                  </Flex>
+                  <Text1 className={'header-btn-text'} /* max={20} min={2} mode="single" */ style={{ fontSize: '1rem', fontWeight: 800 }}>
+                    Wrong Network
+                  </Text1>
+                </>
+              )}
             </NetworkStatus>
             <Web3StatusConnected
               style={{ width: '30%' }}
