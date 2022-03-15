@@ -1,3 +1,5 @@
+import { HISTORY_TRANSACTION_QUEUE_LENGTH } from 'constants/index'
+
 export class FixedSizeQueue<T> {
   private container = new Array<T>()
   readonly maxSize: number
@@ -14,7 +16,7 @@ export class FixedSizeQueue<T> {
   }
 
   public reborn(): FixedSizeQueue<T> {
-    const rebornOne = new FixedSizeQueue<T>(10)
+    const rebornOne = new FixedSizeQueue<T>(HISTORY_TRANSACTION_QUEUE_LENGTH)
     for (const item of this) {
       rebornOne.push(item)
     }

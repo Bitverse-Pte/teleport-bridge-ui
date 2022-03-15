@@ -1,4 +1,7 @@
 import axios from 'axios'
+import { HISTORY_TRANSACTION_QUEUE_LENGTH } from 'constants/index'
+import { TransactionDetail } from 'constants/types'
+import { TRANSACTION_HISTORY_URL } from 'constants/urls'
 import http from 'http'
 import https from 'https'
 
@@ -23,3 +26,12 @@ requestor.interceptors.request.use(
 )
 
 export default requestor
+
+export const getLatest50HistroyTx = async function (account: string) {
+  const {
+    data: {
+      data: { history },
+    },
+  } = await requestor.post<{ data: { history: TransactionDetail[] } }>(TRANSACTION_HISTORY_URL, { sender: account, pagination: { current_page: 1, page_size: HISTORY_TRANSACTION_QUEUE_LENGTH, last_page: 1 } })
+  return history
+}

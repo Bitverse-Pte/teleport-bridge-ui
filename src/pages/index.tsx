@@ -62,7 +62,7 @@ export default function Home({
         }
       },
      */
-      setTransactions(new FixedSizeQueue<TransactionDetail>(10))
+      // setTransactions(new FixedSizeQueue<TransactionDetail>(50))
       setConnectStatus(Store2.get('connect-status'))
     }
   }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName, propsError])

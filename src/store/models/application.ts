@@ -7,7 +7,7 @@ import { Web3Provider } from '@ethersproject/providers'
 import { MaxUint256 } from '@ethersproject/constants'
 import { mergeWith } from 'lodash'
 import Store2 from 'store2'
-import requestor from 'helpers/requestor'
+import requestor, { getLatest50HistroyTx } from 'helpers/requestor'
 
 import {
   AVAILABLE_CHAINS_URL,
@@ -29,6 +29,7 @@ import {
   INIT_STATUS,
   WALLET_TYPE,
   TransactionDetailWithCreateTime,
+  HISTORY_TRANSACTION_QUEUE_LENGTH,
 } from 'constants/index'
 import { getBalance } from 'helpers/web3'
 import { getContract } from 'helpers'
@@ -97,7 +98,7 @@ export const initialState: IAppState = {
   selectedTokenName: '',
   transferStatus: Store2.get('connect-status') ? TRANSFER_STATUS.NO_INPUT : TRANSFER_STATUS.UNCONNECTED,
   currentTokenBalance: undefined,
-  transactions: new FixedSizeQueue(10),
+  transactions: new FixedSizeQueue(HISTORY_TRANSACTION_QUEUE_LENGTH),
   estimation: {} as Estimation,
   estimationUpdating: false,
   selectedTransactionId: '',
@@ -338,13 +339,11 @@ export const application = createModel<RootModel>()({
     async initTransactions(account: string) {
       try {
         dispatch.application.stopTransactionHistoryUpdating()
-        const {
-          data: { data: transactions },
-        } = await requestor.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account })
+        const transactions = await getLatest50HistroyTx(account)
         dispatch.application.saveTransactions(
           FixedSizeQueue.fromArray<TransactionDetail>(
             transactions.reverse().filter((e) => e.sender && e.send_tx_hash && e.amount && e.token_address && e.status),
-            10
+            HISTORY_TRANSACTION_QUEUE_LENGTH
           )
         )
         dispatch.application.startTransactionHistoryUpdating(undefined)
@@ -771,10 +770,7 @@ export const application = createModel<RootModel>()({
           return
         }
         try {
-          const {
-            data: { data: newTxes },
-          } = await requestor.post<{ data: TransactionDetail[] }>(TRANSACTION_HISTORY_URL, { sender: account /* , send_tx_hash: tx.send_tx_hash */ }) // backend does not support tx_hash in query
-
+          const newTxes = await getLatest50HistroyTx(account)
           for (const toUpdateOne of transactions) {
             if (toUpdateOne.status === TRANSACTION_STATUS.PENDING) {
               const newOneIndex = newTxes.findIndex((e) => e.send_tx_hash === toUpdateOne.send_tx_hash)
@@ -811,15 +807,15 @@ export const application = createModel<RootModel>()({
             }
           }
           const newTransactions = [...transactions]
-          if (newTransactions.length < 10) {
+          if (newTransactions.length < HISTORY_TRANSACTION_QUEUE_LENGTH) {
             newTransactions.concat(
               newTxes
                 .reverse()
                 .filter((e) => e.sender && e.send_tx_hash && e.amount && e.token_address && e.status)
-                .splice(-(10 - newTransactions.length))
+                .splice(-(HISTORY_TRANSACTION_QUEUE_LENGTH - newTransactions.length))
             )
           }
-          dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(newTransactions, 10))
+          dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(newTransactions, HISTORY_TRANSACTION_QUEUE_LENGTH))
           // dispatch.application.saveTransactions(transactions)
         } catch (err) {
           console.warn(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
