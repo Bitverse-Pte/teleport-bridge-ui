@@ -48,6 +48,13 @@ export default function Home({
       return
     }
     if (toSetAvailableChains && toSetBridgePairs && toSetSelectedTokenName && toSetSrcChainId && toSetDestChainId) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(toSetAvailableChains)
+        console.log(toSetBridgePairs)
+        console.log(toSetSelectedTokenName)
+        console.log(toSetSrcChainId)
+        console.log(toSetDestChainId)
+      }
       setAvailableChains(new Map(toSetAvailableChains))
       setBridgesPairs(new Map(toSetBridgePairs))
       setSelectedTokenName(toSetSelectedTokenName)

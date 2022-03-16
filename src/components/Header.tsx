@@ -246,7 +246,7 @@ export default function Header() {
               )}
               {!connectedChain && (
                 <>
-                  <Flex minWidth="1.625rem" height={'1.625rem'} alignItems={'center'} justifyContent="flex-start">
+                  <Flex minWidth="1.625rem" height={'1.625rem'} alignItems={'center'} justifyContent="center">
                     <AlertCircle size={'1.25rem'} className={'header-btn-img'} />
                   </Flex>
                   <Text1 className={'header-btn-text'} /* max={20} min={2} mode="single" */ style={{ fontSize: '1rem', fontWeight: 800 }}>
