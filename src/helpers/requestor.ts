@@ -2,6 +2,7 @@ import axios from 'axios'
 import { HISTORY_TRANSACTION_QUEUE_LENGTH } from 'constants/index'
 import { TransactionDetail } from 'constants/types'
 import { TRANSACTION_HISTORY_URL } from 'constants/urls'
+import { isServer } from 'helpers'
 import http from 'http'
 import https from 'https'
 
@@ -14,7 +15,6 @@ const requestor = axios.create({
   timeout: 10 * 1000,
 })
 
-const isServer = typeof window === 'undefined'
 requestor.interceptors.request.use(
   async (config) => {
     if (isServer) {

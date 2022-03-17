@@ -17,6 +17,7 @@ import { useDispatch } from 'hooks'
 import { HistoryGrayDetailText, HistoryGrayText } from 'components/Text'
 import { WrappedLink } from 'components/Link'
 import { TooltippedAmount } from 'components/TooltippedAmount'
+import { sensorsTrack } from 'helpers/sensors'
 
 interface LoosedIChainData {
   short_name?: string
@@ -205,6 +206,11 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
     }
   }, [destChain, transaction])
 
+  const openDetail = useCallback((txHash: string) => {
+    sensorsTrack('detail_click')
+    openTransactionDetailModal(txHash)
+  }, [])
+
   return (
     <>
       {srcToken && (
@@ -218,7 +224,13 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
               <Textfit mode="single" min={2} max={20} style={{ width: 'calc(100% - 2rem)' }}>
                 {srcChain!.name}
               </Textfit>
-              <WrappedLink size={16} /* style={{ marginLeft: '0.5rem' }} */ to={jumpToSrcChainBrowserUrl} />
+              <WrappedLink
+                size={16}
+                /* style={{ marginLeft: '0.5rem' }} */ to={jumpToSrcChainBrowserUrl}
+                onClick={() => {
+                  sensorsTrack('src_explorer_click')
+                }}
+              />
             </HistoryChainButton>
           </Box>
           <Box style={{ display: 'flex', justifyContent: 'end', paddingRight: '0.5rem', alignItems: 'center' }}>
@@ -232,7 +244,13 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
                   <Textfit mode="single" min={2} max={20} style={{ width: 'calc(100% - 2rem)' }}>
                     {destChain!.name}
                   </Textfit>
-                  <WrappedLink size={16} /* style={{ marginLeft: '0.5rem' }} */ to={jumpToDestChainBrowserUrl} />
+                  <WrappedLink
+                    size={16}
+                    /* style={{ marginLeft: '0.5rem' }} */ to={jumpToDestChainBrowserUrl}
+                    onClick={() => {
+                      sensorsTrack('dest_explorer_click')
+                    }}
+                  />
                 </>
               )}
             </HistoryChainButton>
@@ -297,7 +315,7 @@ export default function HistoryRecord({ transaction }: { transaction: Transactio
           <Flex justifyContent={'center'} alignItems={'center'}>
             <HistoryGrayDetailText
               onClick={() => {
-                openTransactionDetailModal(transaction.send_tx_hash)
+                openDetail(transaction.send_tx_hash)
               }}
             >
               <Flex justifyContent={'center'} alignItems={'center'}>

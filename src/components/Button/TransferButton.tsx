@@ -8,6 +8,7 @@ import { CURRENCY_INPUT_ERROR, NetworkSelectModalMode, TRANSFER_STATUS } from 'c
 import { useDispatch } from 'hooks'
 import { Flex } from 'rebass'
 import { css } from 'styled-components'
+import { sensorsTrack } from 'helpers/sensors'
 
 const TRANSFER_STATUS_BUTTONS_MAP = {
   [TRANSFER_STATUS.PENDING_APPROVE]: 5,
@@ -79,17 +80,21 @@ export const TransferButton = function ({ error }: { error?: CURRENCY_INPUT_ERRO
 
   const clickHandler = useCallback(() => {
     if (!walletReady) {
+      sensorsTrack('connect_main_button_click')
       setWalletModalOpen(true)
       return
     }
     if (!chainReady) {
+      sensorsTrack('select_src_chain_main_button_click')
       setNetworkModalMode(NetworkSelectModalMode.SRC)
       return
     }
     if (transferStatus === TRANSFER_STATUS.READY_TO_TRANSFER) {
+      sensorsTrack('transfer_click')
       setTransferConfirmationModalOpen(true)
     }
     if (transferStatus === TRANSFER_STATUS.READY_TO_APPROVE) {
+      sensorsTrack('approve_click')
       approve()
     }
   }, [transferStatus, walletReady, chainReady])

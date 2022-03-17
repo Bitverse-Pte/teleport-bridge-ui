@@ -12,6 +12,9 @@ module.exports = withPlugins(
     env: {
       BACKEND_URL: process.env.BACKEND_URL,
     },
+    publicRuntimeConfig: {
+      APP_ENV: process.env.APP_ENV || 'development',
+    },
     api: {
       externalResolver: true,
     },

@@ -8,12 +8,13 @@ import { RootState } from 'store'
 import { Text2, Text3 } from 'components/Text'
 import { HelpIcon } from 'components/Icon/HelpIcon'
 import { TransitionSpinnerMask } from 'components/Spinner'
+import { sensorsTrack } from 'helpers/sensors'
 
 const EstimationRow = styled(Flex)`
   justify-content: space-between;
 `
 
-export function EstimationBlock({ ...rest }: FlexProps) {
+export function EstimationBlock({ location, ...rest }: { location: string } & FlexProps) {
   const { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating } = useSelector((state: RootState) => {
     const { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating } = state.application
     return { /* estimation, availableChains, */ srcChainId, destChainId, bridgePairs, selectedTokenName, estimationUpdating }
@@ -82,7 +83,7 @@ export function EstimationBlock({ ...rest }: FlexProps) {
         <Text2>
           Fee&nbsp;
           <Tooltip title={<Text>Transfer is free on Testnet</Text>}>
-            <HelpIcon size={12} />
+            <HelpIcon size={12} onMouseOver={() => sensorsTrack(`min_received_${location}_hover`)} />
           </Tooltip>
         </Text2>
         <Text3>
@@ -99,7 +100,12 @@ export function EstimationBlock({ ...rest }: FlexProps) {
         <Text2>
           Min Received&nbsp;
           <Tooltip title={<Text>Transfer is free on Testnet</Text>}>
-            <HelpIcon size={12} />
+            <HelpIcon
+              size={12}
+              onMouseOver={() => {
+                sensorsTrack(`min_received_${location}_hover`)
+              }}
+            />
           </Tooltip>
         </Text2>
         <Text3>

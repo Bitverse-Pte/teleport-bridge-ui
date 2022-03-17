@@ -24,6 +24,7 @@ import { MEDIA_WIDTHS } from 'theme'
 import { NetworkSelectModalMode } from 'constants/types'
 import { StyledLogo } from 'components/Logo'
 import { Icon } from './Icon'
+import { sensorsTrack } from 'helpers/sensors'
 
 const Web3StatusGeneric = styled(ButtonSecondary)`
   ${({ theme }) => theme.flexRowNoWrap}
@@ -210,6 +211,7 @@ export default function Header() {
   }, [flyoutMenuRef, flyoutMenuShow])
  */
   const logout = useCallback(() => {
+    sensorsTrack('logout_click')
     deactivate()
     manuallyLogout()
   }, [deactivate])
@@ -220,6 +222,16 @@ export default function Header() {
     flyoutMenuShow && setFlyoutMenuShow(false)
   }, [flyoutMenuShow])
 
+  const connectToWallet = useCallback(() => {
+    sensorsTrack('connect_header_click')
+    setWalletModalOpen(true)
+  }, [])
+
+  const chooseNetwork = useCallback(() => {
+    sensorsTrack('select_src_chain_header_click')
+    setNetworkModalMode(NetworkSelectModalMode.SRC)
+  }, [])
+
   return (
     <SHeader>
       <BannerArea>
@@ -229,13 +241,7 @@ export default function Header() {
         {ready && (
           <>
             <HistoryButton disabled={!ready} />
-            <NetworkStatus
-              error={!connectedChain}
-              onClick={() => {
-                setNetworkModalMode(NetworkSelectModalMode.SRC)
-              }}
-              style={{ width: '30%', cursor: 'pointer', justifyContent: 'center' }}
-            >
+            <NetworkStatus error={!connectedChain} onClick={chooseNetwork} style={{ width: '30%', cursor: 'pointer', justifyContent: 'center' }}>
               {connectedChain && (
                 <>
                   <StyledLogo className={'header-btn-img'} srcs={[connectedChain?.icon]} size={'1.25rem'} />
@@ -290,11 +296,7 @@ export default function Header() {
                   >
                     <Text1  style={{ fontWeight: 800, width: '100%' }}>Change Wallet</Text1>
                   </ActiveRowWrapper> */}
-                  <ActiveRowWrapper
-                    onClick={() => {
-                      logout()
-                    }}
-                  >
+                  <ActiveRowWrapper onClick={logout}>
                     <Flex flex={1} className="hidden-when-narrow"></Flex>
                     <Flex minWidth="fit-content" className="hidden-when-narrow">
                       <Text1 /*  max={20} min={2} mode="single" */ style={{ fontWeight: 650, width: '100%' }}>Logout</Text1>
@@ -309,7 +311,7 @@ export default function Header() {
           </>
         )}
         {!ready && (
-          <PrimaryButton onClick={() => setWalletModalOpen(true)} style={{ margin: '0 0.5rem', width: '30%', minWidth: 'fit-content' }}>
+          <PrimaryButton onClick={connectToWallet} style={{ margin: '0 0.5rem', width: '30%', minWidth: 'fit-content' }}>
             <Text1 /*  max={20} min={2} mode="single" */ style={{ width: '100%' }}>Connect</Text1>
           </PrimaryButton>
         )}

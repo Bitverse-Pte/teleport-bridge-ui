@@ -9,6 +9,7 @@ import { RootState } from 'store/store'
 import styled, { css } from 'styled-components'
 import { TRANSFER_STATUS } from 'constants/types'
 import { getBalance } from 'helpers/web3'
+import { sensorsTrack } from 'helpers/sensors'
 
 const StyledAnimatedBtn = styled(animated.button)<{ backgroundColor: string }>`
   border-radius: 0.5rem;
@@ -103,9 +104,11 @@ export const TransferConfirmationButton = function () {
 
   const clickHandler = useCallback(() => {
     if (buttonStatus === TransferConfirmButtonStatus.NEED_MANUALLY_ACCEPTED) {
+      sensorsTrack('accept_click')
       setButtonStatus(TransferConfirmButtonStatus.MANUALLY_ACCEPTED)
     }
     if (buttonStatus === TransferConfirmButtonStatus.MANUALLY_ACCEPTED) {
+      sensorsTrack('confirm_click')
       transfer()
     }
   }, [text, transferStatus])

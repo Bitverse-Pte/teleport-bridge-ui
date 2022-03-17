@@ -22,6 +22,7 @@ import DisabledSwitchSvg from 'public/disabled-switch.svg'
 import { BodyWrapper } from 'components/BodyWrapper'
 import { TransferButton } from 'components/Button/TransferButton'
 import { EstimationBlock } from 'components/EstimationBlock'
+import { sensorsTrack } from 'helpers/sensors'
 
 const Container = styled(Flex)<{ hideInput: boolean }>`
   border-radius: 0.5rem;
@@ -306,11 +307,27 @@ export default function AppBody({ ...rest }) {
   }, [selectedTokenPair, srcChainId, chainId, library, account, selectedTokenName])
 
   const transferBalanceToFromValue = useCallback(() => {
+    sensorsTrack('max_click')
     if (connectStatus && fromValueInputRef.current && 'value' in fromValueInputRef.current && currentTokenBalance) {
       fromValueInputRef.current.value = new BigNumber(currentTokenBalance!.toString()).shiftedBy(-selectedTokenPair!.srcToken.decimals).toString()
       fromInputChange()
     }
   }, [fromValueInputRef, currentTokenBalance, connectStatus, selectedTokenPair, transferStatus, toValueInputRef])
+
+  const openSrcChainSelectModal = useCallback(() => {
+    sensorsTrack('select_src_chain_bridge_click')
+    setNetworkModalMode(NetworkSelectModalMode.SRC)
+  }, [])
+
+  const openDestChainSelectModal = useCallback(() => {
+    sensorsTrack('select_dest_chain_bridge_click')
+    setNetworkModalMode(NetworkSelectModalMode.DEST)
+  }, [])
+
+  const switchSrcDestChain = useCallback(() => {
+    sensorsTrack('switch_direction_click')
+    turnOverSrcAndDestChain(undefined)
+  }, [])
 
   return (
     <>
@@ -344,7 +361,7 @@ export default function AppBody({ ...rest }) {
                     logoSrc={srcChain!.icon}
                     interactive={false}
                     width="10rem"
-                    onClick={() => setNetworkModalMode(NetworkSelectModalMode.SRC)}
+                    onClick={openSrcChainSelectModal}
                     fontWeight={600}
                     fontSize="1rem"
                     lineHeight="1.3125rem"
@@ -382,7 +399,7 @@ export default function AppBody({ ...rest }) {
             </Container>
             <WormHoleWrapper>
               <Image alt={'wormhole'} width={'196px'} src={WormHole} objectFit="cover" objectPosition="center" quality={100} />
-              <ArrowWrapper clickable={chainReady && walletReady} onClick={() => turnOverSrcAndDestChain(undefined)}>
+              <ArrowWrapper clickable={chainReady && walletReady} onClick={switchSrcDestChain}>
                 <Icon size={48} src={chainReady && walletReady ? SwitchSvg : DisabledSwitchSvg} />
               </ArrowWrapper>
             </WormHoleWrapper>
@@ -409,7 +426,7 @@ export default function AppBody({ ...rest }) {
                     logoSrc={destChain && destChain!.icon}
                     fontWeight={600}
                     interactive={true}
-                    onClick={() => setNetworkModalMode(NetworkSelectModalMode.DEST)}
+                    onClick={openDestChainSelectModal}
                     // disabled={!ready}
                   />
                 </Flex>
@@ -453,7 +470,7 @@ export default function AppBody({ ...rest }) {
             </Flex>
           </Flex>
         </BodyWrapper>
-        <EstimationBlock style={{ width: '44vw', maxWidth: '512px', borderRadius: '0 0 0.5rem 0.5rem', borderWidth: '0px 1px 1px 1px' }} />
+        <EstimationBlock style={{ width: '44vw', maxWidth: '512px', borderRadius: '0 0 0.5rem 0.5rem', borderWidth: '0px 1px 1px 1px' }} location="bridge" />
       </Flex>
     </>
   )

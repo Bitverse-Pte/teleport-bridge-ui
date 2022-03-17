@@ -1,4 +1,4 @@
-import React, { useDebugValue, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useDebugValue, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { animated, useTransition, config, useSpringRef } from '@react-spring/web'
 import { Textfit } from 'react-textfit'
@@ -12,6 +12,7 @@ import { TRANSACTION_STATUS } from 'constants/index'
 import { TransitionSpinner } from 'components/Spinner'
 import Fade from '@mui/material/Fade'
 import { Flex } from 'rebass'
+import { sensorsTrack } from 'helpers/sensors'
 
 const Wrapper = styled.div`
   position: relative;
@@ -51,6 +52,11 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
     window.setHasPending = setHasPending
   }, []) */
 
+  const openHistoryModal = useCallback(() => {
+    sensorsTrack('history_click')
+    setHistoryModalOpen(true)
+  }, [])
+
   return (
     <>
       <ButtonDropdown
@@ -61,9 +67,7 @@ export function HistoryButton({ disabled }: BaseButtonProps) {
           boxShadow: '0px 0px 4px 2px #323539',
         }}
         disabled={disabled}
-        onClick={() => {
-          setHistoryModalOpen(true)
-        }}
+        onClick={openHistoryModal}
       >
         <Wrapper className={'header-btn-img'}>
           <TransitionSpinner show={hasPending} />

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { NextApiResponse } from 'next'
 import Store2 from 'store2'
 import { isAddress } from 'web3-utils'
+import getConfig from 'next/config'
 
 import requestor from 'helpers/requestor'
 import BridgeUI from 'components/BridgeUI'
@@ -13,6 +14,10 @@ import { FixedSizeQueue } from 'helpers/fixedQueue'
 import { useDispatch } from 'hooks'
 import { RootState } from 'store/store'
 import { useSelector } from 'react-redux'
+import { isServer } from 'helpers'
+
+const { publicRuntimeConfig } = getConfig()
+const APP_ENV = publicRuntimeConfig.APP_ENV
 
 export default function Home({
   toSetBridgePairs,
@@ -33,9 +38,9 @@ export default function Home({
     application: { changeNetwork, setNetworkModalMode, setBridgesPairs, setSelectedTokenName, setSrcChainId, setDestChainId, setAvailableChains, setInitStatus, setTransactions, setConnectStatus },
   } = useDispatch()
 
-  const { connectStatus, availableChains, srcChainId, networkModalMode } = useSelector((state: RootState) => {
-    const { connectStatus, availableChains, srcChainId, networkModalMode } = state.application
-    return { connectStatus, availableChains, srcChainId, networkModalMode }
+  const { connectStatus, availableChains, srcChainId, networkModalMode, initStatus } = useSelector((state: RootState) => {
+    const { connectStatus, availableChains, srcChainId, networkModalMode, initStatus } = state.application
+    return { connectStatus, availableChains, srcChainId, networkModalMode, initStatus }
   })
   const { active, chainId, account, library, error } = useSelector((state: RootState) => {
     const { active, chainId, account, library, error } = state.evmCompatibles
@@ -43,12 +48,13 @@ export default function Home({
   })
 
   useEffect(() => {
+    console.log(APP_ENV)
     if (propsError) {
       setInitStatus(INIT_STATUS.error)
       return
     }
     if (toSetAvailableChains && toSetBridgePairs && toSetSelectedTokenName && toSetSrcChainId && toSetDestChainId) {
-      if (process.env.NODE_ENV === 'development') {
+      if (APP_ENV === 'development') {
         console.log(toSetAvailableChains)
         console.log(toSetBridgePairs)
         console.log(toSetSelectedTokenName)
@@ -73,6 +79,19 @@ export default function Home({
       setConnectStatus(Store2.get('connect-status'))
     }
   }, [toSetBridgePairs, toSetSrcChainId, toSetAvailableChains, toSetDestChainId, toSetSelectedTokenName, propsError])
+
+  useEffect(() => {
+    if (initStatus === INIT_STATUS.initialized) {
+      ;(async () => {
+        try {
+          const { start: startSensors } = await import('helpers/sensors')
+          startSensors()
+        } catch (error) {
+          console.log(error)
+        }
+      })()
+    }
+  }, [initStatus])
   return (
     <>
       {/* <GlobalStyle /> */}
@@ -86,7 +105,6 @@ export default function Home({
   )
 }
 
-const isServer = typeof window === 'undefined'
 let dataCache:
   | {
       props?: {

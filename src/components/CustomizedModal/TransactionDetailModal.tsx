@@ -16,6 +16,7 @@ import { TooltippedAmount } from 'components/TooltippedAmount'
 import { StyledLogo } from 'components/Logo'
 import { TokenPair, TransactionDetail, TransactionDetailWithCreateTime, TRANSACTION_STATUS } from 'constants/index'
 import { darken } from 'polished'
+import { sensorsTrack } from 'helpers/sensors'
 
 const OptionGrid = styled.div`
   display: grid;
@@ -259,11 +260,29 @@ export default function TransactionDetailModal() {
             </Flex>
             <Flex justifyContent={'space-between'}>
               <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
-              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.send_tx_hash} copyable={true} />
+              <Hash
+                textAlign={'right'}
+                flex={1}
+                ellipsis={true}
+                hash={selectedTx.send_tx_hash}
+                copyable={true}
+                onClick={() => {
+                  sensorsTrack('copy_src_hash_click')
+                }}
+              />
             </Flex>
             <Flex justifyContent={'space-between'}>
               <Text2 style={{ whiteSpace: 'nowrap' }}>Sender Address</Text2>
-              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.sender} copyable={true} />
+              <Hash
+                textAlign={'right'}
+                flex={1}
+                ellipsis={true}
+                hash={selectedTx.sender}
+                copyable={true}
+                onClick={() => {
+                  sensorsTrack('copy_src_address_click')
+                }}
+              />
             </Flex>
           </Wrapper>
           <Wrapper>
@@ -292,11 +311,29 @@ export default function TransactionDetailModal() {
             </Flex>
             <Flex justifyContent={'space-between'}>
               <Text2 style={{ whiteSpace: 'nowrap' }}>Tx Hash</Text2>
-              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receive_tx_hash} copyable={true} />
+              <Hash
+                textAlign={'right'}
+                flex={1}
+                ellipsis={true}
+                hash={selectedTx.receive_tx_hash}
+                copyable={true}
+                onClick={() => {
+                  sensorsTrack('copy_dest_hash_click')
+                }}
+              />
             </Flex>
             <Flex justifyContent={'space-between'}>
               <Text2 style={{ whiteSpace: 'nowrap' }}>Receiver Address</Text2>
-              <Hash textAlign={'right'} flex={1} ellipsis={true} hash={selectedTx.receiver} copyable={true} />
+              <Hash
+                textAlign={'right'}
+                flex={1}
+                ellipsis={true}
+                hash={selectedTx.receiver}
+                copyable={true}
+                onClick={() => {
+                  sensorsTrack('copy_dest_address_click')
+                }}
+              />
             </Flex>
           </Wrapper>
 

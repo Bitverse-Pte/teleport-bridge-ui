@@ -6254,6 +6254,11 @@ rxjs@6, rxjs@^6.6.3:
   dependencies:
     tslib "^1.9.0"
 
+sa-sdk-javascript@^1.21.11:
+  version "1.21.11"
+  resolved "https://registry.yarnpkg.com/sa-sdk-javascript/-/sa-sdk-javascript-1.21.11.tgz#c563cae3ac8b6f922d5a87d1b0494d96a5fda750"
+  integrity sha512-KBX9Uddl6M91ZHbUaBGcB3JJE/wnYi7AfGGv3XBgdO2MpdQ7UNRsQ6g+11/qMme2J464DsUJcmz85Ey9L7RI2A==
+
 safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@^5.2.0, safe-buffer@~5.2.0:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.2.1.tgz#1eaf9fa9bdb1fdd4ec75f58f9cdb4e6b7827eec6"

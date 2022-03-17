@@ -103,7 +103,7 @@ export default function TransferConfirmationModal() {
             <Text4 fontSize={'0.5rem'}>{selectedTokenPairs?.srcToken.symbol}</Text4>
           </Flex>
         </Flex>
-        <EstimationBlock width="100%" margin={'1rem 0'} />
+        <EstimationBlock width="100%" margin={'1rem 0'} location="transfer"/>
         <TransferConfirmationButton />
       </Flex>
       {/* </ModalContentWrapper> */}
