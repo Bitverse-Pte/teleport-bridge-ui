@@ -45,7 +45,9 @@ export default function HistoryModal() {
       case WALLET_TYPE.COSMOS:
         return walletAddress
       default:
-        throw new Error('not valid wallet type')
+        if (historyModalOpen) {
+          warnNoti('no valid wallet detected')
+        }
     }
   }, [account, walletType, walletAddress])
 
