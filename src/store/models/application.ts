@@ -7,7 +7,7 @@ import { Web3Provider } from '@ethersproject/providers'
 import { MaxUint256 } from '@ethersproject/constants'
 import { mergeWith } from 'lodash'
 import Store2 from 'store2'
-import requestor, { getLatest50HistroyTx } from 'helpers/requestor'
+import requestor, { getHistroyTxes } from 'helpers/requestor'
 
 import {
   AVAILABLE_CHAINS_URL,
@@ -51,6 +51,12 @@ if (!Store2.has('connect-status')) {
 
 let estimationClockId: number
 export type IAppState = {
+  transactionsPagination: {
+    current_page: number
+    last_page?: number
+    page_size: number
+    total?: number
+  }
   connectStatus: boolean
   walletModalOpen: boolean
   transferConfirmationModalOpen: boolean
@@ -80,6 +86,12 @@ export type IAppState = {
 }
 
 export const initialState: IAppState = {
+  transactionsPagination: {
+    current_page: 0,
+    last_page: 0,
+    page_size: 0,
+    total: 0,
+  },
   connectStatus: Store2.get('connect-status'),
   networkModalMode: false, //NetworkSelectModalMode.CLOSE,
   walletModalOpen: false,
@@ -294,6 +306,14 @@ export const application = createModel<RootModel>()({
         walletType,
       }
     },
+    setTransactionsPagination(state, pagination: IAppState['transactionsPagination']) {
+      return {
+        ...state,
+        transactionsPagination: {
+          ...pagination,
+        },
+      }
+    },
   },
   effects: (dispatch) => ({
     changeTransferStatus(transferStatus: TRANSFER_STATUS) {
@@ -339,16 +359,17 @@ export const application = createModel<RootModel>()({
     async initTransactions(account: string) {
       try {
         dispatch.application.stopTransactionHistoryUpdating()
-        const transactions = await getLatest50HistroyTx(account)
+        const { history: transactions, pagination } = await getHistroyTxes(account)
         dispatch.application.saveTransactions(
           FixedSizeQueue.fromArray<TransactionDetail>(
             transactions.reverse().filter((e) => e.sender && e.send_tx_hash && e.amount && e.token_address && e.status),
             HISTORY_TRANSACTION_QUEUE_LENGTH
           )
         )
+        dispatch.application.setTransactionsPagination(pagination)
         dispatch.application.startTransactionHistoryUpdating(undefined)
       } catch (err) {
-        errorNoti(`failed to load historic transactions info from ${TRANSACTION_HISTORY_URL},
+        warnNoti(`failed to load historic transactions info from ${TRANSACTION_HISTORY_URL},
         the detail is ${(err as any)?.message}`)
       }
     },
@@ -770,7 +791,8 @@ export const application = createModel<RootModel>()({
           return
         }
         try {
-          const newTxes = await getLatest50HistroyTx(account)
+          const { history: newTxes, pagination } = await getHistroyTxes(account)
+          dispatch.application.setTransactionsPagination(pagination)
           for (const toUpdateOne of transactions) {
             if (toUpdateOne.status === TRANSACTION_STATUS.PENDING) {
               const newOneIndex = newTxes.findIndex((e) => e.send_tx_hash === toUpdateOne.send_tx_hash)
@@ -818,8 +840,8 @@ export const application = createModel<RootModel>()({
           dispatch.application.saveTransactions(FixedSizeQueue.fromArray<TransactionDetail>(newTransactions, HISTORY_TRANSACTION_QUEUE_LENGTH))
           // dispatch.application.saveTransactions(transactions)
         } catch (err) {
-          console.warn(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
-          // warnNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
+          // console.warn(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
+          warnNoti(`fetch transaction history for account ${account} failed, detail is ${(err as any).message}`)
         }
       }, 10 * 1000)
       dispatch.application.setTransactionHistoryUpdatingTimer(timer)

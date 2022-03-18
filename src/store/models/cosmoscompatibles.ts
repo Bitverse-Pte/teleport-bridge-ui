@@ -120,7 +120,7 @@ export const initialState: IAppState = {
   availableChains: [],
 }
 
-export const comoscompatibles = createModel<RootModel>()({
+export const cosmosCompatibles = createModel<RootModel>()({
   state: initialState,
   reducers: {
     setAvailableChains(state, availableChains: ChainInfo[]) {
@@ -153,7 +153,7 @@ export const comoscompatibles = createModel<RootModel>()({
     initKeplr() {
       const availableChains = [...store.getState().application.availableChains.values()].filter((e) => e.walletType === WALLET_TYPE.COSMOS) as unknown as ChainInfo[]
       // const availableChains = EmbedChainInfos
-      dispatch.comoscompatibles.setAvailableChains(availableChains)
+      dispatch.cosmosCompatibles.setAvailableChains(availableChains)
       // const chainStore = new ChainStore<ChainInfo>(availableChains)
       // dispatch.comoscompatibles.setChainStore(chainStore)
       // const queriesStore = new QueriesStore(new IndexedDBKVStore('store_queries'), chainStore, getWCKeplr, QueriesWithCosmos)
@@ -173,7 +173,7 @@ export const comoscompatibles = createModel<RootModel>()({
       dispatch.application.setWaitWallet(true)
       const currentState = store.getState()
       const srcChainId = currentState.application.srcChainId
-      const chainInfo = currentState.comoscompatibles.availableChains.find((e) => e.chainId === srcChainId)
+      const chainInfo = currentState.cosmosCompatibles.availableChains.find((e) => e.chainId === srcChainId)
       if (!chainInfo) {
         throw `no valid chain info for target chain id: ${srcChainId}`
       }
@@ -188,25 +188,25 @@ export const comoscompatibles = createModel<RootModel>()({
 
         // make client
         const client = await SigningCosmWasmClient.connectWithSigner(chainInfo.rpc, offlineSigner)
-        dispatch.comoscompatibles.setSigningClient(client)
+        dispatch.cosmosCompatibles.setSigningClient(client)
 
         // get user address
         const [{ address }] = await offlineSigner.getAccounts()
-        dispatch.comoscompatibles.setWalletAddresss(address)
+        dispatch.cosmosCompatibles.setWalletAddresss(address)
 
         dispatch.application.setWaitWallet(false)
       } catch (error) {
-        dispatch.comoscompatibles.setError(error)
+        dispatch.cosmosCompatibles.setError(error)
       }
     },
 
     disconnect() {
-      const signingClient = store.getState().comoscompatibles.signingClient
+      const signingClient = store.getState().cosmosCompatibles.signingClient
       if (signingClient) {
         signingClient.disconnect()
       }
-      dispatch.comoscompatibles.setWalletAddresss('')
-      dispatch.comoscompatibles.setSigningClient(null)
+      dispatch.cosmosCompatibles.setWalletAddresss('')
+      dispatch.cosmosCompatibles.setSigningClient(null)
       dispatch.application.setWaitWallet(false)
     },
   }),

@@ -78,6 +78,7 @@ const ModalContentWrapper = styled(Flex)`
   background-color: ${({ theme }) => theme.bg0};
   display: flex;
   flex: 1;
+  position: relative;
   padding: 1rem 1rem 1rem 1rem;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;

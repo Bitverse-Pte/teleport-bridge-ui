@@ -74,7 +74,10 @@ export const TransitionSpinner = function ({ show, size = '1rem', type = 'circul
 export const TransitionSpinnerMask = function ({ show, children, ...rest }: { show: boolean } & HTMLProps<HTMLDivElement>) {
   return (
     <Fade in={show}>
-      <Flex color="white" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Flex
+        color="white"
+        style={{ zIndex: 100, position: 'absolute', background: 'linear-gradient(to bottom left, rgba(46 48 48 / 40%), rgba(35 35 38 / 45%))', backdropFilter: 'blur(10px)', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      >
         <CircularProgress size="2rem" color="inherit" disableShrink />
         {children}
       </Flex>

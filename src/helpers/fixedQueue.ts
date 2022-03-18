@@ -39,6 +39,11 @@ export class FixedSizeQueue<T> {
       this.container.push(item)
     }
   }
+
+  public filter(callback: (e: T, index: number) => boolean) {
+    return this.container.filter(callback)
+  }
+
   public find(callback: (e: T) => boolean) {
     return this.container.find(callback)
   }

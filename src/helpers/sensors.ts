@@ -41,7 +41,6 @@ const getReferrerPath = () => {
   return parser.pathname
 }
 
-const RUNTIME_ENV = process.env.BUILD_ENV || 'TEST'
 let initilzed = false
 
 const init = async (initOpts: any = { heatmap: {} }, registerOpts = {}) => {
@@ -64,7 +63,6 @@ const init = async (initOpts: any = { heatmap: {} }, registerOpts = {}) => {
   // registering all events need to add common parameters
   if (isObjectLike(registerOpts)) {
     sensors.registerPage({
-      env: RUNTIME_ENV,
       app_id: 10009,
       // notify_lang: // current language
       //   getCookie(BYBIT_LANG_KEY)

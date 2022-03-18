@@ -176,12 +176,12 @@ export default function Header() {
     return { account, active, chainId, deactivate }
   })
   const { walletAddress: keplrWalletAddress } = useSelector((state: RootState) => {
-    const { walletAddress } = state.comoscompatibles
+    const { walletAddress } = state.cosmosCompatibles
     return { walletAddress }
   })
   const {
     application: { setHistoryModalOpen, manuallyLogout, setWalletModalOpen, setNetworkModalMode },
-    comoscompatibles: { disconnect: disconnectKeplr },
+    cosmosCompatibles: { disconnect: disconnectKeplr },
   } = useDispatch()
   const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = useSelector((state: RootState) => {
     const { connectStatus, historyModalOpen, walletModalOpen, availableChains } = state.application
